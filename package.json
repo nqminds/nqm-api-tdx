@@ -1,0 +1,22 @@
+{
+  "name": "nqm-api-tdx",
+  "version": "1.0.0",
+  "description": "nquiringminds Trusted Data Exchange command and query API interface for nodejs clients",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nqminds/nqm-api-tdx.git"
+  },
+  "author": "toby.ealden@gmail.com",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nqminds/nqm-api-tdx/issues"
+  },
+  "homepage": "https://github.com/nqminds/nqm-api-tdx#readme",
+  "dependencies": {
+    "request": "^2.72.0"
+  }
+}
