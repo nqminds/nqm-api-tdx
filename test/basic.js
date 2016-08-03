@@ -3,8 +3,8 @@ var expect = chai.expect;
 
 var APIModule = require("../lib/api.js");
 var testConfig = {
-  baseCommandURL: "https://cmd.nqminds.com",
-  baseQueryURL: "https://q.nqminds.com"
+  commandHost: "https://cmd.nqminds.com",
+  queryHost: "https://q.nqminds.com"
 };
 var api = new APIModule(testConfig);
 

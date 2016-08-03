@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/nqminds/nqm-api-tdx#readme",
   "dependencies": {
+    "debug": "^2.2.0",
     "request": "^2.72.0"
   },
   "devDependencies": {

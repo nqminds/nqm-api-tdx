@@ -17,8 +17,8 @@ mocha test
 var TDXApi = require("nqm-api-tdx");
 
 var config = {
-  baseCommandURL: "https://cmd.nqminds.com",
-  baseQueryURL: "https://q.nqminds.com"  
+  commandHost: "https://cmd.nqminds.com",
+  queryHost: "https://q.nqminds.com"  
 };
 
 var nqmindsTDX = new TDXApi(config);
