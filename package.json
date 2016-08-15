@@ -1,6 +1,6 @@
 {
   "name": "nqm-api-tdx",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "nquiringminds Trusted Data Exchange command and query API interface for nodejs clients",
   "main": "index.js",
   "scripts": {
