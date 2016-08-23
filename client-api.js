@@ -1,4 +1,245 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+var TDXApi = require("./lib/api.js");
+console.log("hh");
+window.TDXApi = TDXApi;
+},{"./lib/api.js":2}],2:[function(require,module,exports){
+module.exports = (function() {
+  "use strict";
+
+  var log = require("debug")("nqm-api-tdx");
+  var util = require("util");
+  var request = require("superagent");
+  var Query = require("./query");
+  var Command = require("./command");
+  
+  /**
+   * @param  {} usr
+   * @param  {} pwd
+   * @param  {} cb
+   */
+  var authenticate = function(usr,pwd,cb) {
+    var credentials;    
+    if (typeof pwd === "function") {
+      cb = pwd;
+      credentials = usr;
+    } else {
+      credentials = usr + ":" + pwd;
+    }
+    cb = cb || function() {};
+    var self = this;
+    var options = {
+      uri: util.format("%s/token", this._config.commandHost || this._config.queryHost),
+      headers: { "Authorization": "Basic " + credentials },
+      json: true,
+      body: { grant_type: "client_credentials", ttl: self._config.accessTokenTTL || 3600 }
+    };
+
+    request.post(options.uri)
+      .set(options.headers)
+      .send(options.body)
+      .end(function(err, res) {
+        if (err) {
+          return cb(err);
+        }
+        if (res.ok) {
+          self._accessToken = res.body.access_token;
+          cb(null, res.body.access_token);
+        } else {
+          cb(new Error(res.body ? res.body.error_description : "unknown error")); 
+        }
+      });
+  };
+
+  function API(config) {
+    if (config.baseCommandURL) {
+      log("baseCommandURL is deprecated - use commandHost");
+      config.commandHost = config.baseCommandURL;
+    }
+    if (config.baseQueryURL) {
+      log("baseQueryURL is deprecated - use queryHost");
+      config.queryHost = config.baseQueryURL;
+    }
+    this._config = config;
+    this._accessToken = config.accessToken || "";
+    this.authenticate = authenticate;
+
+    // Add query methods to API
+    Query.call(this, config);
+
+    // Add command methods to API
+    Command.call(this, config);
+  }
+
+  return API;
+}());
+},{"./command":3,"./query":4,"debug":9,"superagent":12,"util":8}],3:[function(require,module,exports){
+module.exports = (function() {
+  "use strict";
+  var log = require("debug")("hwrc-tdxAPI");
+  var request = require("superagent");
+  var util = require("util");
+
+  var defaultArgs = function(accessToken, cb) {
+    if (typeof accessToken === "function") {
+      cb = accessToken;
+      accessToken = null;
+    }
+    return {
+      accessToken: accessToken || this._accessToken,
+      cb: cb || function() {}
+    }    
+  };
+
+  var handleResponse = function(description, err, response, cb) {
+    var handledOK = false;
+    if (err) {
+      cb(err);
+    } else if (response && response.status !== 200) {
+      var msg = response.body ? (response.body.message || response.body.error) : "unknown";
+      cb(new Error("failure " + description + " : "  + msg));
+    } else {
+      handledOK = true;
+    }
+    return handledOK;
+  };
+
+  var createDataset = function(postData, accessToken, cb) {
+    var args = defaultArgs.call(this, accessToken, cb);
+    var command = util.format("%s/commandSync/resource/create", this._config.commandHost);
+    var header = { authorization: "Bearer " + args.accessToken };
+    request.post(command)
+      .set(header)
+      .send(postData)
+      .end(function(err, response){
+        if (handleResponse("create dataset", err, response, args.cb)) {
+          log("status code is: %s", response.status);
+          args.cb(err, response.body);
+        }
+      });
+  };
+  
+  var truncateDataset = function(id, accessToken, cb) {
+    var args = defaultArgs.call(this, accessToken, cb);
+    var command = util.format("%s/commandSync/resource/truncate", this._config.commandHost);
+    var postData = {};
+    postData.id = id;
+    var header = { authorization: "Bearer " + args.accessToken };
+    request.post(command)
+      .set(header)
+      .send(postData)
+      .end(function(err, response) {
+        if (handleResponse("truncate dataset", err, response, args.cb)) {
+          log("status code is: %s", response.status);
+          args.cb(err, response.body);
+        }
+      });
+  };
+
+  var addDatasetData = function(id, data, accessToken, cb) {
+    var args = defaultArgs.call(this, accessToken, cb);
+    var command = util.format("%s/commandSync/dataset/data/createMany", this._config.commandHost);
+    var postData = {};
+    postData.datasetId = id;
+    postData.payload = [].concat(data);
+    var header = { authorization: "Bearer " + args.accessToken };
+    request.post(command)
+      .set(header)
+      .send(postData)
+      .end(function(err, response) {
+        if (handleResponse("add dataset data", err, response, args.cb)) {
+          args.cb(err, response.body);
+        }
+      });
+  };
+
+  var registerProcessHost = function(status, accessToken, cb) {
+    var args = defaultArgs.call(this, accessToken, cb);
+    var command = util.format("%s/commandSync/process/registerHost", this._config.commandHost);
+    var postData = status;
+    var header = { authorization: "Bearer " + args.accessToken };
+    request.post(command)
+      .set(header)
+      .send(postData)
+      .end (function(err, response) {
+        if (handleResponse("register process host", err, response, args.cb)) {
+          args.cb(err, response.body);
+        }
+      });
+  };
+
+  var updateProcessStatus = function(processId, progress, status, accessToken, cb) {
+    var args = defaultArgs.call(this, accessToken, cb);
+    var command = util.format("%s/commandSync/process/status", this._config.commandHost);
+    var postData = {
+      processId: processId,
+      progress: progress,
+      status: status
+    };
+    var header = { authorization: "Bearer " + args.accessToken };
+    request.post(command)
+      .set(header)
+      .send(postData)
+      .end(function(err, response) {
+        if (handleResponse("update process status", err, response, args.cb)) {
+          args.cb(err, response.body);
+        }
+      });
+  };
+
+  function CommandAPI(config) {
+    this.createDataset = createDataset;
+    this.truncateDataset = truncateDataset;
+    this.addDatasetData = addDatasetData;
+    this.registerProcessHost = registerProcessHost;
+    this.updateProcessStatus = updateProcessStatus;
+  }
+
+  return CommandAPI;
+}());
+},{"debug":9,"superagent":12,"util":8}],4:[function(require,module,exports){
+module.exports = (function() {
+  "use strict";
+  var request = require("superagent");
+  var util = require("util");
+
+  var query = function(method, filter, projection, options, accessToken, cb) {
+    if (typeof accessToken === "function") {
+      cb = accessToken;
+      accessToken = this._accessToken;
+    }
+    filter = filter ? JSON.stringify(filter) : "";
+    projection = projection ? JSON.stringify(projection) : "";
+    options = options ? JSON.stringify(options) : "";
+    var queryURL = util.format("%s/%s/%s?filter=%s&proj=%s&opts=%s", this._config.queryHost, this._version, method, filter, projection, options);
+    var requestOptions = {
+      json: true
+    };
+    if (accessToken) {
+      requestOptions.headers = { authorization: "Bearer " + accessToken };
+    }
+
+    request.get(queryURL)
+      .set(requestOptions.headers)
+      .end(function(err, response) {
+        if (err) {
+          return cb(err);
+        } else if (response && response.status !== 200) {
+          var msg = response.body ? (response.body.message || response.body.error) : "unknown";
+          cb(new Error("failure " + method + " : "  + msg));
+        } else {
+          cb(null, response.body);
+        }
+      });
+  };
+
+  function QueryAPI(config) {
+    this._version = config.version || "v1";
+    this.query = query;
+  }
+
+  return QueryAPI;
+}());
+},{"superagent":12,"util":8}],5:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -23,7 +264,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],2:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -185,14 +426,14 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],3:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],4:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -782,227 +1023,7 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":3,"_process":2,"inherits":1}],5:[function(require,module,exports){
-var TDXApi = require("./lib/api.js");
-window.TDXApi = TDXApi;
-},{"./lib/api.js":6}],6:[function(require,module,exports){
-module.exports = (function() {
-  "use strict";
-
-  var log = require("debug")("nqm-api-tdx");
-  var util = require("util");
-  var request = require("superagent");
-  var Query = require("./query");
-  var Command = require("./command");
-  
-  /**
-   * @param  {} usr
-   * @param  {} pwd
-   * @param  {} cb
-   */
-  var authenticate = function(usr,pwd,cb) {
-    var credentials;    
-    if (typeof pwd === "function") {
-      cb = pwd;
-      credentials = usr;
-    } else {
-      credentials = usr + ":" + pwd;
-    }
-    cb = cb || function() {};
-    var self = this;
-    var options = {
-      uri: util.format("%s/token", this._config.commandHost || this._config.queryHost),
-      headers: { "Authorization": "Basic " + credentials },
-      json: true,
-      body: { grant_type: "client_credentials", ttl: self._config.accessTokenTTL || 3600 }
-    };
-
-    request.post(options.uri).set(options.headers).send(options.body).end(function(err, res) {
-      if (err) {
-        return cb(err);
-      }
-      if (res.ok) {
-        self._accessToken = res.body.access_token;
-        cb(null, res.body.access_token);
-      } else {
-        cb(new Error(res.body ? res.body.error_description : "unknown error")); 
-      }
-    });
-  };
-
-  function API(config) {
-    if (config.baseCommandURL) {
-      log("baseCommandURL is deprecated - use commandHost");
-      config.commandHost = config.baseCommandURL;
-    }
-    if (config.baseQueryURL) {
-      log("baseQueryURL is deprecated - use queryHost");
-      config.queryHost = config.baseQueryURL;
-    }
-    this._config = config;
-    this._accessToken = config.accessToken || "";
-    this.authenticate = authenticate;
-
-    // Add query methods to API
-    Query.call(this, config);
-
-    // Add command methods to API
-    Command.call(this, config);
-  }
-
-  return API;
-}());
-},{"./command":7,"./query":8,"debug":9,"superagent":12,"util":4}],7:[function(require,module,exports){
-module.exports = (function() {
-  "use strict";
-  var log = require("debug")("hwrc-tdxAPI");
-  var request = require("superagent");
-  var util = require("util");
-
-  var defaultArgs = function(accessToken, cb) {
-    if (typeof accessToken === "function") {
-      cb = accessToken;
-      accessToken = null;
-    }
-    return {
-      accessToken: accessToken || this._accessToken,
-      cb: cb || function() {}
-    }    
-  };
-
-  var handleResponse = function(description, err, response, cb) {
-    var handledOK = false;
-    if (err) {
-      cb(err);
-    } else if (response && response.status !== 200) {
-      var msg = response.body ? (response.body.message || response.body.error) : "unknown";
-      cb(new Error("failure " + description + " : "  + msg));
-    } else {
-      handledOK = true;
-    }
-    return handledOK;
-  };
-
-  var createDataset = function(postData, accessToken, cb) {
-    var args = defaultArgs.call(this, accessToken, cb);
-    var command = util.format("%s/commandSync/resource/create", this._config.commandHost);
-    var header = { authorization: "Bearer " + args.accessToken };
-    request.post(command).set(header).send(postData).end(function(err, response){
-      if (handleResponse("create dataset", err, response, args.cb)) {
-        log("status code is: %s", response.status);
-        args.cb(err, response.body);
-      }
-    });
-  };
-  
-  var truncateDataset = function(id, accessToken, cb) {
-    var args = defaultArgs.call(this, accessToken, cb);
-    var command = util.format("%s/commandSync/resource/truncate", this._config.commandHost);
-    var postData = {};
-    postData.id = id;
-    var header = { authorization: "Bearer " + args.accessToken };
-    request.post(command).set(header).send(postData).end(function(err, response) {
-      if (handleResponse("truncate dataset", err, response, args.cb)) {
-        log("status code is: %s", response.status);
-        args.cb(err, response.body);
-      }
-    });
-  };
-
-  var addDatasetData = function(id, data, accessToken, cb) {
-    var args = defaultArgs.call(this, accessToken, cb);
-    var command = util.format("%s/commandSync/dataset/data/createMany", this._config.commandHost);
-    var postData = {};
-    postData.datasetId = id;
-    postData.payload = [].concat(data);
-    var header = { authorization: "Bearer " + args.accessToken };
-    request.post(command).set(header).send(postData).end(function(err, response) {
-      if (handleResponse("add dataset data", err, response, args.cb)) {
-        args.cb(err, response.body);
-      }
-    });
-  };
-
-  var registerProcessHost = function(status, accessToken, cb) {
-    var args = defaultArgs.call(this, accessToken, cb);
-    var command = util.format("%s/commandSync/process/registerHost", this._config.commandHost);
-    var postData = status;
-    var header = { authorization: "Bearer " + args.accessToken };
-    request.post(command).set(header).send(postData).end (function(err, response) {
-      if (handleResponse("register process host", err, response, args.cb)) {
-        args.cb(err, response.body);
-      }
-    });
-  };
-
-  var updateProcessStatus = function(processId, progress, status, accessToken, cb) {
-    var args = defaultArgs.call(this, accessToken, cb);
-    var command = util.format("%s/commandSync/process/status", this._config.commandHost);
-    var postData = {
-      processId: processId,
-      progress: progress,
-      status: status
-    };
-    var header = { authorization: "Bearer " + args.accessToken };
-    request.post(command).set(header).send(postData).end(function(err, response) {
-      if (handleResponse("update process status", err, response, args.cb)) {
-        args.cb(err, response.body);
-      }
-    });
-  };
-
-  function CommandAPI(config) {
-    this.createDataset = createDataset;
-    this.truncateDataset = truncateDataset;
-    this.addDatasetData = addDatasetData;
-    this.registerProcessHost = registerProcessHost;
-    this.updateProcessStatus = updateProcessStatus;
-  }
-
-  return CommandAPI;
-}());
-},{"debug":9,"superagent":12,"util":4}],8:[function(require,module,exports){
-module.exports = (function() {
-  "use strict";
-  var request = require("superagent");
-  var util = require("util");
-
-  var query = function(method, filter, projection, options, accessToken, cb) {
-    if (typeof accessToken === "function") {
-      cb = accessToken;
-      accessToken = this._accessToken;
-    }
-    filter = filter ? JSON.stringify(filter) : "";
-    projection = projection ? JSON.stringify(projection) : "";
-    options = options ? JSON.stringify(options) : "";
-    var queryURL = util.format("%s/%s/%s?filter=%s&proj=%s&opts=%s", this._config.queryHost, this._version, method, filter, projection, options);
-    var requestOptions = {
-      json: true
-    };
-    if (accessToken) {
-      requestOptions.headers = { authorization: "Bearer " + accessToken };
-    }
-
-    request.get(queryURL).set(requestOptions.headers).end(function(err, response) {
-      if (err) {
-        return cb(err);
-      } else if (response && response.status !== 200) {
-        var msg = response.body ? (response.body.message || response.body.error) : "unknown";
-        cb(new Error("failure " + method + " : "  + msg));
-      } else {
-        cb(null, response.body);
-      }
-    });
-  };
-
-  function QueryAPI(config) {
-    this._version = config.version || "v1";
-    this.query = query;
-  }
-
-  return QueryAPI;
-}());
-},{"superagent":12,"util":4}],9:[function(require,module,exports){
+},{"./support/isBuffer":7,"_process":6,"inherits":5}],9:[function(require,module,exports){
 
 /**
  * This is the web browser implementation of `debug()`.
@@ -3039,4 +3060,4 @@ Emitter.prototype.hasListeners = function(event){
   return !! this.listeners(event).length;
 };
 
-},{}]},{},[5]);
+},{}]},{},[1]);
