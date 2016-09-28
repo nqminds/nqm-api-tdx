@@ -26,6 +26,12 @@
         else console.log(data);
 
       });
+
+      nqmindsTDX.getDatasets({"schemaDefinition.basedOn": "PlanningPoplet"}, null, {limit: 1000},  function(err,data) {
+        if (err) console.log(err);
+        else console.log(data);
+
+      });
     }  
   });
 </script>

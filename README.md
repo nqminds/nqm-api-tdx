@@ -54,8 +54,12 @@ nqmindsTDX.authenticate("myTokenID","myTokenSecret", function(err, accessToken) 
 
     });
     // Get data from dataset
-   api.getDatasetData("dataSetId", {filter}, "projection", {options}, (err, data) => {
+    api.getDatasetData("dataSetId", {filter}, {projection}, {options}, function(err, data) {
     
+    });
+    // Get datasets that match filter
+    nqmindsTDX.getDatasets({filter}, {projection}, {options},  function(err,data)  {
+
     });
   }  
 });
