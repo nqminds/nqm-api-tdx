@@ -1,29 +1,4 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-if (typeof Object.create === 'function') {
-  // implementation from standard node.js 'util' module
-  module.exports = function inherits(ctor, superCtor) {
-    ctor.super_ = superCtor
-    ctor.prototype = Object.create(superCtor.prototype, {
-      constructor: {
-        value: ctor,
-        enumerable: false,
-        writable: true,
-        configurable: true
-      }
-    });
-  };
-} else {
-  // old school shim for old browsers
-  module.exports = function inherits(ctor, superCtor) {
-    ctor.super_ = superCtor
-    var TempCtor = function () {}
-    TempCtor.prototype = superCtor.prototype
-    ctor.prototype = new TempCtor()
-    ctor.prototype.constructor = ctor
-  }
-}
-
-},{}],2:[function(require,module,exports){
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.TDXApi = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -35,25 +10,40 @@ var process = module.exports = {};
 var cachedSetTimeout;
 var cachedClearTimeout;
 
+function defaultSetTimout() {
+    throw new Error('setTimeout has not been defined');
+}
+function defaultClearTimeout () {
+    throw new Error('clearTimeout has not been defined');
+}
 (function () {
     try {
-        cachedSetTimeout = setTimeout;
-    } catch (e) {
-        cachedSetTimeout = function () {
-            throw new Error('setTimeout is not defined');
+        if (typeof setTimeout === 'function') {
+            cachedSetTimeout = setTimeout;
+        } else {
+            cachedSetTimeout = defaultSetTimout;
         }
+    } catch (e) {
+        cachedSetTimeout = defaultSetTimout;
     }
     try {
-        cachedClearTimeout = clearTimeout;
-    } catch (e) {
-        cachedClearTimeout = function () {
-            throw new Error('clearTimeout is not defined');
+        if (typeof clearTimeout === 'function') {
+            cachedClearTimeout = clearTimeout;
+        } else {
+            cachedClearTimeout = defaultClearTimeout;
         }
+    } catch (e) {
+        cachedClearTimeout = defaultClearTimeout;
     }
 } ())
 function runTimeout(fun) {
     if (cachedSetTimeout === setTimeout) {
         //normal enviroments in sane situations
+        return setTimeout(fun, 0);
+    }
+    // if setTimeout wasn't available but was latter defined
+    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+        cachedSetTimeout = setTimeout;
         return setTimeout(fun, 0);
     }
     try {
@@ -74,6 +64,11 @@ function runTimeout(fun) {
 function runClearTimeout(marker) {
     if (cachedClearTimeout === clearTimeout) {
         //normal enviroments in sane situations
+        return clearTimeout(marker);
+    }
+    // if clearTimeout wasn't available but was latter defined
+    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+        cachedClearTimeout = clearTimeout;
         return clearTimeout(marker);
     }
     try {
@@ -184,6 +179,31 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 process.umask = function() { return 0; };
+
+},{}],2:[function(require,module,exports){
+if (typeof Object.create === 'function') {
+  // implementation from standard node.js 'util' module
+  module.exports = function inherits(ctor, superCtor) {
+    ctor.super_ = superCtor
+    ctor.prototype = Object.create(superCtor.prototype, {
+      constructor: {
+        value: ctor,
+        enumerable: false,
+        writable: true,
+        configurable: true
+      }
+    });
+  };
+} else {
+  // old school shim for old browsers
+  module.exports = function inherits(ctor, superCtor) {
+    ctor.super_ = superCtor
+    var TempCtor = function () {}
+    TempCtor.prototype = superCtor.prototype
+    ctor.prototype = new TempCtor()
+    ctor.prototype.constructor = ctor
+  }
+}
 
 },{}],3:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
@@ -782,10 +802,23 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":3,"_process":2,"inherits":1}],5:[function(require,module,exports){
-var TDXApi = require("./lib/api.js");
-window.TDXApi = TDXApi;
-},{"./lib/api.js":6}],6:[function(require,module,exports){
+},{"./support/isBuffer":3,"_process":1,"inherits":2}],5:[function(require,module,exports){
+(function (process){
+module.exports = (function() {
+  "use strict";
+
+  // To enable debug.
+  if (!process.env.DEBUG) {
+    process.env.DEBUG = "nqm-*";
+  }
+  // Default output to STDOUT rather than STDERR.
+  process.env.DEBUG_FD = 1;
+
+  var API = require("./lib/api.js");
+  return API;
+}())
+}).call(this,require('_process'))
+},{"./lib/api.js":6,"_process":1}],6:[function(require,module,exports){
 module.exports = (function() {
   "use strict";
 
@@ -794,6 +827,7 @@ module.exports = (function() {
   var request = require("superagent");
   var Query = require("./query");
   var Command = require("./command");
+  var Databot = require("./databot");
   
   /**
    * @param  {} usr
@@ -809,6 +843,7 @@ module.exports = (function() {
       credentials = usr + ":" + pwd;
     }
     cb = cb || function() {};
+    
     var self = this;
     var options = {
       uri: util.format("%s/token", this._config.commandHost || this._config.queryHost),
@@ -817,17 +852,23 @@ module.exports = (function() {
       body: { grant_type: "client_credentials", ttl: self._config.accessTokenTTL || 3600 }
     };
 
-    request.post(options.uri).set(options.headers).send(options.body).end(function(err, res) {
-      if (err) {
-        return cb(err);
-      }
-      if (res.ok) {
-        self._accessToken = res.body.access_token;
-        cb(null, res.body.access_token);
-      } else {
-        cb(new Error(res.body ? res.body.error_description : "unknown error")); 
-      }
-    });
+    request.post(options.uri)
+      .set(options.headers)
+      .send(options.body)
+      .end(function(err, res) {
+        if (err) {
+          var msg;
+          if (err.response) {
+            msg = util.format("authenticate failure: [%s] %s", err.response.body.error, err.response.body.error_description);
+          } else {
+            msg = util.format("authenticate failure: %s", err.message);
+          }
+          cb({name: "TDXApiError", message: msg, status: err.status, stack: err.stack });
+        } else {
+          self._accessToken = res.body.access_token;
+          cb(null, res.body.access_token);
+        } 
+      });
   };
 
   function API(config) {
@@ -848,161 +889,212 @@ module.exports = (function() {
 
     // Add command methods to API
     Command.call(this, config);
+
+    // Add databot mthods to API
+    Databot.call(this, config);
   }
 
   return API;
 }());
-},{"./command":7,"./query":8,"debug":9,"superagent":12,"util":4}],7:[function(require,module,exports){
+},{"./command":7,"./databot":8,"./query":9,"debug":11,"superagent":14,"util":4}],7:[function(require,module,exports){
 module.exports = (function() {
   "use strict";
-  var log = require("debug")("hwrc-tdxAPI");
-  var request = require("superagent");
-  var util = require("util");
 
-  var defaultArgs = function(accessToken, cb) {
-    if (typeof accessToken === "function") {
-      cb = accessToken;
-      accessToken = null;
-    }
-    return {
-      accessToken: accessToken || this._accessToken,
-      cb: cb || function() {}
-    }    
-  };
+  var log = require("debug")("nqm-api-tdx:command");  
+  var sendRequest = require("./send-request");
 
-  var handleResponse = function(description, err, response, cb) {
-    var handledOK = false;
-    if (err) {
-      cb(err);
-    } else if (response && response.status !== 200) {
-      var msg = response.body ? (response.body.message || response.body.error) : "unknown";
-      cb(new Error("failure " + description + " : "  + msg));
-    } else {
-      handledOK = true;
-    }
-    return handledOK;
-  };
-
-  var createDataset = function(postData, accessToken, cb) {
-    var args = defaultArgs.call(this, accessToken, cb);
-    var command = util.format("%s/commandSync/resource/create", this._config.commandHost);
-    var header = { authorization: "Bearer " + args.accessToken };
-    request.post(command).set(header).send(postData).end(function(err, response){
-      if (handleResponse("create dataset", err, response, args.cb)) {
-        log("status code is: %s", response.status);
-        args.cb(err, response.body);
-      }
-    });
+  var createDataset = function(postData, cb) {
+    log("createDataset");
+    return this._commandPost.call(this,"resource/create", postData, cb);
   };
   
-  var truncateDataset = function(id, accessToken, cb) {
-    var args = defaultArgs.call(this, accessToken, cb);
-    var command = util.format("%s/commandSync/resource/truncate", this._config.commandHost);
-    var postData = {};
-    postData.id = id;
-    var header = { authorization: "Bearer " + args.accessToken };
-    request.post(command).set(header).send(postData).end(function(err, response) {
-      if (handleResponse("truncate dataset", err, response, args.cb)) {
-        log("status code is: %s", response.status);
-        args.cb(err, response.body);
-      }
-    });
+  var setDatasetImportFlag = function(datasetId, importing,  cb) {
+    log("setDatasetImportFlag");
+    return this._commandPost.call(this,"resource/importing", { id: datasetId, importing: importing }, cb);
+  };
+  
+  var truncateDataset = function(id, restart, cb) {
+    log("truncateDataset");
+    if (typeof restart === "function") {
+      cb = restart;
+      restart = true;
+    }
+    return this._commandPost.call(this,"resource/truncate", {id: id, noRestart: !restart}, cb);
   };
 
-  var addDatasetData = function(id, data, accessToken, cb) {
-    var args = defaultArgs.call(this, accessToken, cb);
-    var command = util.format("%s/commandSync/dataset/data/createMany", this._config.commandHost);
-    var postData = {};
-    postData.datasetId = id;
-    postData.payload = [].concat(data);
-    var header = { authorization: "Bearer " + args.accessToken };
-    request.post(command).set(header).send(postData).end(function(err, response) {
-      if (handleResponse("add dataset data", err, response, args.cb)) {
-        args.cb(err, response.body);
-      }
-    });
-  };
-
-  var registerProcessHost = function(status, accessToken, cb) {
-    var args = defaultArgs.call(this, accessToken, cb);
-    var command = util.format("%s/commandSync/process/registerHost", this._config.commandHost);
-    var postData = status;
-    var header = { authorization: "Bearer " + args.accessToken };
-    request.post(command).set(header).send(postData).end (function(err, response) {
-      if (handleResponse("register process host", err, response, args.cb)) {
-        args.cb(err, response.body);
-      }
-    });
-  };
-
-  var updateProcessStatus = function(processId, progress, status, accessToken, cb) {
-    var args = defaultArgs.call(this, accessToken, cb);
-    var command = util.format("%s/commandSync/process/status", this._config.commandHost);
+  var addDatasetData = function(id, data, cb) {
+    log("addDatasetData");
     var postData = {
-      processId: processId,
-      progress: progress,
-      status: status
+      datasetId: id,
+      payload: [].concat(data)    
     };
-    var header = { authorization: "Bearer " + args.accessToken };
-    request.post(command).set(header).send(postData).end(function(err, response) {
-      if (handleResponse("update process status", err, response, args.cb)) {
-        args.cb(err, response.body);
-      }
-    });
+    return this._commandPost.call(this,"dataset/data/createMany", postData, cb);
   };
 
   function CommandAPI(config) {
+    this._commandPost = sendRequest.post(config.commandHost + "/commandSync");
     this.createDataset = createDataset;
     this.truncateDataset = truncateDataset;
     this.addDatasetData = addDatasetData;
-    this.registerProcessHost = registerProcessHost;
-    this.updateProcessStatus = updateProcessStatus;
+    this.setDatasetImportFlag = setDatasetImportFlag;
   }
 
   return CommandAPI;
 }());
-},{"debug":9,"superagent":12,"util":4}],8:[function(require,module,exports){
+},{"./send-request":10,"debug":11}],8:[function(require,module,exports){
+
 module.exports = (function() {
   "use strict";
-  var request = require("superagent");
+
+  var log = require("debug")("nqm-api-tdx:process");
+  var sendRequest = require("./send-request");
+
+  var registerHost = function(status, cb) {
+    return this._processPost("host/register", status, cb);
+  };
+
+  var updateStatus = function(status, cb) {
+    return this._processPost("host/status", status, cb);
+  };
+
+  function ProcessAPI(config) {
+    this._processPost = sendRequest.post(config.databotHost + "/");
+    this.registerDatabotHost = registerHost;
+    this.updateDatabotStatus = updateStatus;
+  }
+
+  return ProcessAPI;
+}());
+},{"./send-request":10,"debug":11}],9:[function(require,module,exports){
+module.exports = (function() {
+  "use strict";
+
+  var sendRequest = require("./send-request");
   var util = require("util");
 
-  var query = function(method, filter, projection, options, accessToken, cb) {
-    if (typeof accessToken === "function") {
-      cb = accessToken;
-      accessToken = this._accessToken;
-    }
+  var query = function(method, filter, projection, options, cb) {
     filter = filter ? JSON.stringify(filter) : "";
     projection = projection ? JSON.stringify(projection) : "";
     options = options ? JSON.stringify(options) : "";
-    var queryURL = util.format("%s/%s/%s?filter=%s&proj=%s&opts=%s", this._config.queryHost, this._version, method, filter, projection, options);
-    var requestOptions = {
-      json: true
-    };
-    if (accessToken) {
-      requestOptions.headers = { authorization: "Bearer " + accessToken };
-    }
+    var queryURL = util.format("%s?filter=%s&proj=%s&opts=%s", method, filter, projection, options);
+    return this._queryGet(queryURL, cb);
+  };
 
-    request.get(queryURL).set(requestOptions.headers).end(function(err, response) {
-      if (err) {
-        return cb(err);
-      } else if (response && response.status !== 200) {
-        var msg = response.body ? (response.body.message || response.body.error) : "unknown";
-        cb(new Error("failure " + method + " : "  + msg));
-      } else {
-        cb(null, response.body);
-      }
-    });
+  var getDataset = function(datasetId, cb) {
+    return query.call(this, "datasets/" + datasetId, null, null, null, cb);
+  };
+
+  var getDatasetData = function(datasetId, filter, projection, options, cb) {
+    if (typeof options === "function") {
+      cb = options;
+      options = undefined;
+    }
+    if (typeof projection === "function") {
+      cb = projection;
+      projection = options = undefined;
+    }
+    if (typeof filter === "function") {
+      cb = filter;
+      filter = projection = options = undefined;
+    }
+    return query.call(this,"datasets/" + datasetId + "/data", filter, projection, options, cb);
   };
 
   function QueryAPI(config) {
     this._version = config.version || "v1";
+    this._queryGet = sendRequest.get(config.queryHost + "/" + this._version);
     this.query = query;
+    this.getDataset = getDataset;
+    this.getDatasetData = getDatasetData;
   }
 
   return QueryAPI;
 }());
-},{"superagent":12,"util":4}],9:[function(require,module,exports){
+},{"./send-request":10,"util":4}],10:[function(require,module,exports){
+
+module.exports = (function() {
+  "use strict";
+
+  var log = require("debug")("nqm-api-tdx:send-request");
+  var request = require("superagent");
+  var util = require("util");
+
+  var defaultCallback = function(err) {
+    if (err) {
+      log("uncaught error: %s", err.message);
+    }        
+  };
+
+  var postRequest = function(endpoint) {
+    return function(command, postData, cb) {
+      log("sending %s with %j", command, postData);
+      cb = cb || defaultCallback;
+      var url = util.format("%s/%s", endpoint, command);
+      
+      request
+        .post(url)
+        .send(postData)
+        .set({ authorization: "Bearer " + this._accessToken })
+        .end(function(err, res) {
+          if (err) {
+            var msg;
+            if (err.response) {
+              msg = util.format("%s failure: %s", command, err.response.text);
+            } else {
+              msg = util.format("%s failure: %s", command, err.message);
+            }
+            cb({name: "TDXApiError", message: msg, status: err.status, stack: err.stack, code: err.code });
+          } else {
+            if (!res.body) {
+              // superagent sometimes doesn't work reliably because of this issue:
+              // https://github.com/visionmedia/superagent/issues/990
+              // The response.body is sometimes undefined when calling the command API?
+              log("BAD RESPONSE - NO BODY >>>>>>> %j", res);
+            }
+            cb(null, res.body);
+          }
+        })
+    }
+  };
+
+  var getRequest = function(endpoint) {
+    return function(query, cb) {
+      log("sending %s", query);
+      cb = cb || defaultCallback;
+      var url = util.format("%s/%s", endpoint, query);
+      
+      request
+        .get(url)
+        .set(this._accessToken ? { authorization: "Bearer " + this._accessToken } : {})
+        .end(function(err, res) {
+          if (err) {
+            var msg;
+            if (err.response) {
+              msg = util.format("%s failure: %s", query, err.response.text);
+            } else {
+              msg = util.format("%s failure: %s", query, err.message);
+            }
+            cb({name: "TDXApiError", message: msg, status: err.status, stack: err.stack, code: err.code });
+          } else {
+            if (!res.body) {
+              // superagent sometimes doesn't work reliably because of this issue:
+              // https://github.com/visionmedia/superagent/issues/990
+              // The response.body is sometimes undefined when calling the command API?
+              log("BAD RESPONSE - NO BODY >>>>>>> %j", res);
+            }
+            cb(null, res.body);
+          }
+        })
+    }
+  };
+
+  return {
+    post: postRequest,
+    get: getRequest
+  };
+
+}());
+},{"debug":11,"superagent":14,"util":4}],11:[function(require,module,exports){
 
 /**
  * This is the web browser implementation of `debug()`.
@@ -1172,7 +1264,7 @@ function localstorage(){
   } catch (e) {}
 }
 
-},{"./debug":10}],10:[function(require,module,exports){
+},{"./debug":12}],12:[function(require,module,exports){
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -1371,7 +1463,7 @@ function coerce(val) {
   return val;
 }
 
-},{"ms":11}],11:[function(require,module,exports){
+},{"ms":13}],13:[function(require,module,exports){
 /**
  * Helpers.
  */
@@ -1498,7 +1590,7 @@ function plural(ms, n, name) {
   return Math.ceil(ms / n) + ' ' + name + 's';
 }
 
-},{}],12:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 /**
  * Root reference for iframes.
  */
@@ -2274,24 +2366,24 @@ Request.prototype.end = function(fn){
   };
 
   // progress
-  var handleProgress = function(e){
+  var handleProgress = function(direction, e) {
     if (e.total > 0) {
       e.percent = e.loaded / e.total * 100;
     }
-    e.direction = 'download';
+    e.direction = direction;
     self.emit('progress', e);
-  };
-  if (this.hasListeners('progress')) {
-    xhr.onprogress = handleProgress;
   }
-  try {
-    if (xhr.upload && this.hasListeners('progress')) {
-      xhr.upload.onprogress = handleProgress;
+  if (this.hasListeners('progress')) {
+    try {
+      xhr.onprogress = handleProgress.bind(null, 'download');
+      if (xhr.upload) {
+        xhr.upload.onprogress = handleProgress.bind(null, 'upload');
+      }
+    } catch(e) {
+      // Accessing xhr.upload fails in IE from a web worker, so just pretend it doesn't exist.
+      // Reported here:
+      // https://connect.microsoft.com/IE/feedback/details/837245/xmlhttprequest-upload-throws-invalid-argument-when-used-from-web-worker-context
     }
-  } catch(e) {
-    // Accessing xhr.upload fails in IE from a web worker, so just pretend it doesn't exist.
-    // Reported here:
-    // https://connect.microsoft.com/IE/feedback/details/837245/xmlhttprequest-upload-throws-invalid-argument-when-used-from-web-worker-context
   }
 
   // timeout
@@ -2476,7 +2568,7 @@ request.put = function(url, data, fn){
   return req;
 };
 
-},{"./is-object":13,"./request":15,"./request-base":14,"emitter":16}],13:[function(require,module,exports){
+},{"./is-object":15,"./request":17,"./request-base":16,"emitter":18}],15:[function(require,module,exports){
 /**
  * Check if `obj` is an object.
  *
@@ -2491,7 +2583,7 @@ function isObject(obj) {
 
 module.exports = isObject;
 
-},{}],14:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 /**
  * Module of mixed-in functions shared between node and client code
  */
@@ -2570,6 +2662,10 @@ exports.then = function then(resolve, reject) {
   }
   return this._fullfilledPromise.then(resolve, reject);
 }
+
+exports.catch = function(cb) {
+  return this.then(undefined, cb);
+};
 
 /**
  * Allow for extension
@@ -2660,21 +2756,42 @@ exports.unset = function(field){
 };
 
 /**
- * Write the field `name` and `val` for "multipart/form-data"
- * request bodies.
+ * Write the field `name` and `val`, or multiple fields with one object
+ * for "multipart/form-data" request bodies.
  *
  * ``` js
  * request.post('/upload')
  *   .field('foo', 'bar')
  *   .end(callback);
+ *
+ * request.post('/upload')
+ *   .field({ foo: 'bar', baz: 'qux' })
+ *   .end(callback);
  * ```
  *
- * @param {String} name
+ * @param {String|Object} name
  * @param {String|Blob|File|Buffer|fs.ReadStream} val
  * @return {Request} for chaining
  * @api public
  */
 exports.field = function(name, val) {
+
+  // name should be either a string or an object.
+  if (null === name ||  undefined === name) {
+    throw new Error('.field(name, val) name can not be empty');
+  }
+
+  if (isObject(name)) {
+    for (var key in name) {
+      this.field(key, name[key]);
+    }
+    return this;
+  }
+
+  // val should be defined now
+  if (null === val || undefined === val) {
+    throw new Error('.field(name, val) val can not be empty');
+  }
   this._getFormData().append(name, val);
   return this;
 };
@@ -2840,7 +2957,7 @@ exports.send = function(data){
   return this;
 };
 
-},{"./is-object":13}],15:[function(require,module,exports){
+},{"./is-object":15}],17:[function(require,module,exports){
 // The node and browser modules expose versions of this with the
 // appropriate constructor function bound as first argument
 /**
@@ -2874,7 +2991,7 @@ function request(RequestConstructor, method, url) {
 
 module.exports = request;
 
-},{}],16:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 
 /**
  * Expose `Emitter`.
@@ -3039,4 +3156,5 @@ Emitter.prototype.hasListeners = function(event){
   return !! this.listeners(event).length;
 };
 
-},{}]},{},[5]);
+},{}]},{},[5])(5)
+});
