@@ -50,8 +50,12 @@ nqmindsTDX.authenticate("myTokenID","myTokenSecret", function(err, accessToken) 
       
     });
     // Aggregate query
-    nqmindsTDX.getAggregateData("dataSetId", "pipeline", {options},  function(err,data) {
+    nqmindsTDX.getAggregateData("dataSetId", "pipeline", {options},  function(err, data) {
 
+    });
+    // Get data from dataset
+   api.getDatasetData("dataSetId", {filter}, "projection", {options}, (err, data) => {
+    
     });
   }  
 });
