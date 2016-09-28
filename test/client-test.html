@@ -20,6 +20,12 @@
         else console.log(data);
 
       });
+
+      nqmindsTDX.getAggregateData("BkWqQQuBo", '[{"$match":{"parent_id":"E09000001"}},{"$group":{"_id":null,"id_array":{"$push":"$child_id"}}}]', {limit: 1000},  function(err,data) {
+        if (err) console.log(err);
+        else console.log(data);
+
+      });
     }  
   });
 </script>
