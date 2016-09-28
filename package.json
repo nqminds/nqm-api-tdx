@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "browserify index.js --s TDXApi > client-api.js"
+    "build": "browserify index.js --s TDXApi > client-api.js",
+    "postinstall": "browserify index.js --s TDXApi > client-api.js"
   },
   "repository": {
     "type": "git",

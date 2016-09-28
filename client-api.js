@@ -1,4 +1,296 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.TDXApi = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function (process){
+module.exports = (function() {
+  "use strict";
+
+  // To enable debug.
+  if (!process.env.DEBUG) {
+    process.env.DEBUG = "nqm-*";
+  }
+  // Default output to STDOUT rather than STDERR.
+  process.env.DEBUG_FD = 1;
+
+  var API = require("./lib/api.js");
+  return API;
+}())
+}).call(this,require('_process'))
+},{"./lib/api.js":2,"_process":7}],2:[function(require,module,exports){
+module.exports = (function() {
+  "use strict";
+
+  var log = require("debug")("nqm-api-tdx");
+  var util = require("util");
+  var request = require("superagent");
+  var Query = require("./query");
+  var Command = require("./command");
+  var Databot = require("./databot");
+  
+  /**
+   * @param  {} usr
+   * @param  {} pwd
+   * @param  {} cb
+   */
+  var authenticate = function(usr,pwd,cb) {
+    var credentials;    
+    if (typeof pwd === "function") {
+      cb = pwd;
+      credentials = usr;
+    } else {
+      credentials = usr + ":" + pwd;
+    }
+    cb = cb || function() {};
+    
+    var self = this;
+    var options = {
+      uri: util.format("%s/token", this._config.commandHost || this._config.queryHost),
+      headers: { "Authorization": "Basic " + credentials },
+      json: true,
+      body: { grant_type: "client_credentials", ttl: self._config.accessTokenTTL || 3600 }
+    };
+
+    request.post(options.uri)
+      .set(options.headers)
+      .send(options.body)
+      .end(function(err, res) {
+        if (err) {
+          var msg;
+          if (err.response) {
+            msg = util.format("authenticate failure: [%s] %s", err.response.body.error, err.response.body.error_description);
+          } else {
+            msg = util.format("authenticate failure: %s", err.message);
+          }
+          cb({name: "TDXApiError", message: msg, status: err.status, stack: err.stack });
+        } else {
+          self._accessToken = res.body.access_token;
+          cb(null, res.body.access_token);
+        } 
+      });
+  };
+
+  function API(config) {
+    if (config.baseCommandURL) {
+      log("baseCommandURL is deprecated - use commandHost");
+      config.commandHost = config.baseCommandURL;
+    }
+    if (config.baseQueryURL) {
+      log("baseQueryURL is deprecated - use queryHost");
+      config.queryHost = config.baseQueryURL;
+    }
+    this._config = config;
+    this._accessToken = config.accessToken || "";
+    this.authenticate = authenticate;
+
+    // Add query methods to API
+    Query.call(this, config);
+
+    // Add command methods to API
+    Command.call(this, config);
+
+    // Add databot mthods to API
+    Databot.call(this, config);
+  }
+
+  return API;
+}());
+},{"./command":3,"./databot":4,"./query":5,"debug":11,"superagent":14,"util":10}],3:[function(require,module,exports){
+module.exports = (function() {
+  "use strict";
+
+  var log = require("debug")("nqm-api-tdx:command");  
+  var sendRequest = require("./send-request");
+
+  var createDataset = function(postData, cb) {
+    log("createDataset");
+    return this._commandPost.call(this,"resource/create", postData, cb);
+  };
+  
+  var setDatasetImportFlag = function(datasetId, importing,  cb) {
+    log("setDatasetImportFlag");
+    return this._commandPost.call(this,"resource/importing", { id: datasetId, importing: importing }, cb);
+  };
+  
+  var truncateDataset = function(id, restart, cb) {
+    log("truncateDataset");
+    if (typeof restart === "function") {
+      cb = restart;
+      restart = true;
+    }
+    return this._commandPost.call(this,"resource/truncate", {id: id, noRestart: !restart}, cb);
+  };
+
+  var addDatasetData = function(id, data, cb) {
+    log("addDatasetData");
+    var postData = {
+      datasetId: id,
+      payload: [].concat(data)    
+    };
+    return this._commandPost.call(this,"dataset/data/createMany", postData, cb);
+  };
+
+  function CommandAPI(config) {
+    this._commandPost = sendRequest.post(config.commandHost + "/commandSync");
+    this.createDataset = createDataset;
+    this.truncateDataset = truncateDataset;
+    this.addDatasetData = addDatasetData;
+    this.setDatasetImportFlag = setDatasetImportFlag;
+  }
+
+  return CommandAPI;
+}());
+},{"./send-request":6,"debug":11}],4:[function(require,module,exports){
+
+module.exports = (function() {
+  "use strict";
+
+  var log = require("debug")("nqm-api-tdx:process");
+  var sendRequest = require("./send-request");
+
+  var registerHost = function(status, cb) {
+    return this._processPost("host/register", status, cb);
+  };
+
+  var updateStatus = function(status, cb) {
+    return this._processPost("host/status", status, cb);
+  };
+
+  function ProcessAPI(config) {
+    this._processPost = sendRequest.post(config.databotHost + "/");
+    this.registerDatabotHost = registerHost;
+    this.updateDatabotStatus = updateStatus;
+  }
+
+  return ProcessAPI;
+}());
+},{"./send-request":6,"debug":11}],5:[function(require,module,exports){
+module.exports = (function() {
+  "use strict";
+
+  var sendRequest = require("./send-request");
+  var util = require("util");
+
+  var query = function(method, filter, projection, options, cb) {
+    filter = filter ? JSON.stringify(filter) : "";
+    projection = projection ? JSON.stringify(projection) : "";
+    options = options ? JSON.stringify(options) : "";
+    var queryURL = util.format("%s?filter=%s&proj=%s&opts=%s", method, filter, projection, options);
+    return this._queryGet(queryURL, cb);
+  };
+
+  var getDataset = function(datasetId, cb) {
+    return query.call(this, "datasets/" + datasetId, null, null, null, cb);
+  };
+
+  var getDatasetData = function(datasetId, filter, projection, options, cb) {
+    if (typeof options === "function") {
+      cb = options;
+      options = undefined;
+    }
+    if (typeof projection === "function") {
+      cb = projection;
+      projection = options = undefined;
+    }
+    if (typeof filter === "function") {
+      cb = filter;
+      filter = projection = options = undefined;
+    }
+    return query.call(this,"datasets/" + datasetId + "/data", filter, projection, options, cb);
+  };
+
+  function QueryAPI(config) {
+    this._version = config.version || "v1";
+    this._queryGet = sendRequest.get(config.queryHost + "/" + this._version);
+    this.query = query;
+    this.getDataset = getDataset;
+    this.getDatasetData = getDatasetData;
+  }
+
+  return QueryAPI;
+}());
+},{"./send-request":6,"util":10}],6:[function(require,module,exports){
+
+module.exports = (function() {
+  "use strict";
+
+  var log = require("debug")("nqm-api-tdx:send-request");
+  var request = require("superagent");
+  var util = require("util");
+
+  var defaultCallback = function(err) {
+    if (err) {
+      log("uncaught error: %s", err.message);
+    }        
+  };
+
+  var postRequest = function(endpoint) {
+    return function(command, postData, cb) {
+      log("sending %s with %j", command, postData);
+      cb = cb || defaultCallback;
+      var url = util.format("%s/%s", endpoint, command);
+      
+      request
+        .post(url)
+        .send(postData)
+        .set({ authorization: "Bearer " + this._accessToken })
+        .end(function(err, res) {
+          if (err) {
+            var msg;
+            if (err.response) {
+              msg = util.format("%s failure: %s", command, err.response.text);
+            } else {
+              msg = util.format("%s failure: %s", command, err.message);
+            }
+            cb({name: "TDXApiError", message: msg, status: err.status, stack: err.stack, code: err.code });
+          } else {
+            if (!res.body) {
+              // superagent sometimes doesn't work reliably because of this issue:
+              // https://github.com/visionmedia/superagent/issues/990
+              // The response.body is sometimes undefined when calling the command API?
+              log("BAD RESPONSE - NO BODY >>>>>>> %j", res);
+            }
+            cb(null, res.body);
+          }
+        })
+    }
+  };
+
+  var getRequest = function(endpoint) {
+    return function(query, cb) {
+      log("sending %s", query);
+      cb = cb || defaultCallback;
+      var url = util.format("%s/%s", endpoint, query);
+      
+      request
+        .get(url)
+        .set(this._accessToken ? { authorization: "Bearer " + this._accessToken } : {})
+        .end(function(err, res) {
+          if (err) {
+            var msg;
+            if (err.response) {
+              msg = util.format("%s failure: %s", query, err.response.text);
+            } else {
+              msg = util.format("%s failure: %s", query, err.message);
+            }
+            cb({name: "TDXApiError", message: msg, status: err.status, stack: err.stack, code: err.code });
+          } else {
+            if (!res.body) {
+              // superagent sometimes doesn't work reliably because of this issue:
+              // https://github.com/visionmedia/superagent/issues/990
+              // The response.body is sometimes undefined when calling the command API?
+              log("BAD RESPONSE - NO BODY >>>>>>> %j", res);
+            }
+            cb(null, res.body);
+          }
+        })
+    }
+  };
+
+  return {
+    post: postRequest,
+    get: getRequest
+  };
+
+}());
+},{"debug":11,"superagent":14,"util":10}],7:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -180,7 +472,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],2:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -205,14 +497,14 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],3:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],4:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -802,299 +1094,7 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":3,"_process":1,"inherits":2}],5:[function(require,module,exports){
-(function (process){
-module.exports = (function() {
-  "use strict";
-
-  // To enable debug.
-  if (!process.env.DEBUG) {
-    process.env.DEBUG = "nqm-*";
-  }
-  // Default output to STDOUT rather than STDERR.
-  process.env.DEBUG_FD = 1;
-
-  var API = require("./lib/api.js");
-  return API;
-}())
-}).call(this,require('_process'))
-},{"./lib/api.js":6,"_process":1}],6:[function(require,module,exports){
-module.exports = (function() {
-  "use strict";
-
-  var log = require("debug")("nqm-api-tdx");
-  var util = require("util");
-  var request = require("superagent");
-  var Query = require("./query");
-  var Command = require("./command");
-  var Databot = require("./databot");
-  
-  /**
-   * @param  {} usr
-   * @param  {} pwd
-   * @param  {} cb
-   */
-  var authenticate = function(usr,pwd,cb) {
-    var credentials;    
-    if (typeof pwd === "function") {
-      cb = pwd;
-      credentials = usr;
-    } else {
-      credentials = usr + ":" + pwd;
-    }
-    cb = cb || function() {};
-    
-    var self = this;
-    var options = {
-      uri: util.format("%s/token", this._config.commandHost || this._config.queryHost),
-      headers: { "Authorization": "Basic " + credentials },
-      json: true,
-      body: { grant_type: "client_credentials", ttl: self._config.accessTokenTTL || 3600 }
-    };
-
-    request.post(options.uri)
-      .set(options.headers)
-      .send(options.body)
-      .end(function(err, res) {
-        if (err) {
-          var msg;
-          if (err.response) {
-            msg = util.format("authenticate failure: [%s] %s", err.response.body.error, err.response.body.error_description);
-          } else {
-            msg = util.format("authenticate failure: %s", err.message);
-          }
-          cb({name: "TDXApiError", message: msg, status: err.status, stack: err.stack });
-        } else {
-          self._accessToken = res.body.access_token;
-          cb(null, res.body.access_token);
-        } 
-      });
-  };
-
-  function API(config) {
-    if (config.baseCommandURL) {
-      log("baseCommandURL is deprecated - use commandHost");
-      config.commandHost = config.baseCommandURL;
-    }
-    if (config.baseQueryURL) {
-      log("baseQueryURL is deprecated - use queryHost");
-      config.queryHost = config.baseQueryURL;
-    }
-    this._config = config;
-    this._accessToken = config.accessToken || "";
-    this.authenticate = authenticate;
-
-    // Add query methods to API
-    Query.call(this, config);
-
-    // Add command methods to API
-    Command.call(this, config);
-
-    // Add databot mthods to API
-    Databot.call(this, config);
-  }
-
-  return API;
-}());
-},{"./command":7,"./databot":8,"./query":9,"debug":11,"superagent":14,"util":4}],7:[function(require,module,exports){
-module.exports = (function() {
-  "use strict";
-
-  var log = require("debug")("nqm-api-tdx:command");  
-  var sendRequest = require("./send-request");
-
-  var createDataset = function(postData, cb) {
-    log("createDataset");
-    return this._commandPost.call(this,"resource/create", postData, cb);
-  };
-  
-  var setDatasetImportFlag = function(datasetId, importing,  cb) {
-    log("setDatasetImportFlag");
-    return this._commandPost.call(this,"resource/importing", { id: datasetId, importing: importing }, cb);
-  };
-  
-  var truncateDataset = function(id, restart, cb) {
-    log("truncateDataset");
-    if (typeof restart === "function") {
-      cb = restart;
-      restart = true;
-    }
-    return this._commandPost.call(this,"resource/truncate", {id: id, noRestart: !restart}, cb);
-  };
-
-  var addDatasetData = function(id, data, cb) {
-    log("addDatasetData");
-    var postData = {
-      datasetId: id,
-      payload: [].concat(data)    
-    };
-    return this._commandPost.call(this,"dataset/data/createMany", postData, cb);
-  };
-
-  function CommandAPI(config) {
-    this._commandPost = sendRequest.post(config.commandHost + "/commandSync");
-    this.createDataset = createDataset;
-    this.truncateDataset = truncateDataset;
-    this.addDatasetData = addDatasetData;
-    this.setDatasetImportFlag = setDatasetImportFlag;
-  }
-
-  return CommandAPI;
-}());
-},{"./send-request":10,"debug":11}],8:[function(require,module,exports){
-
-module.exports = (function() {
-  "use strict";
-
-  var log = require("debug")("nqm-api-tdx:process");
-  var sendRequest = require("./send-request");
-
-  var registerHost = function(status, cb) {
-    return this._processPost("host/register", status, cb);
-  };
-
-  var updateStatus = function(status, cb) {
-    return this._processPost("host/status", status, cb);
-  };
-
-  function ProcessAPI(config) {
-    this._processPost = sendRequest.post(config.databotHost + "/");
-    this.registerDatabotHost = registerHost;
-    this.updateDatabotStatus = updateStatus;
-  }
-
-  return ProcessAPI;
-}());
-},{"./send-request":10,"debug":11}],9:[function(require,module,exports){
-module.exports = (function() {
-  "use strict";
-
-  var sendRequest = require("./send-request");
-  var util = require("util");
-
-  var query = function(method, filter, projection, options, cb) {
-    filter = filter ? JSON.stringify(filter) : "";
-    projection = projection ? JSON.stringify(projection) : "";
-    options = options ? JSON.stringify(options) : "";
-    var queryURL = util.format("%s?filter=%s&proj=%s&opts=%s", method, filter, projection, options);
-    return this._queryGet(queryURL, cb);
-  };
-
-  var getDataset = function(datasetId, cb) {
-    return query.call(this, "datasets/" + datasetId, null, null, null, cb);
-  };
-
-  var getDatasetData = function(datasetId, filter, projection, options, cb) {
-    if (typeof options === "function") {
-      cb = options;
-      options = undefined;
-    }
-    if (typeof projection === "function") {
-      cb = projection;
-      projection = options = undefined;
-    }
-    if (typeof filter === "function") {
-      cb = filter;
-      filter = projection = options = undefined;
-    }
-    return query.call(this,"datasets/" + datasetId + "/data", filter, projection, options, cb);
-  };
-
-  function QueryAPI(config) {
-    this._version = config.version || "v1";
-    this._queryGet = sendRequest.get(config.queryHost + "/" + this._version);
-    this.query = query;
-    this.getDataset = getDataset;
-    this.getDatasetData = getDatasetData;
-  }
-
-  return QueryAPI;
-}());
-},{"./send-request":10,"util":4}],10:[function(require,module,exports){
-
-module.exports = (function() {
-  "use strict";
-
-  var log = require("debug")("nqm-api-tdx:send-request");
-  var request = require("superagent");
-  var util = require("util");
-
-  var defaultCallback = function(err) {
-    if (err) {
-      log("uncaught error: %s", err.message);
-    }        
-  };
-
-  var postRequest = function(endpoint) {
-    return function(command, postData, cb) {
-      log("sending %s with %j", command, postData);
-      cb = cb || defaultCallback;
-      var url = util.format("%s/%s", endpoint, command);
-      
-      request
-        .post(url)
-        .send(postData)
-        .set({ authorization: "Bearer " + this._accessToken })
-        .end(function(err, res) {
-          if (err) {
-            var msg;
-            if (err.response) {
-              msg = util.format("%s failure: %s", command, err.response.text);
-            } else {
-              msg = util.format("%s failure: %s", command, err.message);
-            }
-            cb({name: "TDXApiError", message: msg, status: err.status, stack: err.stack, code: err.code });
-          } else {
-            if (!res.body) {
-              // superagent sometimes doesn't work reliably because of this issue:
-              // https://github.com/visionmedia/superagent/issues/990
-              // The response.body is sometimes undefined when calling the command API?
-              log("BAD RESPONSE - NO BODY >>>>>>> %j", res);
-            }
-            cb(null, res.body);
-          }
-        })
-    }
-  };
-
-  var getRequest = function(endpoint) {
-    return function(query, cb) {
-      log("sending %s", query);
-      cb = cb || defaultCallback;
-      var url = util.format("%s/%s", endpoint, query);
-      
-      request
-        .get(url)
-        .set(this._accessToken ? { authorization: "Bearer " + this._accessToken } : {})
-        .end(function(err, res) {
-          if (err) {
-            var msg;
-            if (err.response) {
-              msg = util.format("%s failure: %s", query, err.response.text);
-            } else {
-              msg = util.format("%s failure: %s", query, err.message);
-            }
-            cb({name: "TDXApiError", message: msg, status: err.status, stack: err.stack, code: err.code });
-          } else {
-            if (!res.body) {
-              // superagent sometimes doesn't work reliably because of this issue:
-              // https://github.com/visionmedia/superagent/issues/990
-              // The response.body is sometimes undefined when calling the command API?
-              log("BAD RESPONSE - NO BODY >>>>>>> %j", res);
-            }
-            cb(null, res.body);
-          }
-        })
-    }
-  };
-
-  return {
-    post: postRequest,
-    get: getRequest
-  };
-
-}());
-},{"debug":11,"superagent":14,"util":4}],11:[function(require,module,exports){
+},{"./support/isBuffer":9,"_process":7,"inherits":8}],11:[function(require,module,exports){
 
 /**
  * This is the web browser implementation of `debug()`.
@@ -3156,5 +3156,5 @@ Emitter.prototype.hasListeners = function(event){
   return !! this.listeners(event).length;
 };
 
-},{}]},{},[5])(5)
+},{}]},{},[1])(1)
 });
