@@ -50,15 +50,23 @@ nqmindsTDX.authenticate("myTokenID","myTokenSecret", function(err, accessToken) 
       
     });
     // Aggregate query
-    nqmindsTDX.getAggregateData("dataSetId", "pipeline", {options},  function(err, data) {
+    nqmindsTDX.getAggregateData("datasetId", "pipeline", {options},  function(err, data) {
 
     });
     // Get data from dataset
-    api.getDatasetData("dataSetId", {filter}, {projection}, {options}, function(err, data) {
+    nqmindsTDX.getDatasetData("datasetId", {filter}, {projection}, {options}, function(err, data) {
     
     });
     // Get datasets that match filter
     nqmindsTDX.getDatasets({filter}, {projection}, {options},  function(err,data)  {
+
+    });
+    // Truncate -- careful!
+    nqmindsTDX.truncateDataset("datasetId", function(err, response) {
+
+    });
+    // Add data 
+    nqmindsTDX.addDatasetData("datasetId",{data}, function(err, response) {
 
     });
   }  
