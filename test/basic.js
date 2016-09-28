@@ -35,6 +35,16 @@ describe("query", function() {
   });
 });
 
+describe("aggregate", function() {
+  it("aggregate dataset data", function(done) {
+    api.aggregate("datasets/BkWqQQuBo/data", '[{"$match":{"parent_id":"E09000001"}},{"$group":{"_id":null,"id_array":{"$push":"$child_id"}}}]', null, function(err, data) {
+      expect(err).to.not.exist;
+      expect(data).to.exist;
+      done();
+    });
+  });
+});
+
 describe("commands", function() {
   it("creates dataset", function(done) {
     var createOptions = {

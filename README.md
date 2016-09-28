@@ -48,7 +48,27 @@ nqmindsTDX.authenticate("myTokenID","myTokenSecret", function(err, accessToken) 
     // Create a dataset.
     nqmindsTDX.createDataset({ name: "foo", parentId: "xyzID", basedOnSchema: "dataset"}, function(err,id) {
       
-    })
+    });
+    // Aggregate query
+    nqmindsTDX.getAggregateData("dataSetId", "pipeline", {options},  function(err, data) {
+
+    });
+    // Get data from dataset
+    api.getDatasetData("dataSetId", {filter}, {projection}, {options}, function(err, data) {
+    
+    });
+    // Get datasets that match filter
+    nqmindsTDX.getDatasets({filter}, {projection}, {options},  function(err,data)  {
+
+    });
   }  
 });
+```
+Passing in an existing token:
+```
+var config = {
+  commandHost: "https://cmd.nqminds.com",
+  queryHost: "https://q.nqminds.com",
+  accessToken: "yourTokenGoesHere  
+};
 ```

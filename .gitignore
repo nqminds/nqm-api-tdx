@@ -38,3 +38,6 @@ jspm_packages
 
 # Auto generated files
 client-api.js
+
+#lint
+.eslintrc.json
