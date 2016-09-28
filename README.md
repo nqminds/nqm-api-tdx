@@ -11,11 +11,28 @@ npm install nqm-api-tdx
 mocha test
 ```
 
-## usage
+## include
 
+### nodejs
 ```
 var TDXApi = require("nqm-api-tdx");
+```
 
+### meteor
+```
+import TDXApi from "nqm-api-tdx/client-api"
+```
+
+### web page
+Copy client-api.js (generated when you npm install) to your js directory then:
+```
+<script src="/path/to/client-api.js"></script>
+```
+
+## usage
+Include in the appropriate manner as shown above
+
+```
 var config = {
   commandHost: "https://cmd.nqminds.com",
   queryHost: "https://q.nqminds.com"  
