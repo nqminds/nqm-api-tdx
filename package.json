@@ -4,7 +4,9 @@
   "description": "nquiringminds Trusted Data Exchange command and query API interface for nodejs clients",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "browserify index.js --s TDXApi > client-api.js",
+    "postinstall": "browserify index.js --s TDXApi > client-api.js"
   },
   "repository": {
     "type": "git",
@@ -17,6 +19,7 @@
   },
   "homepage": "https://github.com/nqminds/nqm-api-tdx#readme",
   "dependencies": {
+    "browserify": "^13.1.0",
     "debug": "^2.2.0",
     "superagent": "^2.2.0"
   },

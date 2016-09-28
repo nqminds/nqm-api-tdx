@@ -1,0 +1,25 @@
+<script src="client-api.js"></script>
+<script>
+// You must copy client-api.js to the same folder as this page. Check the console for output.
+
+  var config = {
+    commandHost: "https://cmd.nqminds.com",
+    queryHost: "https://q.nqminds.com"  
+  };
+
+  var nqmindsTDX = new TDXApi(config);
+
+  // Authenticate using token id and secret (from the toolbox)
+  nqmindsTDX.authenticate("BJeMKwDUT","12345", function(err, accessToken) {
+    if (err) {
+      console.log(err);
+    }
+    else {
+      nqmindsTDX.getDataset("SJx-IgF8a", function(err,data) {
+        if (err) console.log(err);
+        else console.log(data);
+
+      });
+    }  
+  });
+</script>
