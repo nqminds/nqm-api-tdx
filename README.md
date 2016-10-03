@@ -69,6 +69,10 @@ nqmindsTDX.authenticate("myTokenID","myTokenSecret", function(err, accessToken) 
     nqmindsTDX.addDatasetData("datasetId",{data}, function(err, response) {
 
     });
+    // Get distinct keys
+    nqmindsTDX.getDistinct("datasetId", "key", {filter}, {projection}, {options}, function(err, data) {
+
+    };
   }  
 });
 ```
