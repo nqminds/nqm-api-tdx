@@ -56,5 +56,16 @@ describe("commands", function() {
       expect(err).to.not.exist;
       done();
     });
-  })
+  });
+});
+
+
+describe("distinct", function() {
+  it("gets unique values of key", function(done) {
+    api.distinct("datasets/SkxbDChh_/distinct", "year", null, null, null,  function(err, data) {
+      expect(err).to.not.exist;
+      expect(data).to.exist;
+      done();
+    });
+  });
 });
