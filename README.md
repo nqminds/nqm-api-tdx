@@ -57,6 +57,10 @@ nqmindsTDX.authenticate("myTokenID","myTokenSecret", function(err, accessToken) 
     nqmindsTDX.getDatasetData("datasetId", {filter}, {projection}, {options}, function(err, data) {
     
     });
+    // Get data from dataset in newline delimited format
+    nqmindsTDX.getDatasetNDData("datasetId", {filter}, {projection}, {options}, function(err, data) {
+    
+    });
     // Get datasets that match filter
     nqmindsTDX.getDatasets({filter}, {projection}, {options},  function(err,data)  {
 
