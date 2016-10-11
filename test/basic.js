@@ -35,6 +35,27 @@ describe("query", function() {
   });
 });
 
+describe("queryStream", function() {
+  it("queries dataset data and streams the response", function(done) {
+    var request = api.getDatasetData("rJgyaqJrM", function(err,resp) {
+      // Shouldn't get called back when streaming the response.
+      expect(false).to.be.true();
+      done();
+    });
+    var fs = require("fs");
+    request.pipe(fs.createWriteStream("./stream-test.json")).on("finish",function() {
+      var contents = fs.readFileSync("./stream-test.json");
+      console.log(contents.toString());
+      var data = JSON.parse(contents);
+      expect(data.data.length).to.equal(1000);
+      done();
+    });
+    request.on("error", function(err) {
+      expect(err).to.not.exist;
+    });
+  })
+});
+
 describe("aggregate", function() {
   it("aggregate dataset data", function(done) {
     api.aggregate("datasets/BkWqQQuBo/data", '[{"$match":{"parent_id":"E09000001"}},{"$group":{"_id":null,"id_array":{"$push":"$child_id"}}}]', null, function(err, data) {
