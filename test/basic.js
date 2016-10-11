@@ -56,6 +56,17 @@ describe("queryStream", function() {
   })
 });
 
+describe("data count", function() {
+  it("queries dataset data count", function(done) {
+    api.getDatasetDataCount("NJgMR6EPmg", function(err, data) {
+      expect(err).to.not.exist;
+      expect(data).to.exist;
+      expect(data.count).to.equal(1520);
+      done();
+    });
+  });
+});
+
 describe("aggregate", function() {
   it("aggregate dataset data", function(done) {
     api.aggregate("datasets/BkWqQQuBo/data", '[{"$match":{"parent_id":"E09000001"}},{"$group":{"_id":null,"id_array":{"$push":"$child_id"}}}]', null, function(err, data) {
