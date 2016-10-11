@@ -45,7 +45,7 @@ describe("queryStream", function() {
     var fs = require("fs");
     request.pipe(fs.createWriteStream("./stream-test.json")).on("finish",function() {
       var contents = fs.readFileSync("./stream-test.json");
-      console.log(contents.toString());
+      // console.log(contents.toString());
       var data = JSON.parse(contents);
       expect(data.data.length).to.equal(1000);
       done();
@@ -62,6 +62,18 @@ describe("data count", function() {
       expect(err).to.not.exist;
       expect(data).to.exist;
       expect(data.count).to.equal(1520);
+      done();
+    });
+  });
+});
+
+describe("get raw file", function() {
+  it("gets raw file data", function(done) {
+    var request = api.getRawFile("SygmvnAX8");
+    var fs = require("fs");
+    var str = fs.createWriteStream("./raw-file.json");
+    request.pipe(str).on("finish", function() {
+      console.log("got raw file: ");
       done();
     });
   });
