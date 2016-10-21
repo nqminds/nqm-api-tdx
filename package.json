@@ -21,7 +21,7 @@
   "dependencies": {
     "browserify": "^13.1.0",
     "debug": "^2.2.0",
-    "superagent": "^2.2.0"
+    "superagent": "^2.3.0"
   },
   "devDependencies": {
     "chai": "^3.5.0",
