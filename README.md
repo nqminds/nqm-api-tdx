@@ -82,6 +82,11 @@ nqmindsTDX.authenticate("myTokenID","myTokenSecret", function(err, accessToken) 
 
     };
 
+    // Delete a dataset - very careful!
+    nqmindsTDX.deleteDataset("datasetId", function(err, response) {
+
+    });
+
     // Start a databot
     const instanceData = {
       name: "my databot instance",
