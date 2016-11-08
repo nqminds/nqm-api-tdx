@@ -17,7 +17,7 @@ describe("authenticate", function() {
     });
   });
   it("authenticates valid credentials", function(done) {
-    api.authenticate("Skgsbgond","password",function(err, token) {
+    api.authenticate("ryg94GVkZe","12345",function(err, token) {
       expect(token).to.exist;
       expect(err).to.not.exist;
       done();
@@ -97,6 +97,16 @@ describe("commands", function() {
       basedOnSchema: "dataset"
     };
     api.createDataset(createOptions, function(err, id) {
+      expect(err).to.not.exist;
+      done();
+    });
+  });
+});
+
+describe("delete", function() {
+  it("deletes dataset", function(done) {
+    api.deleteDataset("HygNQgNkZx", function(err, response) {
+      console.log(err);
       expect(err).to.not.exist;
       done();
     });
