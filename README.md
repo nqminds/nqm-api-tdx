@@ -57,6 +57,10 @@ nqmindsTDX.authenticate("myTokenID","myTokenSecret", function(err, accessToken) 
     nqmindsTDX.getDatasetData("datasetId", {filter}, {projection}, {options}, function(err, data) {
     
     });
+    // Get data from dataset in newline delimited format
+    nqmindsTDX.getDatasetNDData("datasetId", {filter}, {projection}, {options}, function(err, data) {
+    
+    });
     // Get datasets that match filter
     nqmindsTDX.getDatasets({filter}, {projection}, {options},  function(err,data)  {
 
@@ -69,10 +73,41 @@ nqmindsTDX.authenticate("myTokenID","myTokenSecret", function(err, accessToken) 
     nqmindsTDX.addDatasetData("datasetId",{data}, function(err, response) {
 
     });
+    // Update data
+    nqmindsTDX.updateDatasetData("datasetId", {data}, function(err, response) {
+      
+    });
     // Get distinct keys
     nqmindsTDX.getDistinct("datasetId", "key", {filter}, {projection}, {options}, function(err, data) {
 
     };
+
+    // Start a databot
+    const instanceData = {
+      name: "my databot instance",
+      shareKeyId: shareKeyId,
+      shareKeySecret: shareKeySecret,
+      authTokenTTL: authTokenTTL,
+      chunks: 1,
+      inputs: {
+        someInput1: 133,
+        someInput2: {
+          foo: "bar"
+        }
+      }
+    };    
+    nqmindsTDX.startDatabotInstance(databotDefinitionId, instanceData, function(err, startResult) {
+      console.log("started databot instance id is %s", startResult.response.instanceId);
+    });
+
+    // Get databot instance status.
+    nqmindsTDX.getDatabotInstanceStatus(instanceId, function(err, statusResult) {
+      if (statusResult.status === "complete") {
+        console.log("databot instance %s is finished", instanceId);
+      } else {
+        console.log("databot instance %s status is %s", instanceId, statusResult.status);
+      }
+    });
   }  
 });
 ```

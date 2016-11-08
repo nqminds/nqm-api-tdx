@@ -1,6 +1,6 @@
 {
   "name": "nqm-api-tdx",
-  "version": "0.1.2",
+  "version": "0.1.20",
   "description": "nquiringminds Trusted Data Exchange command and query API interface for nodejs clients",
   "main": "index.js",
   "scripts": {
@@ -21,7 +21,7 @@
   "dependencies": {
     "browserify": "^13.1.0",
     "debug": "^2.2.0",
-    "superagent": "^2.2.0"
+    "superagent": "^2.3.0"
   },
   "devDependencies": {
     "chai": "^3.5.0",
