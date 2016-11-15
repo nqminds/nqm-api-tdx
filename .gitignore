@@ -41,3 +41,4 @@ client-api.js
 
 #lint
 .eslintrc.json
+/typings/
