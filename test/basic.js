@@ -6,7 +6,10 @@ var testConfig = {
   commandHost: "https://cmd.nqminds.com",
   queryHost: "https://q.nqminds.com"
 };
-var api = new APIModule(testConfig);
+var newConfig = {
+  tdxHost: "https://tdx.nqminds.com",
+};
+var api = new APIModule(newConfig);
 
 describe("authenticate", function() {
   it("fails to authenticate invalid credentials", function(done) {
