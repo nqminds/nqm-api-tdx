@@ -87,6 +87,12 @@ nqmindsTDX.authenticate("myTokenID","myTokenSecret", function(err, accessToken) 
 
     });
 
+    // Download a raw file from resource id
+
+    nqmindsTDX.getRawFile("resourceId", function(err, response)) {
+
+    });
+
     // Start a databot
     const instanceData = {
       name: "my databot instance",
