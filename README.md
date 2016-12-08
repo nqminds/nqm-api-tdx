@@ -87,8 +87,13 @@ nqmindsTDX.authenticate("myTokenID","myTokenSecret", function(err, accessToken) 
 
     });
 
-    // Download a raw file from resource id
+    // Delete dataset data
+    // E.g. primaryKey="timestamp" keyValue="1093290930"
+    nqmindsTDX.deleteDatasetData("datasetId, "primaryKey", keyValue, function(err, response)) {
 
+    });
+
+    // Download a raw file from resource id
     nqmindsTDX.getRawFile("resourceId", function(err, response)) {
 
     });
