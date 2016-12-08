@@ -118,7 +118,7 @@ describe("delete", function() {
 
 describe("deleteDatasetData", function() {
   it("deletes document", function(done) {
-    api.deleteDatasetData("r1lqT7RtY", "timestamp", 1470911485911, function (err, response) {
+    api.deleteDatasetData("r1lqT7RtY", [{timestamp: 1470911545915}], function (err, response) {
       expect(err).to.not.exist;
       done();
     });
