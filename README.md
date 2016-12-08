@@ -88,7 +88,7 @@ nqmindsTDX.authenticate("myTokenID","myTokenSecret", function(err, accessToken) 
     });
 
     // Delete dataset data
-    // data should take the form of an array e.g.
+    // {primaryKey: value}
     // [{primaryKey1: value1}, {primaryKey2: value 2}]
     nqmindsTDX.deleteDatasetData("datasetId", data, function(err, response)) {
 

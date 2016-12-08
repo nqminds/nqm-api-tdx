@@ -117,8 +117,17 @@ describe("delete", function() {
 });
 
 describe("deleteDatasetData", function() {
-  it("deletes document", function(done) {
-    api.deleteDatasetData("r1lqT7RtY", [{timestamp: 1470911545915}], function (err, response) {
+  it("deletes document taking array of primary keys as parameter", function(done) {
+    api.deleteDatasetData("HJl60hiIQx", [{name: "me"}, {id: "delete"}], function (err, response) {
+      expect(err).to.not.exist;
+      done();
+    });
+  });
+});
+
+describe("deleteDatasetData", function() {
+  it("deletes document with singular primary key", function(done) {
+    api.deleteDatasetData("r1lqT7RtY", {timestamp: 1470911605921}, function (err, response) {
       expect(err).to.not.exist;
       done();
     });
