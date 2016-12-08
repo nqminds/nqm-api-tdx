@@ -88,8 +88,9 @@ nqmindsTDX.authenticate("myTokenID","myTokenSecret", function(err, accessToken) 
     });
 
     // Delete dataset data
-    // E.g. primaryKey="timestamp" keyValue="1093290930"
-    nqmindsTDX.deleteDatasetData("datasetId, "primaryKey", keyValue, function(err, response)) {
+    // {primaryKey: value}
+    // [{primaryKey1: value1}, {primaryKey2: value 2}]
+    nqmindsTDX.deleteDatasetData("datasetId", data, function(err, response)) {
 
     });
 
