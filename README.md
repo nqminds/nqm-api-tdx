@@ -99,6 +99,11 @@ nqmindsTDX.authenticate("myTokenID","myTokenSecret", function(err, accessToken) 
 
     });
 
+    // Get count for dataset
+    nqmindsTDX.getDatasetDataCount("resourceId", {filter}, function(err, response) {
+
+    });
+
     // Start a databot
     const instanceData = {
       name: "my databot instance",
