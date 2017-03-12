@@ -2,10 +2,6 @@ var chai = require("chai");
 var expect = chai.expect;
 
 var APIModule = require("../lib/api.js");
-var testConfig = {
-  commandHost: "https://cmd.nqminds.com",
-  queryHost: "https://q.nqminds.com"
-};
 var newConfig = {
   tdxHost: "https://tdx.nqminds.com",
 };
