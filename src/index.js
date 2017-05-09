@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 import Promise from "bluebird";
+import fetch from "isomorphic-fetch";
 
 const checkResponse = function(response) {
   return response.json()
