@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 import Promise from "bluebird";
 import fetch from "isomorphic-fetch";
+import base64 from "base-64";
 
 const checkResponse = function(response) {
   return response.json()
@@ -75,11 +76,17 @@ class TDXApi {
   }
   authenticate(token, secret) {
     let credentials;
+
     if (secret === undefined) {
+      // Assume the first argument is a pre-formed credentials string
       credentials = token;
     } else {
-      credentials = `${token}:${secret}`;
+      // uri-encode the username and concatenate with secret.
+      credentials = `${encodeURIComponent(token)}:${secret}`;
     }
+
+    // Authorization headers must be base-64 encoded.
+    credentials = base64.encode(credentials);
 
     const uri = `${this.config.tdxHost || this.config.commandHost || this.config.queryHost}/token`;
     const request = new Request(uri, {
