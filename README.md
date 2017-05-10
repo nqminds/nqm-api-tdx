@@ -49,6 +49,20 @@ nqmindsTDX.authenticate("myTokenID","myTokenSecret", function(err, accessToken) 
     nqmindsTDX.createDataset({ name: "foo", parentId: "xyzID", basedOnSchema: "dataset"}, function(err,id) {
       
     });
+    // Update a dataset.
+    // Each of the properties below is optional. E.g. to rename a resource, simple supply the 'name' property,
+    // to rename and change the description, supply both 'name' and 'description'.
+    nqmindsTDX.updateDataset(
+      datasetId,
+      {
+        name: "new-foo",
+        tags: ["new", "tag"],
+        description: "new description",
+        meta: {new: "foo"}
+      },
+      function(err,id) {
+      }
+    );
     // Aggregate query
     nqmindsTDX.getAggregateData("datasetId", "pipeline", {options},  function(err, data) {
 
