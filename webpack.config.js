@@ -49,14 +49,15 @@ const config = {
   externals: {
     "base-64": "base-64",
     bluebird: "bluebird",
+    debug: "debug",
     "isomorphic-fetch": "isomorphic-fetch",
     lodash: {
       commonjs: "lodash",
       commonjs2: "lodash",
       amd: "_",
-      root: "_"
+      root: "_",
     },
-  }
+  },
 };
 
 module.exports = config;

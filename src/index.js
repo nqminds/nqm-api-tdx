@@ -1,7 +1,10 @@
-/* eslint-disable no-console */
 import Promise from "bluebird";
 import fetch from "isomorphic-fetch";
 import base64 from "base-64";
+import debug from "debug";
+
+const log = debug("nqm-api-tdx");
+const errLog = debug("nqm-api-tdx:error");
 
 const checkResponse = function(response) {
   return response.json()
@@ -29,7 +32,7 @@ const setDefaults = function(config) {
     config.commandHost = config.commandHost || `${protocol}://cmd.${hostname}`;
     config.queryHost = config.queryHost || `${protocol}://q.${hostname}`;
     config.databotHost = config.databotHost || `${protocol}://databot.${hostname}`;
-    console.log(
+    log(
       "defaulted hosts to %s, %s, %s",
       config.commandHost,
       config.queryHost,
@@ -74,15 +77,15 @@ class TDXApi {
       }),
     });
   }
-  authenticate(token, secret) {
+  authenticate(id, secret) {
     let credentials;
 
     if (secret === undefined) {
       // Assume the first argument is a pre-formed credentials string
-      credentials = token;
+      credentials = id;
     } else {
       // uri-encode the username and concatenate with secret.
-      credentials = `${encodeURIComponent(token)}:${secret}`;
+      credentials = `${encodeURIComponent(id)}:${secret}`;
     }
 
     // Authorization headers must be base-64 encoded.
@@ -102,12 +105,12 @@ class TDXApi {
     return fetch(request)
       .then(checkResponse)
       .then((result) => {
-        console.log(result);
+        log(result);
         this.accessToken = result.access_token;
         return this.accessToken;
       })
       .catch((err) => {
-        console.log(`error: ${err.message}`);
+        errLog(`error: ${err.message}`);
         return Promise.reject(err);
       });
   }
@@ -120,7 +123,7 @@ class TDXApi {
     const request = this.buildCommandRequest("account/create", options);
     return fetch(request)
       .catch((err) => {
-        console.error("TDXApi.addAccount: %s", err.message);
+        errLog("TDXApi.addAccount: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
       .then(checkResponse);
@@ -129,7 +132,7 @@ class TDXApi {
     const request = this.buildCommandRequest("trustedConnection/create", options);
     return fetch(request)
       .catch((err) => {
-        console.error("TDXApi.addTrustedExchange: %s", err.message);
+        errLog("TDXApi.addTrustedExchange: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
       .then(checkResponse);
@@ -138,7 +141,7 @@ class TDXApi {
     const request = this.buildCommandRequest("resource/create", options);
     return fetch(request)
       .catch((err) => {
-        console.error("TDXApi.addResource: %s", err.message);
+        errLog("TDXApi.addResource: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
       .then(checkResponse);
@@ -147,7 +150,7 @@ class TDXApi {
     const request = this.buildCommandRequest("resource/delete", {id: resourceId});
     return fetch(request)
       .catch((err) => {
-        console.error("TDXApi.deleteResource: %s", err.message);
+        errLog("TDXApi.deleteResource: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
       .then(checkResponse);
@@ -161,7 +164,7 @@ class TDXApi {
     });
     return fetch(request)
       .catch((err) => {
-        console.error("TDXApi.addResourceAccess: %s", err.message);
+        errLog("TDXApi.addResourceAccess: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
       .then(checkResponse);
@@ -176,7 +179,7 @@ class TDXApi {
     });
     return fetch(request)
       .catch((err) => {
-        console.error("TDXApi.removeResourceAccess: %s", err.message);
+        errLog("TDXApi.removeResourceAccess: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
       .then(checkResponse);
@@ -185,7 +188,7 @@ class TDXApi {
     const request = this.buildCommandRequest("resource/setShareMode", {id: resourceId, shareMode});
     return fetch(request)
       .catch((err) => {
-        console.error("TDXApi.setResourceShareMode: %s", err.message);
+        errLog("TDXApi.setResourceShareMode: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
       .then(checkResponse);
@@ -197,7 +200,7 @@ class TDXApi {
     });
     return fetch(request)
       .catch((err) => {
-        console.error("TDXApi.setResourcePermissiveShare: %s", err.message);
+        errLog("TDXApi.setResourcePermissiveShare: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
       .then(checkResponse);
@@ -211,7 +214,7 @@ class TDXApi {
     const request = this.buildCommandRequest("dataset/data/updateMany", postData);
     return fetch(request)
       .catch((err) => {
-        console.error("TDXApi.updateData: %s", err.message);
+        errLog("TDXApi.updateData: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
       .then(checkResponse);
@@ -224,7 +227,7 @@ class TDXApi {
     const request = this.buildCommandRequest("dataset/data/upsertMany", postData);
     return fetch(request)
       .catch((err) => {
-        console.error("TDXApi.patchData: %s", err.message);
+        errLog("TDXApi.patchData: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
       .then(checkResponse);
@@ -237,7 +240,7 @@ class TDXApi {
     const request = this.buildCommandRequest("dataset/data/delete", postData);
     return fetch(request)
       .catch((err) => {
-        console.error("TDXApi.deleteData: %s", err.message);
+        errLog("TDXApi.deleteData: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
       .then(checkResponse);
@@ -251,7 +254,7 @@ class TDXApi {
     const request = this.buildQueryRequest("zones", {username: zoneId});
     return fetch(request)
       .catch((err) => {
-        console.error("TDXApi.getZone: %s", err.message);
+        errLog("TDXApi.getZone: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
       .then(checkResponse);
@@ -260,7 +263,7 @@ class TDXApi {
     const request = this.buildQueryRequest(`datasets/${resourceId}`);
     return fetch(request)
       .catch((err) => {
-        console.error("TDXApi.getResource: %s", err.message);
+        errLog("TDXApi.getResource: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
       .then(checkResponse);
@@ -269,7 +272,7 @@ class TDXApi {
     const request = this.buildQueryRequest(`datasets/${datasetId}/ancestors`);
     return fetch(request)
       .catch((err) => {
-        console.error("TDXApi.getDatasetAncestors: %s", err.message);
+        errLog("TDXApi.getDatasetAncestors: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
       .then(checkResponse);
@@ -278,7 +281,7 @@ class TDXApi {
     const request = this.buildQueryRequest(`datasets/${datasetId}/data`, filter, projection, options);
     return fetch(request)
       .catch((err) => {
-        console.error("TDXApi.getDatasetData: %s", err.message);
+        errLog("TDXApi.getDatasetData: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
       .then(checkResponse);
@@ -287,7 +290,7 @@ class TDXApi {
     const request = this.buildQueryRequest(`datasets/${datasetId}/count`, filter);
     return fetch(request)
       .catch((err) => {
-        console.error("TDXApi.getDatasetDataCount: %s", err.message);
+        errLog("TDXApi.getDatasetDataCount: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
       .then(checkResponse);
@@ -298,19 +301,19 @@ class TDXApi {
       .then((dataset) => {
         const checkResult = check(dataset, retryCount);
         if (checkResult instanceof Error) {
-          console.log("waitForResource - check failed with error [%s]", checkResult.message);
+          log("waitForResource - check failed with error [%s]", checkResult.message);
           return Promise.reject(checkResult);
         }
 
         if (!checkResult) {
           // A negative maxRetries value will retry indefinitely.
           if (maxRetries >= 0 && retryCount > maxRetries) {
-            console.log("waitForResource - giving up after %d attempts", retryCount);
+            log("waitForResource - giving up after %d attempts", retryCount);
             return Promise.reject(new Error(`gave up waiting for ${datasetId} after ${retryCount} attempts`));
           }
 
           // Try again after a delay.
-          console.log("waitForResource - waiting for %d msec", pollingInterval);
+          log("waitForResource - waiting for %d msec", pollingInterval);
           return Promise.delay(pollingInterval)
             .then(() => {
               return this.waitForResource(datasetId, check, retryCount + 1, maxRetries);
@@ -330,7 +333,7 @@ class TDXApi {
               // Ignore resource not found and not authorized errors here, they are probably caused by
               // waiting for the projections to catch up (esp. in debug environments) by falling through
               // we will still be limited by the retry count, so won't loop forever.
-              console.log("waitForResource - ignoring error %s", err.message);
+              log("waitForResource - ignoring error %s", err.message);
               return Promise.delay(pollingInterval)
                 .then(() => {
                   return this.waitForResource(datasetId, check, retryCount + 1, maxRetries);
@@ -356,7 +359,7 @@ class TDXApi {
     let initialStatus = "";
 
     const builtIndexCheck = function(dataset, retryCount) {
-      console.log("builtIndexCheck: %s", dataset ? dataset.indexStatus : "no dataset");
+      log("builtIndexCheck: %s", dataset ? dataset.indexStatus : "no dataset");
 
       let continueWaiting;
 
