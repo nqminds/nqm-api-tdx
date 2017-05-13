@@ -260,7 +260,7 @@ class TDXApi {
       .then(checkResponse);
   }
   getResource(resourceId) {
-    const request = this.buildQueryRequest(`datasets/${resourceId}`);
+    const request = this.buildQueryRequest(`resources/${resourceId}`);
     return fetch(request)
       .catch((err) => {
         errLog("TDXApi.getResource: %s", err.message);
@@ -268,8 +268,21 @@ class TDXApi {
       })
       .then(checkResponse);
   }
-  getDatasetAncestors(datasetId) {
-    const request = this.buildQueryRequest(`datasets/${datasetId}/ancestors`);
+  getResources(filter, projection, options) {
+    const request = this.buildQueryRequest("resources", filter, projection, options);
+    return fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.getResource: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse);
+  }
+  getResourcesWithSchema(schemaId) {
+    const filter = {"schemaDefinition.parent": schemaId};
+    return this.getResources(filter);
+  }
+  getResourceAncestors(resourceId) {
+    const request = this.buildQueryRequest(`datasets/${resourceId}/ancestors`);
     return fetch(request)
       .catch((err) => {
         errLog("TDXApi.getDatasetAncestors: %s", err.message);
