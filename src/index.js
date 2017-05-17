@@ -320,6 +320,7 @@ class TDXApi {
         }
       })
       .catch((err) => {
+        debugger;   // eslint-disable-line no-debugger
         if (err.name !== "TDXApiError") {
           return Promise.reject(err);
         } else {
