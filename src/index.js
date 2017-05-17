@@ -112,7 +112,10 @@ class TDXApi {
       .then(checkResponse)
       .then((result) => {
         if (wait) {
-          return this.waitForIndex(result.response.id).return(result);
+          return this.waitForIndex(result.response.id)
+            .then(() => {
+              return result;
+            });
         } else {
           return result;
         }
