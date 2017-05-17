@@ -34,7 +34,7 @@ const checkResponse = function(source, response) {
           debugger; // eslint-disable-line no-debugger
           return Promise.reject(handleError(source, {message: json.error}));
         } else {
-          return Promise.reject(handleError(source, json));
+          return Promise.reject(handleError(source, {code: response.statusCode, message: json}));
         }
       }
     });
