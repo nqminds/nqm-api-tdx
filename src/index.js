@@ -291,7 +291,7 @@ class TDXApi {
   }
   waitForResource(datasetId, check, retryCount, maxRetries) {
     retryCount = retryCount || 0;
-    return this.getDataset(datasetId)
+    return this.getResource(datasetId)
       .then((dataset) => {
         const checkResult = check(dataset, retryCount);
         if (checkResult instanceof Error) {
