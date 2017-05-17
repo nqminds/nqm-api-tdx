@@ -1,13 +1,41 @@
 import Promise from "bluebird";
 import debug from "debug";
 
-const checkResponse = function(response) {
+const TDXApiError = function(message, stack) {
+  this.name = "TDXApiError";
+  this.message = message || "no message given";
+  this.stack = stack || (new Error()).stack;
+};
+
+TDXApiError.prototype = Object.create(Error.prototype);
+TDXApiError.prototype.constructor = TDXApiError;
+
+const handleError = function(source, err) {
+  const code = typeof err.code === "undefined" ? "n/a" : err.code;
+  const message = err.response ? (err.response.text || err.message) : err.message;
+  const internal = {
+    name: "TDXApiError",
+    from: source,
+    failure: message,
+    stack: err.stack,
+    code: code,
+  };
+  return new TDXApiError(JSON.stringify(internal), err.stack);
+};
+
+const checkResponse = function(source, response) {
   return response.json()
     .then((json) => {
       if (response.ok) {
         return Promise.resolve(json);
       } else {
-        return Promise.reject(new Error(json.error || JSON.stringify(json)));
+        if (json.error) {
+          // TODO  - test
+          debugger; // eslint-disable-line no-debugger
+          return Promise.reject(handleError(source, {message: json.error}));
+        } else {
+          return Promise.reject(handleError(source, json));
+        }
       }
     });
 };
@@ -39,5 +67,7 @@ const setDefaults = function(config) {
 
 export {
   checkResponse,
+  handleError,
   setDefaults,
+  TDXApiError,
 };

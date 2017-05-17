@@ -68,7 +68,7 @@ class TDXApi {
     });
 
     return fetch(request)
-      .then(checkResponse)
+      .then(checkResponse.bind(null, "authenticate"))
       .then((result) => {
         log(result);
         this.accessToken = result.access_token;
@@ -91,7 +91,7 @@ class TDXApi {
         errLog("TDXApi.addAccount: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse);
+      .then(checkResponse.bind(null, "addAccount"));
   }
   addTrustedExchange(options) {
     const request = this.buildCommandRequest("trustedConnection/create", options);
@@ -100,7 +100,7 @@ class TDXApi {
         errLog("TDXApi.addTrustedExchange: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse);
+      .then(checkResponse.bind(null, "addTrustedExchange"));
   }
   addResource(options, wait) {
     const request = this.buildCommandRequest("resource/create", options);
@@ -109,7 +109,7 @@ class TDXApi {
         errLog("TDXApi.addResource: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse)
+      .then(checkResponse.bind(null, "addResource"))
       .then((result) => {
         if (wait) {
           return this.waitForIndex(result.response.id)
@@ -128,7 +128,7 @@ class TDXApi {
         errLog("TDXApi.updateResource: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse);
+      .then(checkResponse.bind(null, "updateResource"));
   }
   deleteResource(resourceId) {
     const request = this.buildCommandRequest("resource/delete", {id: resourceId});
@@ -137,7 +137,7 @@ class TDXApi {
         errLog("TDXApi.deleteResource: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse);
+      .then(checkResponse.bind(null, "deleteResource"));
   }
   addResourceAccess(resourceId, accountId, sourceId, access) {
     const request = this.buildCommandRequest("resourceAccess/add", {
@@ -151,7 +151,7 @@ class TDXApi {
         errLog("TDXApi.addResourceAccess: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse);
+      .then(checkResponse.bind(null, "addResourceAccess"));
   }
   removeResourceAccess(resourceId, accountId, addedBy, sourceId, access) {
     const request = this.buildCommandRequest("resourceAccess/delete", {
@@ -166,7 +166,7 @@ class TDXApi {
         errLog("TDXApi.removeResourceAccess: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse);
+      .then(checkResponse.bind(null, "removeResourceAccess"));
   }
   setResourceShareMode(resourceId, shareMode) {
     const request = this.buildCommandRequest("resource/setShareMode", {id: resourceId, shareMode});
@@ -175,7 +175,7 @@ class TDXApi {
         errLog("TDXApi.setResourceShareMode: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse);
+      .then(checkResponse.bind(null, "setResourceShareMode"));
   }
   setResourcePermissiveShare(resourceId, allowPermissive) {
     const request = this.buildCommandRequest("resource/setPermissiveShare", {
@@ -187,7 +187,7 @@ class TDXApi {
         errLog("TDXApi.setResourcePermissiveShare: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse);
+      .then(checkResponse.bind(null, "setResourcePermissiveShare"));
   }
   updateData(datasetId, data, upsert) {
     const postData = {
@@ -201,7 +201,7 @@ class TDXApi {
         errLog("TDXApi.updateData: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse);
+      .then(checkResponse.bind(null, "updateData"));
   }
   patchData(datasetId, data) {
     const postData = {
@@ -214,7 +214,7 @@ class TDXApi {
         errLog("TDXApi.patchData: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse);
+      .then(checkResponse.bind(null, "patchData"));
   }
   deleteData(datasetId, data) {
     const postData = {
@@ -227,7 +227,7 @@ class TDXApi {
         errLog("TDXApi.deleteData: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse);
+      .then(checkResponse.bind(null, "deleteData"));
   }
   /*
    *
@@ -241,7 +241,7 @@ class TDXApi {
         errLog("TDXApi.getZone: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse);
+      .then(checkResponse.bind(null, "getZone"));
   }
   getResource(resourceId) {
     const request = this.buildQueryRequest(`resources/${resourceId}`);
@@ -250,7 +250,7 @@ class TDXApi {
         errLog("TDXApi.getResource: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse);
+      .then(checkResponse.bind(null, "getResource"));
   }
   getResources(filter, projection, options) {
     const request = this.buildQueryRequest("resources", filter, projection, options);
@@ -259,7 +259,7 @@ class TDXApi {
         errLog("TDXApi.getResource: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse);
+      .then(checkResponse.bind(null, "getResources"));
   }
   getResourcesWithSchema(schemaId) {
     const filter = {"schemaDefinition.parent": schemaId};
@@ -272,7 +272,7 @@ class TDXApi {
         errLog("TDXApi.getDatasetAncestors: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse);
+      .then(checkResponse.bind(null, "getResourceAncestors"));
   }
   getDatasetData(datasetId, filter, projection, options) {
     const request = this.buildQueryRequest(`datasets/${datasetId}/data`, filter, projection, options);
@@ -281,7 +281,7 @@ class TDXApi {
         errLog("TDXApi.getDatasetData: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse);
+      .then(checkResponse.bind(null, "getDatasetData"));
   }
   getDatasetDataCount(datasetId, filter) {
     const request = this.buildQueryRequest(`datasets/${datasetId}/count`, filter);
@@ -290,7 +290,7 @@ class TDXApi {
         errLog("TDXApi.getDatasetDataCount: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse);
+      .then(checkResponse.bind(null, "getDatasetDataCount"));
   }
   waitForResource(resourceId, check, retryCount, maxRetries) {
     retryCount = retryCount || 0;
