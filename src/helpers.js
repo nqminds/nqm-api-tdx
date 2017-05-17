@@ -32,9 +32,9 @@ const checkResponse = function(source, response) {
         if (json.error) {
           // TODO  - test
           debugger; // eslint-disable-line no-debugger
-          return Promise.reject(handleError(source, {message: json.error}));
+          return Promise.reject(handleError(source, json.error));
         } else {
-          return Promise.reject(handleError(source, {code: response.statusCode, message: json}));
+          return Promise.reject(handleError(source, JSON.stringify({code: response.statusCode, message: json})));
         }
       }
     });
