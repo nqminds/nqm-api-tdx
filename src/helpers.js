@@ -5,7 +5,7 @@ const checkResponse = function(response) {
   return response.json()
     .then((json) => {
       if (response.ok) {
-        return json;
+        return Promise.resolve(json);
       } else {
         return Promise.reject(new Error(json.error || JSON.stringify(json)));
       }

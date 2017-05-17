@@ -289,11 +289,11 @@ class TDXApi {
       })
       .then(checkResponse);
   }
-  waitForResource(datasetId, check, retryCount, maxRetries) {
+  waitForResource(resourceId, check, retryCount, maxRetries) {
     retryCount = retryCount || 0;
-    return this.getResource(datasetId)
-      .then((dataset) => {
-        const checkResult = check(dataset, retryCount);
+    return this.getResource(resourceId)
+      .then((resource) => {
+        const checkResult = check(resource, retryCount);
         if (checkResult instanceof Error) {
           log("waitForResource - check failed with error [%s]", checkResult.message);
           return Promise.reject(checkResult);
@@ -303,17 +303,17 @@ class TDXApi {
           // A negative maxRetries value will retry indefinitely.
           if (maxRetries >= 0 && retryCount > maxRetries) {
             log("waitForResource - giving up after %d attempts", retryCount);
-            return Promise.reject(new Error(`gave up waiting for ${datasetId} after ${retryCount} attempts`));
+            return Promise.reject(new Error(`gave up waiting for ${resourceId} after ${retryCount} attempts`));
           }
 
           // Try again after a delay.
           log("waitForResource - waiting for %d msec", pollingInterval);
           return Promise.delay(pollingInterval)
             .then(() => {
-              return this.waitForResource(datasetId, check, retryCount + 1, maxRetries);
+              return this.waitForResource(resourceId, check, retryCount + 1, maxRetries);
             });
         } else {
-          return dataset;
+          return resource;
         }
       })
       .catch((err) => {
@@ -330,7 +330,7 @@ class TDXApi {
               log("waitForResource - ignoring error %s", err.message);
               return Promise.delay(pollingInterval)
                 .then(() => {
-                  return this.waitForResource(datasetId, check, retryCount + 1, maxRetries);
+                  return this.waitForResource(resourceId, check, retryCount + 1, maxRetries);
                 });
             } else {
               // All other errors are fatal.
