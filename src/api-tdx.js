@@ -28,11 +28,18 @@ class TDXApi {
       body: JSON.stringify(data),
     });
   }
-  buildQueryRequest(method, filter, projection, options) {
+  buildQueryRequest(prefix, filter, projection, options) {
     filter = filter ? JSON.stringify(filter) : "";
     projection = projection ? JSON.stringify(projection) : "";
     options = options ? JSON.stringify(options) : "";
-    const query = `${method}?filter=${filter}&proj=${projection}&opts=${options}`;
+    let query;
+    if (prefix.indexOf("?") < 0) {
+      // There is no query portion in the prefix - add one now.
+      query = `${prefix}?filter=${filter}&proj=${projection}&opts=${options}`;
+    } else {
+      // There is already a query portion, so append the params.
+      query = `${prefix}&filter=${filter}&proj=${projection}&opts=${options}`;
+    }
     return new Request(`${this.config.queryHost}/v1/${query}`, {
       method: "GET",
       mode: "cors",
@@ -291,6 +298,15 @@ class TDXApi {
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
       .then(checkResponse.bind(null, "getDatasetDataCount"));
+  }
+  getDistinct(datasetId, key, filter, projection, options) {
+    const request = this.buildQueryRequest(`datasets/${datasetId}/distinct?key={key}`, filter, projection, options);
+    return fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.getDistinct: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "getDatasetData"));
   }
   waitForResource(resourceId, check, retryCount, maxRetries) {
     retryCount = retryCount || 0;
