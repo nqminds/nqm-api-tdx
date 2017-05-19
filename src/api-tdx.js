@@ -300,7 +300,7 @@ class TDXApi {
       .then(checkResponse.bind(null, "getDatasetDataCount"));
   }
   getDistinct(datasetId, key, filter, projection, options) {
-    const request = this.buildQueryRequest(`datasets/${datasetId}/distinct?key={key}`, filter, projection, options);
+    const request = this.buildQueryRequest(`datasets/${datasetId}/distinct?key=${key}`, filter, projection, options);
     return fetch(request)
       .catch((err) => {
         errLog("TDXApi.getDistinct: %s", err.message);
