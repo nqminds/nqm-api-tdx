@@ -196,6 +196,15 @@ class TDXApi {
       })
       .then(checkResponse.bind(null, "setResourcePermissiveShare"));
   }
+  truncateResource(resourceId) {
+    const request = this.buildCommandRequest("resource/truncate", {id: resourceId});
+    return fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.truncateResource: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "truncateResource"));
+  }
   updateData(datasetId, data, upsert) {
     const postData = {
       datasetId,
