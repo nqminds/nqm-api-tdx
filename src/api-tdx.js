@@ -100,6 +100,15 @@ class TDXApi {
       })
       .then(checkResponse.bind(null, "addAccount"));
   }
+  resetAccount(username, key) {
+    const request = this.buildCommandRequest("account/reset", {username, key});
+    return fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.resetAccount: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "resetAccount"));
+  }
   addTrustedExchange(options) {
     const request = this.buildCommandRequest("trustedConnection/create", options);
     return fetch(request)
