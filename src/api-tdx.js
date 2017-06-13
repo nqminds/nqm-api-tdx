@@ -100,6 +100,15 @@ class TDXApi {
       })
       .then(checkResponse.bind(null, "addAccount"));
   }
+  approveAccount(username, approved) {
+    const request = this.buildCommandRequest("account/approve", {username, approved});
+    return fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.approveAccount: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "approveAccount"));
+  }
   resetAccount(username, key) {
     const request = this.buildCommandRequest("account/reset", {username, key});
     return fetch(request)
@@ -108,6 +117,15 @@ class TDXApi {
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
       .then(checkResponse.bind(null, "resetAccount"));
+  }
+  verifyAccount(username, verified) {
+    const request = this.buildCommandRequest("account/verify", {username, verified});
+    return fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.verifyAccount: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "verifyAccount"));
   }
   addTrustedExchange(options) {
     const request = this.buildCommandRequest("trustedConnection/create", options);
