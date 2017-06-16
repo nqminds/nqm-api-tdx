@@ -10,17 +10,14 @@ const TDXApiError = function(message, stack) {
 TDXApiError.prototype = Object.create(Error.prototype);
 TDXApiError.prototype.constructor = TDXApiError;
 
-const handleError = function(source, err) {
-  const code = typeof err.code === "undefined" ? "n/a" : err.code;
-  const message = err.response ? (err.response.text || err.message) : err.message;
+const handleError = function(source, failure, code) {
   const internal = {
     name: "TDXApiError",
     from: source,
-    failure: message,
-    stack: err.stack,
-    code: code,
+    failure: JSON.stringify(failure),
+    code: typeof code === "undefined" ? "n/a" : code,
   };
-  return new TDXApiError(JSON.stringify(internal), err.stack);
+  return new TDXApiError(JSON.stringify(internal), (new Error()).stack);
 };
 
 const checkResponse = function(source, response) {
@@ -30,13 +27,11 @@ const checkResponse = function(source, response) {
         return Promise.resolve(json);
       } else {
         if (json.error) {
-          // TODO  - test
-          debugger; // eslint-disable-line no-debugger
           // Build a failure object from the json response.
           const failure = {code: json.error, message: json.error_description};
-          return Promise.reject(handleError(source, {code: response.status, message: JSON.stringify(failure)}));
+          return Promise.reject(handleError(source, failure, response.status));
         } else {
-          return Promise.reject(handleError(source, {code: response.status, message: JSON.stringify(json)}));
+          return Promise.reject(handleError(source, json, response.status));
         }
       }
     });
@@ -69,7 +64,6 @@ const setDefaults = function(config) {
 
 export {
   checkResponse,
-  handleError,
   setDefaults,
   TDXApiError,
 };
