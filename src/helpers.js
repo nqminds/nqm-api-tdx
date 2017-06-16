@@ -32,7 +32,9 @@ const checkResponse = function(source, response) {
         if (json.error) {
           // TODO  - test
           debugger; // eslint-disable-line no-debugger
-          return Promise.reject(handleError(source, {code: response.status, message: json.error}));
+          // Build a failure object from the json response.
+          const failure = {code: json.error, message: json.error_description};
+          return Promise.reject(handleError(source, {code: response.status, message: JSON.stringify(failure)}));
         } else {
           return Promise.reject(handleError(source, {code: response.status, message: JSON.stringify(json)}));
         }
