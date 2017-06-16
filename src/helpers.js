@@ -12,7 +12,6 @@ TDXApiError.prototype.constructor = TDXApiError;
 
 const handleError = function(source, failure, code) {
   const internal = {
-    name: "TDXApiError",
     from: source,
     failure: JSON.stringify(failure),
     code: typeof code === "undefined" ? "n/a" : code,
