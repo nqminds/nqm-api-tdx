@@ -64,15 +64,15 @@ nqmindsTDX.authenticate("myTokenID","myTokenSecret", function(err, accessToken) 
       }
     );
     // Aggregate query
-    nqmindsTDX.getAggregateData("datasetId", "pipeline", {options},  function(err, data) {
+    nqmindsTDX.getAggregateData("<datasetId>", "pipeline", {options},  function(err, data) {
 
     });
     // Get data from dataset
-    nqmindsTDX.getDatasetData("datasetId", {filter}, {projection}, {options}, function(err, data) {
+    nqmindsTDX.getDatasetData("<datasetId>", {filter}, {projection}, {options}, function(err, data) {
     
     });
     // Get data from dataset in newline delimited format
-    nqmindsTDX.getDatasetNDData("datasetId", {filter}, {projection}, {options}, function(err, data) {
+    nqmindsTDX.getDatasetNDData("<datasetId>", {filter}, {projection}, {options}, function(err, data) {
     
     });
     // Get datasets that match filter
@@ -80,31 +80,36 @@ nqmindsTDX.authenticate("myTokenID","myTokenSecret", function(err, accessToken) 
 
     });
     // Truncate -- careful!
-    nqmindsTDX.truncateDataset("datasetId", function(err, response) {
+    nqmindsTDX.truncateDataset("<datasetId>", function(err, response) {
 
     });
     // Add data 
-    nqmindsTDX.addDatasetData("datasetId",{data}, function(err, response) {
+    nqmindsTDX.addDatasetData("<datasetId>",{data}, function(err, response) {
 
     });
     // Update data
-    nqmindsTDX.updateDatasetData("datasetId", {data}, function(err, response) {
+    nqmindsTDX.updateDatasetData("<datasetId>", {data}, function(err, response) {
       
     });
     // Get distinct keys
-    nqmindsTDX.getDistinct("datasetId", "key", {filter}, {projection}, {options}, function(err, data) {
+    nqmindsTDX.getDistinct("<datasetId>", "key", {filter}, {projection}, {options}, function(err, data) {
 
     };
 
     // Delete a dataset - very careful!
-    nqmindsTDX.deleteDataset("datasetId", function(err, response) {
+    nqmindsTDX.deleteDataset("<datasetId>", function(err, response) {
 
     });
 
     // Delete dataset data
     // {primaryKey: value}
     // [{primaryKey1: value1}, {primaryKey2: value 2}]
-    nqmindsTDX.deleteDatasetData("datasetId", data, function(err, response)) {
+    nqmindsTDX.deleteDatasetData("<datasetId>", data, function(err, response)) {
+
+    });
+
+    // Delete dataset data by query
+    nqmindsTDX.deleteDatasetDataQuery("<datasetId>", {temperature: ${gt: 20}}, function(err, response)) {
 
     });
 
