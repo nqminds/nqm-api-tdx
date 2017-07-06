@@ -232,6 +232,19 @@ class TDXApi {
       })
       .then(checkResponse.bind(null, "truncateResource"));
   }
+  addData(datasetId, data) {
+    const postData = {
+      datasetId,
+      payload: [].concat(data),
+    };
+    const request = this.buildCommandRequest("dataset/data/createMany", postData);
+    return fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.createData: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "updateData"));
+  }
   updateData(datasetId, data, upsert) {
     const postData = {
       datasetId,
@@ -271,6 +284,19 @@ class TDXApi {
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
       .then(checkResponse.bind(null, "deleteData"));
+  }
+  deleteDataByQuery(datasetId, query) {
+    const postData = {
+      datasetId,
+      query,
+    };
+    const request = this.buildCommandRequest("dataset/data/deleteQuery", postData);
+    return fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.deleteDataByQuery: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "deleteDataByQuery"));
   }
   /*
    *
