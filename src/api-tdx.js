@@ -164,6 +164,15 @@ class TDXApi {
       })
       .then(checkResponse.bind(null, "updateResource"));
   }
+  moveResource(id, fromParentId, toParentId) {
+    const request = this.buildCommandRequest("resource/move", {id, fromParentId, toParentId});
+    return fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.moveResource: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "moveResource"));
+  }
   deleteResource(resourceId) {
     const request = this.buildCommandRequest("resource/delete", {id: resourceId});
     return fetch(request)
