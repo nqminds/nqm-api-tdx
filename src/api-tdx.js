@@ -191,6 +191,40 @@ class TDXApi {
       })
       .then(checkResponse.bind(null, "deleteResource"));
   }
+  rebuildResourceIndex(resourceId) {
+    const request = this.buildCommandRequest("resource/index/rebuild", {id: resourceId});
+    let result;
+    return fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.rebuildResourceIndex: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "rebuildIndex"))
+      .then((res) => {
+        result = res;
+        return this.waitForIndex(result.response.id);
+      })
+      .then(() => {
+        return result;
+      });
+  }
+  suspendResourceIndex(resourceId) {
+    const request = this.buildCommandRequest("resource/index/suspend", {id: resourceId});
+    let result;
+    return fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.suspendResourceIndex: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "suspendIndex"))
+      .then((res) => {
+        result = res;
+        return this.waitForIndex(result.response.id);
+      })
+      .then(() => {
+        return result;
+      });
+  }
   addResourceAccess(resourceId, accountId, sourceId, access) {
     const request = this.buildCommandRequest("resourceAccess/add", {
       rid: resourceId,
