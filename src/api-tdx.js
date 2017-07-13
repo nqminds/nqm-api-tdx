@@ -100,6 +100,15 @@ class TDXApi {
       })
       .then(checkResponse.bind(null, "addAccount"));
   }
+  updateAccount(username, options) {
+    const request = this.buildCommandRequest("account/update", {username, ...options});
+    return fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.updateAccount: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "addAccount"));
+  }
   approveAccount(username, approved) {
     const request = this.buildCommandRequest("account/approve", {username, approved});
     return fetch(request)
