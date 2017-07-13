@@ -202,7 +202,7 @@ class TDXApi {
       .then(checkResponse.bind(null, "rebuildIndex"))
       .then((res) => {
         result = res;
-        return this.waitForIndex(result.response.id);
+        return this.waitForIndex(result.response.id, "built");
       })
       .then(() => {
         return result;
@@ -219,7 +219,7 @@ class TDXApi {
       .then(checkResponse.bind(null, "suspendIndex"))
       .then((res) => {
         result = res;
-        return this.waitForIndex(result.response.id);
+        return this.waitForIndex(result.response.id, "suspended");
       })
       .then(() => {
         return result;
