@@ -50,7 +50,7 @@ const setDefaults = function(config) {
     }
     const hostname = hostComponents.slice(1).join(".");
     config.commandHost = config.commandHost || `${protocol}://cmd.${hostname}`;
-    config.queryHost = config.queryHost || `${protocol}://q.${hostname}`;
+    config.queryHost = config.queryHost || `${protocol}://q.${hostname}/v1/`;
     config.databotHost = config.databotHost || `${protocol}://databot.${hostname}`;
     log(
       "defaulted hosts to %s, %s, %s",

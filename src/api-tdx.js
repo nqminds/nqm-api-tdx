@@ -40,7 +40,7 @@ class TDXApi {
       // There is already a query portion, so append the params.
       query = `${prefix}&filter=${filter}&proj=${projection}&opts=${options}`;
     }
-    return new Request(`${this.config.queryHost}/v1/${query}`, {
+    return new Request(`${this.config.queryHost}${query}`, {
       method: "GET",
       mode: "cors",
       headers: new Headers({
