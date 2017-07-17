@@ -91,6 +91,12 @@ nqmindsTDX.authenticate("myTokenID","myTokenSecret", function(err, accessToken) 
     nqmindsTDX.updateDatasetData("<datasetId>", {data}, function(err, response) {
       
     });
+
+    // Update dataset data by query
+    nqmindsTDX.updateDatasetDataQuery("<datasetId>", {temperature: ${gt: 20}}, {status: "hot"}, function(err, response)) {
+
+    });
+    
     // Get distinct keys
     nqmindsTDX.getDistinct("<datasetId>", "key", {filter}, {projection}, {options}, function(err, data) {
 
