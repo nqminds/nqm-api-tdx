@@ -63,6 +63,7 @@ const setDefaults = function(config) {
 
 export {
   checkResponse,
+  handleError,
   setDefaults,
   TDXApiError,
 };

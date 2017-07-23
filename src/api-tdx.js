@@ -2,7 +2,7 @@ import Promise from "bluebird";
 import fetch from "isomorphic-fetch";
 import base64 from "base-64";
 import debug from "debug";
-import {setDefaults, checkResponse} from "./helpers";
+import {checkResponse, handleError, setDefaults} from "./helpers";
 
 const log = debug("nqm-api-tdx");
 const errLog = debug("nqm-api-tdx:error");
@@ -366,12 +366,23 @@ class TDXApi {
       body: file,
     });
 
+    let response;
     return fetch(request)
       .catch((err) => {
         errLog("TDXApi.fileUpload: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "fileUpload"));
+      .then((resp) => {
+        response = resp;
+        return response.text();
+      })
+      .then((text) => {
+        if (response.ok) {
+          return Promise.resolve(text);
+        } else {
+          return Promise.reject(handleError("fileUpload", {code: "failure", message: text}));
+        }
+      });
   }
   /*
    *
