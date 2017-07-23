@@ -17,13 +17,14 @@ class TDXApi {
     this.accessToken = config.accessToken || "";
     setDefaults(this.config);
   }
-  buildCommandRequest(command, data) {
+  buildCommandRequest(command, data, contentType) {
+    contentType = contentType || "application/json";
     return new Request(`${this.config.commandHost}/commandSync/${command}`, {
       method: "POST",
       mode: "cors",
       headers: new Headers({
         "Authorization": `Bearer ${this.accessToken}`,
-        "Content-Type": "application/json",
+        "Content-Type": contentType,
       }),
       body: JSON.stringify(data),
     });
@@ -349,6 +350,26 @@ class TDXApi {
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
       .then(checkResponse.bind(null, "deleteDataByQuery"));
+  }
+  fileUpload(resourceId, file) {
+    const postData = new FormData();
+    postData.append("file", file);
+
+    const request = new Request(`${this.config.commandHost}/resource/${resourceId}/upload`, {
+      method: "POST",
+      mode: "cors",
+      headers: new Headers({
+        "Authorization": `Bearer ${this.accessToken}`,
+      }),
+      body: postData,
+    });
+
+    return fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.fileUpload: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "fileUpload"));
   }
   /*
    *
