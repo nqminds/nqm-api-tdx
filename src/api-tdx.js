@@ -353,13 +353,14 @@ class TDXApi {
   }
   fileUpload(resourceId, file) {
     const postData = new FormData();
-    postData.append("file", file, file.name);
+    postData.append("file", file);
 
     const request = new Request(`${this.config.commandHost}/commandSync/resource/${resourceId}/upload`, {
       method: "POST",
       mode: "cors",
       headers: new Headers({
         "Authorization": `Bearer ${this.accessToken}`,
+        "Content-Disposition": `attachment; filename=\"${file.name}\"`,
       }),
       body: postData,
     });
