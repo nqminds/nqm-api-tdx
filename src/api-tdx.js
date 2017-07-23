@@ -360,7 +360,8 @@ class TDXApi {
       mode: "cors",
       headers: new Headers({
         "Authorization": `Bearer ${this.accessToken}`,
-        "Content-Disposition": `attachment; filename=\"${file.name}\"`,
+        "Content-Disposition": `attachment; filename="${file.name}"`,
+        "Content-Length": file.size,
       }),
       body: postData,
     });
