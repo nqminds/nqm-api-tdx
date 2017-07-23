@@ -352,8 +352,8 @@ class TDXApi {
       .then(checkResponse.bind(null, "deleteDataByQuery"));
   }
   fileUpload(resourceId, file) {
-    const postData = new FormData();
-    postData.append("file", file);
+    // const postData = new FormData();
+    // postData.append("file", file);
 
     const request = new Request(`${this.config.commandHost}/commandSync/resource/${resourceId}/upload`, {
       method: "POST",
@@ -363,7 +363,7 @@ class TDXApi {
         "Content-Disposition": `attachment; filename="${file.name}"`,
         "Content-Length": file.size,
       }),
-      body: postData,
+      body: file,
     });
 
     return fetch(request)
