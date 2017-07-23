@@ -351,10 +351,7 @@ class TDXApi {
       })
       .then(checkResponse.bind(null, "deleteDataByQuery"));
   }
-  fileUpload(resourceId, file) {
-    // const postData = new FormData();
-    // postData.append("file", file);
-
+  fileUpload(resourceId, file, stream) {
     const request = new Request(`${this.config.commandHost}/commandSync/resource/${resourceId}/upload`, {
       method: "POST",
       mode: "cors",
@@ -366,23 +363,27 @@ class TDXApi {
       body: file,
     });
 
-    let response;
-    return fetch(request)
+    const response = fetch(request)
       .catch((err) => {
         errLog("TDXApi.fileUpload: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
+      });
+
+    if (stream) {
+      return response;
+    } else {
+      return response
+      .then((response) => {
+        return [response, response.text()];
       })
-      .then((resp) => {
-        response = resp;
-        return response.text();
-      })
-      .then((text) => {
+      .spread((response, text) => {
         if (response.ok) {
           return Promise.resolve(text);
         } else {
           return Promise.reject(handleError("fileUpload", {code: "failure", message: text}));
         }
       });
+    }
   }
   /*
    *
