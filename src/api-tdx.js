@@ -385,6 +385,19 @@ class TDXApi {
       });
     }
   }
+  startDatabotInstance(databotId, payload) {
+    const postData = {
+      databotId,
+      instanceData: payload,
+    };
+    const request = this.buildCommandRequest("databot/startInstance", postData);
+    return fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.startDatabotInstance: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "startDatabotInstance"));
+  }
   /*
    *
    *  QUERIES
