@@ -64,6 +64,7 @@ class TDXApi {
     // Authorization headers must be base-64 encoded.
     credentials = base64.encode(credentials);
 
+    // Can get a token from any of the TDX services.
     const uri = `${this.config.tdxHost || this.config.commandHost || this.config.queryHost}/token`;
     const request = new Request(uri, {
       method: "POST",
@@ -412,14 +413,27 @@ class TDXApi {
       })
       .then(checkResponse.bind(null, "getZone"));
   }
-  getResource(resourceId) {
+  getResource(resourceId, noThrow) {
     const request = this.buildQueryRequest(`resources/${resourceId}`);
     return fetch(request)
       .catch((err) => {
         errLog("TDXApi.getResource: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "getResource"));
+      .then((response) => {
+        if (noThrow) {
+          // If noThrow specified, return null if there is an error fetching the resource, rather than throwing.
+          if (response.ok) {
+            return response.json();
+          } else if (response.status === 404) {
+            return null;
+          } else {
+            return checkResponse("getResource", response);
+          }
+        } else {
+          return checkResponse("getResource", response);
+        }
+      });
   }
   getResources(filter, projection, options) {
     const request = this.buildQueryRequest("resources", filter, projection, options);
@@ -469,6 +483,15 @@ class TDXApi {
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
       .then(checkResponse.bind(null, "getDatasetData"));
+  }
+  getTDXToken(tdx) {
+    const request = this.buildQueryRequest(`tdx-token/${tdx}`);
+    return fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.getTDXToken: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "getTDXToken"));
   }
   waitForResource(resourceId, check, retryCount, maxRetries) {
     retryCount = retryCount || 0;

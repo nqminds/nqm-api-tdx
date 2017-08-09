@@ -30,6 +30,7 @@ const checkResponse = function(source, response) {
           const failure = {code: json.error, message: json.error_description};
           return Promise.reject(handleError(source, failure, response.status));
         } else {
+          // The response body holds the error details.
           return Promise.reject(handleError(source, json, response.status));
         }
       }
