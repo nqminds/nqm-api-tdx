@@ -138,6 +138,15 @@ class TDXApi {
       })
       .then(checkResponse.bind(null, "verifyAccount"));
   }
+  deleteAccount(username) {
+    const request = this.buildCommandRequest("account/delete", {username});
+    return fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.deleteAccount: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "deleteAccount"));
+  }
   addTrustedExchange(options) {
     const request = this.buildCommandRequest("trustedConnection/create", options);
     return fetch(request)
