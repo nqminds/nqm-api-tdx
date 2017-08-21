@@ -408,6 +408,46 @@ class TDXApi {
       })
       .then(checkResponse.bind(null, "startDatabotInstance"));
   }
+  stopDatabotInstance(instanceId, mode) {
+    const postData = {
+      instanceId,
+      mode,
+    };
+    const request = this.buildCommandRequest("databot/stopInstance", postData);
+    return fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.stopDatabotInstance: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "stopDatabotInstance"));
+  }
+  deleteDatabotInstance(instanceId) {
+    const postData = {
+      instanceId,
+    };
+    const request = this.buildCommandRequest("databot/deleteInstance", postData);
+    return fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.deleteDatabotInstance: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "deleteDatabotInstance"));
+  }
+  sendDatabotHostCommand(command, hostId, hostIp, hostPort) {
+    const postData = {
+      hostId,
+      hostIp,
+      hostPort,
+      command,
+    };
+    const request = this.buildCommandRequest("databot/host/command", postData);
+    return fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.sendDatabotHostCommand: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "sendDatabotHostCommand"));
+  }
   /*
    *
    *  QUERIES
