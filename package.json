@@ -41,7 +41,6 @@
   },
   "dependencies": {
     "base-64": "^0.1.0",
-    "bluebird": "^3.5.0",
     "debug": "^2.6.6",
     "isomorphic-fetch": "^2.2.1",
     "lodash": "^4.17.4"

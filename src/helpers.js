@@ -1,4 +1,3 @@
-import Promise from "bluebird";
 import debug from "debug";
 
 const TDXApiError = function(message, stack) {

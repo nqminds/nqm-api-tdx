@@ -48,7 +48,6 @@ const config = {
   plugins: plugins,
   externals: {
     "base-64": "base-64",
-    bluebird: "bluebird",
     debug: "debug",
     "isomorphic-fetch": "isomorphic-fetch",
     lodash: {

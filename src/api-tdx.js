@@ -1,4 +1,3 @@
-import Promise from "bluebird";
 import fetch from "isomorphic-fetch";
 import base64 from "base-64";
 import debug from "debug";
@@ -17,6 +16,7 @@ class TDXApi {
     this.accessToken = config.accessToken || "";
     setDefaults(this.config);
   }
+
   buildCommandRequest(command, data, contentType) {
     contentType = contentType || "application/json";
     return new Request(`${this.config.commandHost}/commandSync/${command}`, {
@@ -29,6 +29,7 @@ class TDXApi {
       body: JSON.stringify(data),
     });
   }
+
   buildQueryRequest(prefix, filter, projection, options) {
     filter = filter ? JSON.stringify(filter) : "";
     projection = projection ? JSON.stringify(projection) : "";
@@ -50,6 +51,7 @@ class TDXApi {
       }),
     });
   }
+
   authenticate(id, secret) {
     let credentials;
 
@@ -88,11 +90,13 @@ class TDXApi {
         return Promise.reject(err);
       });
   }
+
   /*
    *
-   *  COMMANDS
+   *  ACCOUNT COMMANDS
    *
    */
+
   addAccount(options) {
     const request = this.buildCommandRequest("account/create", options);
     return fetch(request)
@@ -102,6 +106,7 @@ class TDXApi {
       })
       .then(checkResponse.bind(null, "addAccount"));
   }
+
   updateAccount(username, options) {
     const request = this.buildCommandRequest("account/update", {username, ...options});
     return fetch(request)
@@ -111,6 +116,7 @@ class TDXApi {
       })
       .then(checkResponse.bind(null, "addAccount"));
   }
+
   approveAccount(username, approved) {
     const request = this.buildCommandRequest("account/approve", {username, approved});
     return fetch(request)
@@ -120,6 +126,7 @@ class TDXApi {
       })
       .then(checkResponse.bind(null, "approveAccount"));
   }
+
   resetAccount(username, key) {
     const request = this.buildCommandRequest("account/reset", {username, key});
     return fetch(request)
@@ -129,6 +136,7 @@ class TDXApi {
       })
       .then(checkResponse.bind(null, "resetAccount"));
   }
+
   verifyAccount(username, verified) {
     const request = this.buildCommandRequest("account/verify", {username, verified});
     return fetch(request)
@@ -138,6 +146,7 @@ class TDXApi {
       })
       .then(checkResponse.bind(null, "verifyAccount"));
   }
+
   deleteAccount(username) {
     const request = this.buildCommandRequest("account/delete", {username});
     return fetch(request)
@@ -147,6 +156,13 @@ class TDXApi {
       })
       .then(checkResponse.bind(null, "deleteAccount"));
   }
+
+  /*
+   *
+   *  RESOURCE COMMANDS
+   *
+   */
+
   addTrustedExchange(options) {
     const request = this.buildCommandRequest("trustedConnection/create", options);
     return fetch(request)
@@ -156,6 +172,7 @@ class TDXApi {
       })
       .then(checkResponse.bind(null, "addTrustedExchange"));
   }
+
   addResource(options, wait) {
     const request = this.buildCommandRequest("resource/create", options);
     return fetch(request)
@@ -175,6 +192,7 @@ class TDXApi {
         }
       });
   }
+
   updateResource(resourceId, update) {
     const request = this.buildCommandRequest("resource/update", {id: resourceId, ...update});
     return fetch(request)
@@ -184,6 +202,7 @@ class TDXApi {
       })
       .then(checkResponse.bind(null, "updateResource"));
   }
+
   moveResource(id, fromParentId, toParentId) {
     const request = this.buildCommandRequest("resource/move", {id, fromParentId, toParentId});
     return fetch(request)
@@ -193,6 +212,7 @@ class TDXApi {
       })
       .then(checkResponse.bind(null, "moveResource"));
   }
+
   deleteResource(resourceId) {
     const request = this.buildCommandRequest("resource/delete", {id: resourceId});
     return fetch(request)
@@ -202,6 +222,7 @@ class TDXApi {
       })
       .then(checkResponse.bind(null, "deleteResource"));
   }
+
   rebuildResourceIndex(resourceId) {
     const request = this.buildCommandRequest("resource/index/rebuild", {id: resourceId});
     let result;
@@ -219,6 +240,7 @@ class TDXApi {
         return result;
       });
   }
+
   suspendResourceIndex(resourceId) {
     const request = this.buildCommandRequest("resource/index/suspend", {id: resourceId});
     let result;
@@ -236,6 +258,7 @@ class TDXApi {
         return result;
       });
   }
+
   addResourceAccess(resourceId, accountId, sourceId, access) {
     const request = this.buildCommandRequest("resourceAccess/add", {
       rid: resourceId,
@@ -250,6 +273,7 @@ class TDXApi {
       })
       .then(checkResponse.bind(null, "addResourceAccess"));
   }
+
   removeResourceAccess(resourceId, accountId, addedBy, sourceId, access) {
     const request = this.buildCommandRequest("resourceAccess/delete", {
       rid: resourceId,
@@ -265,6 +289,7 @@ class TDXApi {
       })
       .then(checkResponse.bind(null, "removeResourceAccess"));
   }
+
   setResourceShareMode(resourceId, shareMode) {
     const request = this.buildCommandRequest("resource/setShareMode", {id: resourceId, shareMode});
     return fetch(request)
@@ -274,6 +299,7 @@ class TDXApi {
       })
       .then(checkResponse.bind(null, "setResourceShareMode"));
   }
+
   setResourcePermissiveShare(resourceId, allowPermissive) {
     const request = this.buildCommandRequest("resource/setPermissiveShare", {
       id: resourceId,
@@ -286,6 +312,7 @@ class TDXApi {
       })
       .then(checkResponse.bind(null, "setResourcePermissiveShare"));
   }
+
   truncateResource(resourceId) {
     const request = this.buildCommandRequest("resource/truncate", {id: resourceId});
     return fetch(request)
@@ -295,6 +322,13 @@ class TDXApi {
       })
       .then(checkResponse.bind(null, "truncateResource"));
   }
+
+  /*
+   *
+   *  RESOURCE DATA COMMANDS
+   *
+   */
+
   addData(datasetId, data) {
     const postData = {
       datasetId,
@@ -308,6 +342,7 @@ class TDXApi {
       })
       .then(checkResponse.bind(null, "updateData"));
   }
+
   updateData(datasetId, data, upsert) {
     const postData = {
       datasetId,
@@ -322,6 +357,7 @@ class TDXApi {
       })
       .then(checkResponse.bind(null, "updateData"));
   }
+
   patchData(datasetId, data) {
     const postData = {
       datasetId,
@@ -335,6 +371,7 @@ class TDXApi {
       })
       .then(checkResponse.bind(null, "patchData"));
   }
+
   deleteData(datasetId, data) {
     const postData = {
       datasetId,
@@ -348,6 +385,7 @@ class TDXApi {
       })
       .then(checkResponse.bind(null, "deleteData"));
   }
+
   deleteDataByQuery(datasetId, query) {
     const postData = {
       datasetId,
@@ -361,6 +399,7 @@ class TDXApi {
       })
       .then(checkResponse.bind(null, "deleteDataByQuery"));
   }
+
   fileUpload(resourceId, file, stream) {
     const request = new Request(`${this.config.commandHost}/commandSync/resource/${resourceId}/upload`, {
       method: "POST",
@@ -395,6 +434,13 @@ class TDXApi {
       });
     }
   }
+
+  /*
+   *
+   *  DATABOT COMMANDS
+   *
+   */
+
   startDatabotInstance(databotId, payload) {
     const postData = {
       databotId,
@@ -408,6 +454,7 @@ class TDXApi {
       })
       .then(checkResponse.bind(null, "startDatabotInstance"));
   }
+
   stopDatabotInstance(instanceId, mode) {
     const postData = {
       instanceId,
@@ -421,6 +468,7 @@ class TDXApi {
       })
       .then(checkResponse.bind(null, "stopDatabotInstance"));
   }
+
   deleteDatabotInstance(instanceId) {
     const postData = {
       instanceId,
@@ -433,6 +481,7 @@ class TDXApi {
       })
       .then(checkResponse.bind(null, "deleteDatabotInstance"));
   }
+
   sendDatabotHostCommand(command, hostId, hostIp, hostPort) {
     const postData = {
       hostId,
@@ -453,6 +502,7 @@ class TDXApi {
    *  QUERIES
    *
    */
+
   getZone(zoneId) {
     const request = this.buildQueryRequest("zones", {username: zoneId});
     return fetch(request)
@@ -462,6 +512,7 @@ class TDXApi {
       })
       .then(checkResponse.bind(null, "getZone"));
   }
+
   getResource(resourceId, noThrow) {
     const request = this.buildQueryRequest(`resources/${resourceId}`);
     return fetch(request)
@@ -484,6 +535,7 @@ class TDXApi {
         }
       });
   }
+
   getResources(filter, projection, options) {
     const request = this.buildQueryRequest("resources", filter, projection, options);
     return fetch(request)
@@ -493,10 +545,12 @@ class TDXApi {
       })
       .then(checkResponse.bind(null, "getResources"));
   }
+
   getResourcesWithSchema(schemaId) {
     const filter = {"schemaDefinition.parent": schemaId};
     return this.getResources(filter);
   }
+
   getResourceAncestors(resourceId) {
     const request = this.buildQueryRequest(`datasets/${resourceId}/ancestors`);
     return fetch(request)
@@ -506,6 +560,7 @@ class TDXApi {
       })
       .then(checkResponse.bind(null, "getResourceAncestors"));
   }
+
   getDatasetData(datasetId, filter, projection, options) {
     const request = this.buildQueryRequest(`datasets/${datasetId}/data`, filter, projection, options);
     return fetch(request)
@@ -515,6 +570,7 @@ class TDXApi {
       })
       .then(checkResponse.bind(null, "getDatasetData"));
   }
+
   getDatasetDataCount(datasetId, filter) {
     const request = this.buildQueryRequest(`datasets/${datasetId}/count`, filter);
     return fetch(request)
@@ -524,6 +580,7 @@ class TDXApi {
       })
       .then(checkResponse.bind(null, "getDatasetDataCount"));
   }
+
   getDistinct(datasetId, key, filter, projection, options) {
     const request = this.buildQueryRequest(`datasets/${datasetId}/distinct?key=${key}`, filter, projection, options);
     return fetch(request)
@@ -533,6 +590,7 @@ class TDXApi {
       })
       .then(checkResponse.bind(null, "getDatasetData"));
   }
+
   getTDXToken(tdx) {
     const request = this.buildQueryRequest(`tdx-token/${tdx}`);
     return fetch(request)
@@ -542,6 +600,7 @@ class TDXApi {
       })
       .then(checkResponse.bind(null, "getTDXToken"));
   }
+
   waitForResource(resourceId, check, retryCount, maxRetries) {
     retryCount = retryCount || 0;
     return this.getResource(resourceId)
@@ -596,6 +655,7 @@ class TDXApi {
         }
       });
   }
+
   waitForIndex(datasetId, status, maxRetries) {
     // The argument maxRetries is optional.
     if (typeof maxRetries === "undefined") {
