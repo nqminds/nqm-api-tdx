@@ -620,10 +620,11 @@ class TDXApi {
 
           // Try again after a delay.
           log("waitForResource - waiting for %d msec", pollingInterval);
-          return Promise.delay(pollingInterval)
-            .then(() => {
-              return this.waitForResource(resourceId, check, retryCount + 1, maxRetries);
-            });
+          return new Promise((resolve) => {
+            setTimeout(() => {
+              resolve(this.waitForResource(resourceId, check, retryCount + 1, maxRetries));
+            }, pollingInterval);
+          });
         } else {
           return resource;
         }
@@ -640,10 +641,11 @@ class TDXApi {
               // waiting for the projections to catch up (esp. in debug environments) by falling through
               // we will still be limited by the retry count, so won't loop forever.
               log("waitForResource - ignoring error %s", err.message);
-              return Promise.delay(pollingInterval)
-                .then(() => {
-                  return this.waitForResource(resourceId, check, retryCount + 1, maxRetries);
-                });
+              return new Promise((resolve) => {
+                setTimeout(() => {
+                  resolve(this.waitForResource(resourceId, check, retryCount + 1, maxRetries));
+                }, pollingInterval);
+              });
             } else {
               // All other errors are fatal.
               return Promise.reject(err);
