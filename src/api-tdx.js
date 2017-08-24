@@ -375,9 +375,9 @@ class TDXApi {
   deleteData(datasetId, data) {
     const postData = {
       datasetId,
-      ...data,
+      payload: [].concat(data),
     };
-    const request = this.buildCommandRequest("dataset/data/delete", postData);
+    const request = this.buildCommandRequest("dataset/data/deleteMany", postData);
     return fetch(request)
       .catch((err) => {
         errLog("TDXApi.deleteData: %s", err.message);
@@ -622,6 +622,7 @@ class TDXApi {
           log("waitForResource - waiting for %d msec", pollingInterval);
           return new Promise((resolve) => {
             setTimeout(() => {
+              log("waitForResource - trying again");
               resolve(this.waitForResource(resourceId, check, retryCount + 1, maxRetries));
             }, pollingInterval);
           });
@@ -652,6 +653,7 @@ class TDXApi {
             }
           } catch (parseEx) {
             // Failed to parse TDX error - re-throw the original error.
+            log("waitForResource failure: [%s]", parseEx.message);
             return Promise.reject(err);
           }
         }
