@@ -174,9 +174,9 @@ Adds a data exchange to the list of trusted exchanges known to the current TDX.
 | Param | Type | Description |
 | --- | --- | --- |
 | options | <code>object</code> |  |
-| options.owner | <code>string</code> | the account on this TDX to which the trust relates, e.g. bob@mail.com/tdx.acme.com |
-| options.targetServer | <code>string</code> | the TDX to be trusted, e.g. tdx.nqminds.com |
-| options.targetOwner | <code>string</code> | the account on the target TDX that is trusted,  e.g. alice@mail.com/tdx.nqminds.com. |
+| options.owner | <code>string</code> | the account on this TDX to which the trust relates, e.g. `bob@mail.com/tdx.acme.com` |
+| options.targetServer | <code>string</code> | the TDX to be trusted, e.g. `tdx.nqminds.com` |
+| options.targetOwner | <code>string</code> | the account on the target TDX that is trusted,  e.g. `alice@mail.com/tdx.nqminds.com`. |
 
 <a name="TDXApi+addResource"></a>
 
@@ -190,10 +190,10 @@ Adds a resource to the TDX.
 | options | <code>object</code> |  | details of the resource to be added. |
 | [options.basedOnSchema] | <code>string</code> | <code>&quot;dataset&quot;</code> | the id of the schema on which this resource will be based. |
 | [options.derived] | <code>object</code> |  | definition of derived filter, implying this resource is a view on an existing dataset. |
-| [options.derived.filter] | <code>object</code> |  | the (read) filter to apply, in mongodb query format, e.g. `{"temperature": {"$gt": 15}}` will mean that only data with a temperature value greater than 15 will be available in this view. The filter can be any arbitrarily complex mongodb query. Use the placeholder  "@@_identity_@@" to indicate that the identity of the currently authenticated user should be substituted. For example, if the user "bob@acme.com/tdx.acme.com" is currently authenticated, a filter of `{"username":  "@@_identity_@@"}` will resolve at runtime to `{"username": "bob@acme.com/tdx.acme.com"}`. |
+| [options.derived.filter] | <code>object</code> |  | the (read) filter to apply, in mongodb query format, e.g. `{"temperature": {"$gt": 15}}` will mean that only data with a temperature value greater than 15 will be available in this view. The filter can be any arbitrarily complex mongodb query. Use the placeholder  `"@@_identity_@@"` to indicate that the identity of the currently authenticated user should be substituted. For example, if the user `bob@acme.com/tdx.acme.com` is currently authenticated, a filter of `{"username":  "@@_identity_@@"}` will resolve at runtime to `{"username": "bob@acme.com/tdx.acme.com"}`. |
 | [options.derived.projection] | <code>object</code> |  | the (read) projection to apply, in mongodb projection format, e.g. `{"timestamp": 1, "temperature": 1}` implies only the 'timestamp' and 'temperature' properties will be returned. |
 | [options.derived.source] | <code>string</code> |  | the id of the source dataset on which to apply the filters and projections. |
-| [options.derived.writeFilter] | <code>object</code> |  | the write filter to apply, in mongodb query format. This controls what data can be written to the underlying source dataset. For example, a write filter of  `{"temperature": {"$lt": 40}}` means that attempts to write a temperature value greater than or equal to 40 will fail. The filter can be any arbitrarily complex mongodb query. |
+| [options.derived.writeFilter] | <code>object</code> |  | the write filter to apply, in mongodb query format. This controls what data can be written to the underlying source dataset. For example, a write filter of  `{"temperature": {"$lt": 40}}` means that attempts to write a temperature value greater than or equal to `40` will fail. The filter can be any arbitrarily complex mongodb query. |
 | [options.derived.writeProjection] | <code>object</code> |  | the write projection to apply, in mongodb projection format. This controls what properties can be written to the underlying dataset. For example, a write projection of `{"temperature": 1}` means that only the temperature field can be written, and attempts to write data to other properties will fail. To allow a view to create new data in the underlying dataset, the primary key fields must be included in the write projection. |
 | [options.description] | <code>string</code> |  | a description for the resource. |
 | [options.id] | <code>string</code> |  | the requested ID of the new resource. Must be unique. Will be auto-generated if  omitted (recommended). |
@@ -216,7 +216,7 @@ Modify one or more of the meta data associated with the resource.
 | Param | Type | Description |
 | --- | --- | --- |
 | resourceId | <code>string</code> | id of the resource to update |
-| update | <code>object</code> | object containing the properties to update. Can be one or more of those listed below. See the `addResource` method for semantics and syntax of each property. |
+| update | <code>object</code> | object containing the properties to update. Can be one or more of those listed below. See the [addResource](#TDXApi+addResource) method for semantics and syntax of each property. |
 | [update.derived] | <code>string</code> |  |
 | [update.description] | <code>string</code> |  |
 | [update.meta] | <code>string</code> |  |

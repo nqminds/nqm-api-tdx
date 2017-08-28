@@ -208,10 +208,10 @@ class TDXApi {
    * Adds a data exchange to the list of trusted exchanges known to the current TDX.
    * @param  {object} options
    * @param  {string} options.owner - the account on this TDX to which the trust relates,
-   * e.g. bob@mail.com/tdx.acme.com
-   * @param  {string} options.targetServer - the TDX to be trusted, e.g. tdx.nqminds.com
+   * e.g. `bob@mail.com/tdx.acme.com`
+   * @param  {string} options.targetServer - the TDX to be trusted, e.g. `tdx.nqminds.com`
    * @param  {string} options.targetOwner - the account on the target TDX that is trusted, 
-   * e.g. alice@mail.com/tdx.nqminds.com.
+   * e.g. `alice@mail.com/tdx.nqminds.com`.
    */
   addTrustedExchange(options) {
     const request = buildCommandRequest.call(this, "trustedConnection/create", options);
@@ -232,8 +232,8 @@ class TDXApi {
    * @param  {object} [options.derived.filter] - the (read) filter to apply, in mongodb query format,
    * e.g. `{"temperature": {"$gt": 15}}` will mean that only data with a temperature value greater than 15 will be
    * available in this view. The filter can be any arbitrarily complex mongodb query. Use the placeholder 
-   * "@@_identity_@@" to indicate that the identity of the currently authenticated user should be substituted.
-   * For example, if the user "bob@acme.com/tdx.acme.com" is currently authenticated, a filter of `{"username":
+   * `"@@_identity_@@"` to indicate that the identity of the currently authenticated user should be substituted.
+   * For example, if the user `bob@acme.com/tdx.acme.com` is currently authenticated, a filter of `{"username":
    *  "@@_identity_@@"}` will resolve at runtime to `{"username": "bob@acme.com/tdx.acme.com"}`.
    * @param  {object} [options.derived.projection] - the (read) projection to apply, in mongodb projection format,
    * e.g. `{"timestamp": 1, "temperature": 1}` implies only the 'timestamp' and 'temperature' properties will be
@@ -242,7 +242,7 @@ class TDXApi {
    * projections.
    * @param  {object} [options.derived.writeFilter] - the write filter to apply, in mongodb query format. This
    * controls what data can be written to the underlying source dataset. For example, a write filter of 
-   * `{"temperature": {"$lt": 40}}` means that attempts to write a temperature value greater than or equal to 40
+   * `{"temperature": {"$lt": 40}}` means that attempts to write a temperature value greater than or equal to `40`
    * will fail. The filter can be any arbitrarily complex mongodb query.
    * @param  {object} [options.derived.writeProjection] - the write projection to apply, in mongodb projection format.
    * This controls what properties can be written to the underlying dataset. For example, a write projection of
@@ -287,7 +287,7 @@ class TDXApi {
    * Modify one or more of the meta data associated with the resource.
    * @param  {string} resourceId - id of the resource to update
    * @param  {object} update - object containing the properties to update. Can be one or more of those
-   * listed below. See the `addResource` method for semantics and syntax of each property.
+   * listed below. See the {@link TDXApi#addResource} method for semantics and syntax of each property.
    * @param  {string} [update.derived]
    * @param  {string} [update.description]
    * @param  {string} [update.meta]
