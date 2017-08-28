@@ -41,6 +41,11 @@ import TDXApi from "nqm-api-tdx"
     * [.addTrustedExchange(options)](#TDXApi+addTrustedExchange)
     * [.addResource(options, [wait])](#TDXApi+addResource)
     * [.updateResource(resourceId, update)](#TDXApi+updateResource)
+    * [.moveResource(id, fromParentId, toParentId)](#TDXApi+moveResource)
+    * [.deleteResource(resourceId)](#TDXApi+deleteResource)
+    * [.rebuildResourceIndex(resourceId)](#TDXApi+rebuildResourceIndex)
+    * [.suspendResourceIndex(resourceId)](#TDXApi+suspendResourceIndex)
+    * [.addResourceAccess(resourceId, accountId, sourceId, access)](#TDXApi+addResourceAccess)
 
 <a name="new_TDXApi_new"></a>
 
@@ -97,7 +102,8 @@ a databot host, an application, or an account-set (user group).
 <a name="TDXApi+updateAccount"></a>
 
 ### tdxApi.updateAccount(username, options)
-Updates account details. All update properties are optional. See createAccount for full details.
+Updates account details. All update properties are optional. See createAccount for full details of
+each option.
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
 
@@ -105,11 +111,11 @@ Updates account details. All update properties are optional. See createAccount f
 | --- | --- | --- |
 | username | <code>string</code> | the full TDX identity of the account to update. |
 | options | <code>object</code> | the update options |
-| [options.displayName] | <code>string</code> | the human-friendly display name of the account |
-| [options.key] | <code>string</code> | the account secret |
-| [options.scratchAccess] | <code>bool</code> | indicates this account can create resources in the owners scratch folder. |
-| [options.settings] | <code>object</code> | free-form JSON object for user data. |
-| [options.whitelist] | <code>Array.&lt;string&gt;</code> | a list of IP addresses |
+| [options.displayName] | <code>string</code> |  |
+| [options.key] | <code>string</code> |  |
+| [options.scratchAccess] | <code>bool</code> |  |
+| [options.settings] | <code>object</code> |  |
+| [options.whitelist] | <code>Array.&lt;string&gt;</code> |  |
 
 <a name="TDXApi+approveAccount"></a>
 
@@ -203,12 +209,83 @@ Adds a resource to the TDX.
 <a name="TDXApi+updateResource"></a>
 
 ### tdxApi.updateResource(resourceId, update)
-Modify one or more of the metadata associated with the resource.
+Modify one or more of the meta data associated with the resource.
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
 
-| Param |
-| --- |
-| resourceId | 
-| update | 
+| Param | Type | Description |
+| --- | --- | --- |
+| resourceId | <code>string</code> | id of the resource to update |
+| update | <code>object</code> | object containing the properties to update. Can be one or more of those listed below. See the `addResource` method for semantics and syntax of each property. |
+| [update.derived] | <code>string</code> |  |
+| [update.description] | <code>string</code> |  |
+| [update.meta] | <code>string</code> |  |
+| [update.name] | <code>string</code> |  |
+| [update.provenance] | <code>string</code> |  |
+| [update.schema] | <code>string</code> |  |
+| [update.tags] | <code>string</code> |  |
+
+<a name="TDXApi+moveResource"></a>
+
+### tdxApi.moveResource(id, fromParentId, toParentId)
+Move resource from one folder to another. Requires write permission on the resource, the
+source parent and the target parent resources.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| id | <code>string</code> | the id of the resource to move. |
+| fromParentId | <code>string</code> | the current parent resource to move from. |
+| toParentId | <code>string</code> | the target folder resource to move to. |
+
+<a name="TDXApi+deleteResource"></a>
+
+### tdxApi.deleteResource(resourceId)
+Permanently deletes a resource.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| resourceId | <code>string</code> | the id of the resource to delete. Requires write permission to the resource. |
+
+<a name="TDXApi+rebuildResourceIndex"></a>
+
+### tdxApi.rebuildResourceIndex(resourceId)
+Resets the resource index. This involves deleting existing indexes and rebuilding them. May take
+a while depending on the size of any associated dataset and the number and complexity of indexes.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| resourceId | <code>string</code> | the id of the resource, requires write permission. |
+
+<a name="TDXApi+suspendResourceIndex"></a>
+
+### tdxApi.suspendResourceIndex(resourceId)
+Suspends the resource index. This involves deleting any existing indexes. Requires write permission. When
+a resource index is in `suspended` status, it is not possible to run any queries or updates against
+the resource.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| resourceId | <code>string</code> | the id of the resource. Requires write permission. |
+
+<a name="TDXApi+addResourceAccess"></a>
+
+### tdxApi.addResourceAccess(resourceId, accountId, sourceId, access)
+Adds read and/or write permission for an account to access a resource.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| resourceId | <code>string</code> | the resource id |
+| accountId | <code>string</code> | the account id to assign permission to |
+| sourceId | <code>string</code> | the id of the resource acting as the source of the access. This is usually the same as the target resourceId, but can also be a parent resource. For example, if write access is granted with the sourceId set to be a parent, then if the permission is  revoked from the parent resource it will also be revoked from this resource. |
+| access | <code>Array.&lt;string&gt;</code> | the access, one of [`"r"`, `"w"`] |
 
