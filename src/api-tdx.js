@@ -119,16 +119,15 @@ class TDXApi {
   }
 
   /**
-   * Updates account details. All update properties are optional. See createAccount for full details.
+   * Updates account details. All update properties are optional. See createAccount for full details of
+   * each option.
    * @param  {string} username - the full TDX identity of the account to update.
    * @param  {object} options - the update options
-   * @param  {string} [options.displayName] - the human-friendly display name of the account
-   * @param  {string} [options.key] - the account secret
-   * @param  {bool} [options.scratchAccess] - indicates this account can create resources in the owners scratch
-   * folder.
-   * @param  {object} [options.settings] - free-form JSON object for user data.
-   * @param  {string[]} [options.whitelist] - a list of IP addresses
-   * 
+   * @param  {string} [options.displayName]
+   * @param  {string} [options.key]
+   * @param  {bool} [options.scratchAccess]
+   * @param  {object} [options.settings]
+   * @param  {string[]} [options.whitelist]
    */
   updateAccount(username, options) {
     const request = buildCommandRequest.call(this, "account/update", {username, ...options});
@@ -285,9 +284,17 @@ class TDXApi {
   }
 
   /**
-   * Modify one or more of the metadata associated with the resource.
-   * @param  {} resourceId
-   * @param  {} update
+   * Modify one or more of the meta data associated with the resource.
+   * @param  {string} resourceId - id of the resource to update
+   * @param  {object} update - object containing the properties to update. Can be one or more of those
+   * listed below. See the `addResource` method for semantics and syntax of each property.
+   * @param  {string} [update.derived]
+   * @param  {string} [update.description]
+   * @param  {string} [update.meta]
+   * @param  {string} [update.name]
+   * @param  {string} [update.provenance]
+   * @param  {string} [update.schema]
+   * @param  {string} [update.tags]
    */
   updateResource(resourceId, update) {
     const request = buildCommandRequest.call(this, "resource/update", {id: resourceId, ...update});
@@ -299,6 +306,13 @@ class TDXApi {
       .then(checkResponse.bind(null, "updateResource"));
   }
 
+  /**
+   * Move resource from one folder to another. Requires write permission on the resource, the
+   * source parent and the target parent resources.
+   * @param  {string} id - the id of the resource to move.
+   * @param  {string} fromParentId - the current parent resource to move from.
+   * @param  {string} toParentId - the target folder resource to move to.
+   */
   moveResource(id, fromParentId, toParentId) {
     const request = buildCommandRequest.call(this, "resource/move", {id, fromParentId, toParentId});
     return fetch(request)
@@ -309,6 +323,11 @@ class TDXApi {
       .then(checkResponse.bind(null, "moveResource"));
   }
 
+  /**
+   * Permanently deletes a resource.
+   * @param  {string} resourceId - the id of the resource to delete. Requires write permission
+   * to the resource.
+   */
   deleteResource(resourceId) {
     const request = buildCommandRequest.call(this, "resource/delete", {id: resourceId});
     return fetch(request)
@@ -319,6 +338,11 @@ class TDXApi {
       .then(checkResponse.bind(null, "deleteResource"));
   }
 
+  /**
+   * Resets the resource index. This involves deleting existing indexes and rebuilding them. May take
+   * a while depending on the size of any associated dataset and the number and complexity of indexes.
+   * @param  {string} resourceId - the id of the resource, requires write permission.
+   */
   rebuildResourceIndex(resourceId) {
     const request = buildCommandRequest.call(this, "resource/index/rebuild", {id: resourceId});
     let result;
@@ -337,6 +361,12 @@ class TDXApi {
       });
   }
 
+  /**
+   * Suspends the resource index. This involves deleting any existing indexes. Requires write permission. When
+   * a resource index is in `suspended` status, it is not possible to run any queries or updates against
+   * the resource.
+   * @param  {string} resourceId - the id of the resource. Requires write permission.
+   */
   suspendResourceIndex(resourceId) {
     const request = buildCommandRequest.call(this, "resource/index/suspend", {id: resourceId});
     let result;
@@ -355,6 +385,16 @@ class TDXApi {
       });
   }
 
+  /**
+   * Adds read and/or write permission for an account to access a resource.
+   * @param  {string} resourceId - the resource id
+   * @param  {string} accountId - the account id to assign permission to
+   * @param  {string} sourceId - the id of the resource acting as the source of the access. This
+   * is usually the same as the target resourceId, but can also be a parent resource. For example,
+   * if write access is granted with the sourceId set to be a parent, then if the permission is 
+   * revoked from the parent resource it will also be revoked from this resource.
+   * @param  {string[]} access - the access, one of [`"r"`, `"w"`]
+   */
   addResourceAccess(resourceId, accountId, sourceId, access) {
     const request = buildCommandRequest.call(this, "resourceAccess/add", {
       rid: resourceId,
