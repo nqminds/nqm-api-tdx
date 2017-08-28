@@ -1,7 +1,7 @@
 import fetch from "isomorphic-fetch";
 import base64 from "base-64";
 import debug from "debug";
-import {checkResponse, handleError, setDefaults} from "./helpers";
+import {buildCommandRequest, buildQueryRequest, checkResponse, handleError, setDefaults} from "./helpers";
 
 const log = debug("nqm-api-tdx");
 const errLog = debug("nqm-api-tdx:error");
@@ -11,53 +11,39 @@ const pollingInterval = 1000;
 const waitInfinitely = -1;
 
 class TDXApi {
+  /**
+   * Create a TDXApi instance
+   * @param  {object} config - the TDX configuration for the remote TDX
+   * @param  {string} [config.tdxHost] - the URL of the TDX auth server, e.g. https://tdx.nqminds.com. Usually this
+   * is the only host parameter needed, as long as the target TDX conforms to the standard service naming conventions
+   * e.g. https://[service].[tdx-domain].com. In this case the individual service hosts can be derived from the tdxHost
+   * name. Optionally, you can specify each individual service host (see below). Note you only need to provide the host
+   * for services you intend to use. For example, if you only need query services, just provide the query host.
+   * @param  {string} [config.commandHost] - the URL of the TDX command service, e.g. https://cmd.nqminds.com 
+   * @param  {string} [config.queryHost] - the URL of the TDX query service, e.g. https://q.nqminds.com
+   * @param  {string} [config.databotHost] - the URL of the TDX databot service, e.g. https://databot.nqminds.com
+   * @param  {string} [config.accessToken] - an access token that will be used to authorise commands and queries.
+   * Alternatively you can use the authenticate method to acquire a token.
+   */
   constructor(config) {
     this.config = config;
     this.accessToken = config.accessToken || "";
     setDefaults(this.config);
   }
-
-  buildCommandRequest(command, data, contentType) {
-    contentType = contentType || "application/json";
-    return new Request(`${this.config.commandHost}/commandSync/${command}`, {
-      method: "POST",
-      mode: "cors",
-      headers: new Headers({
-        "Authorization": `Bearer ${this.accessToken}`,
-        "Content-Type": contentType,
-      }),
-      body: JSON.stringify(data),
-    });
-  }
-
-  buildQueryRequest(prefix, filter, projection, options) {
-    filter = filter ? JSON.stringify(filter) : "";
-    projection = projection ? JSON.stringify(projection) : "";
-    options = options ? JSON.stringify(options) : "";
-    let query;
-    if (prefix.indexOf("?") < 0) {
-      // There is no query portion in the prefix - add one now.
-      query = `${prefix}?filter=${filter}&proj=${projection}&opts=${options}`;
-    } else {
-      // There is already a query portion, so append the params.
-      query = `${prefix}&filter=${filter}&proj=${projection}&opts=${options}`;
-    }
-    return new Request(`${this.config.queryHost}${query}`, {
-      method: "GET",
-      mode: "cors",
-      headers: new Headers({
-        "Authorization": `Bearer ${this.accessToken}`,
-        "Content-Type": "application/json",
-      }),
-    });
-  }
-
-  authenticate(id, secret) {
+  
+  /**
+   * Authenticates with the TDX, acquiring an authorisation token.
+   * @param  {string} id - the account id, or a pre-formed credentials string, e.g. "DKJG8dfg:letmein"
+   * @param  {string} secret - the account secret
+   * @param  {number} [ttl=3600] - the Time-To-Live of the token in seconds, default is 1 hour.
+   */
+  authenticate(id, secret, ttl) {
     let credentials;
 
-    if (secret === undefined) {
+    if (typeof secret !== "string") {
       // Assume the first argument is a pre-formed credentials string
       credentials = id;
+      ttl = secret;
     } else {
       // uri-encode the username and concatenate with secret.
       credentials = `${encodeURIComponent(id)}:${secret}`;
@@ -66,7 +52,7 @@ class TDXApi {
     // Authorization headers must be base-64 encoded.
     credentials = base64.encode(credentials);
 
-    // Can get a token from any of the TDX services.
+    // We can get a token from any of the TDX services - use the first one we find to build a fetch Request.
     const uri = `${this.config.tdxHost || this.config.commandHost || this.config.queryHost}/token`;
     const request = new Request(uri, {
       method: "POST",
@@ -75,7 +61,7 @@ class TDXApi {
         "Authorization": `Basic ${credentials}`,
         "Content-Type": "application/json",
       }),
-      body: JSON.stringify({grant_type: "client_credentials", ttl: this.config.accessTokenTTL || 3600}),
+      body: JSON.stringify({grant_type: "client_credentials", ttl: ttl || this.config.accessTokenTTL || 3600}),
     });
 
     return fetch(request)
@@ -96,9 +82,34 @@ class TDXApi {
    *  ACCOUNT COMMANDS
    *
    */
-
+   
+  /**
+   * Adds an account to the TDX. An account can be an e-mail based user account, a share key (token) account,
+   * a databot host, an application, or an account-set (user group).
+   * @param  {object} options - new account options
+   * @param  {string} options.accountType - the type of account, one of ["user", "token"]
+   * @param  {bool} [options.approved] - account is pre-approved (reserved for system use only)
+   * @param  {string} [options.authService] - the authentication type, one of ["local", "oauth:google",
+   * "oauth:github"]. Required for user-based accounts. Ignored for non-user accounts.
+   * @param  {string} [options.displayName] - the human-friendly display name of the account, e.g. "Toby's share key"
+   * @param  {number} [options.expires] - a timestamp at which the account expires and will no longer be granted a
+   * token
+   * @param  {string} [options.key] - the account secret. Required for all but oauth-based account types.
+   * @param  {string} [options.owner] - the owner of the account.
+   * @param  {bool} [options.scratchAccess] - indicates this account can create resources in the owners scratch
+   * folder. Ignored for all accounts except share key (token) accounts. Is useful for databots that need to create
+   * intermediate or temporary resources without specifying a parent resource - if no parent resource is given
+   * when a resource is created and scratch access is enabled, the resource will be created in the owner's scratch
+   * folder.
+   * @param  {object} [options.settings] - free-form JSON object for user data.
+   * @param  {string} [options.username] - the username of the new account. Required for user-based accounts, and
+   * should be the account e-mail address. Can be omitted for non-user accounts, and will be auto-generated.
+   * @param  {bool} [options.verified] - account is pre-verified (reserved for system use only)
+   * @param  {string[]} [options.whitelist] - a list of IP addresses. Tokens will only be granted if the requesting
+   * IP address is in this list
+   */
   addAccount(options) {
-    const request = this.buildCommandRequest("account/create", options);
+    const request = buildCommandRequest.call(this, "account/create", options);
     return fetch(request)
       .catch((err) => {
         errLog("TDXApi.addAccount: %s", err.message);
@@ -107,8 +118,20 @@ class TDXApi {
       .then(checkResponse.bind(null, "addAccount"));
   }
 
+  /**
+   * Updates account details. All update properties are optional. See createAccount for full details.
+   * @param  {string} username - the full TDX identity of the account to update.
+   * @param  {object} options - the update options
+   * @param  {string} [options.displayName] - the human-friendly display name of the account
+   * @param  {string} [options.key] - the account secret
+   * @param  {bool} [options.scratchAccess] - indicates this account can create resources in the owners scratch
+   * folder.
+   * @param  {object} [options.settings] - free-form JSON object for user data.
+   * @param  {string[]} [options.whitelist] - a list of IP addresses
+   * 
+   */
   updateAccount(username, options) {
-    const request = this.buildCommandRequest("account/update", {username, ...options});
+    const request = buildCommandRequest.call(this, "account/update", {username, ...options});
     return fetch(request)
       .catch((err) => {
         errLog("TDXApi.updateAccount: %s", err.message);
@@ -117,8 +140,13 @@ class TDXApi {
       .then(checkResponse.bind(null, "addAccount"));
   }
 
+  /**
+   * Set account approved status. Reserved for system use.
+   * @param  {string} username - the full TDX identity of the account.
+   * @param  {bool} approved - account approved status
+   */
   approveAccount(username, approved) {
-    const request = this.buildCommandRequest("account/approve", {username, approved});
+    const request = buildCommandRequest.call(this, "account/approve", {username, approved});
     return fetch(request)
       .catch((err) => {
         errLog("TDXApi.approveAccount: %s", err.message);
@@ -127,8 +155,13 @@ class TDXApi {
       .then(checkResponse.bind(null, "approveAccount"));
   }
 
+  /**
+   * Change account secret.
+   * @param  {string} username - the full TDX identity of the account.
+   * @param  {string} key - the new secret
+   */
   resetAccount(username, key) {
-    const request = this.buildCommandRequest("account/reset", {username, key});
+    const request = buildCommandRequest.call(this, "account/reset", {username, key});
     return fetch(request)
       .catch((err) => {
         errLog("TDXApi.resetAccount: %s", err.message);
@@ -137,8 +170,13 @@ class TDXApi {
       .then(checkResponse.bind(null, "resetAccount"));
   }
 
+  /**
+   * Set account verified status. Reserved for system use.
+   * @param  {string} username - the full TDX identity of the account.
+   * @param  {bool} approved - account verified status
+   */
   verifyAccount(username, verified) {
-    const request = this.buildCommandRequest("account/verify", {username, verified});
+    const request = buildCommandRequest.call(this, "account/verify", {username, verified});
     return fetch(request)
       .catch((err) => {
         errLog("TDXApi.verifyAccount: %s", err.message);
@@ -147,8 +185,12 @@ class TDXApi {
       .then(checkResponse.bind(null, "verifyAccount"));
   }
 
+  /**
+   * Delete an account
+   * @param  {string} username - the full TDX identity of the account to delete.
+   */
   deleteAccount(username) {
-    const request = this.buildCommandRequest("account/delete", {username});
+    const request = buildCommandRequest.call(this, "account/delete", {username});
     return fetch(request)
       .catch((err) => {
         errLog("TDXApi.deleteAccount: %s", err.message);
@@ -163,8 +205,17 @@ class TDXApi {
    *
    */
 
+  /**
+   * Adds a data exchange to the list of trusted exchanges known to the current TDX.
+   * @param  {object} options
+   * @param  {string} options.owner - the account on this TDX to which the trust relates,
+   * e.g. bob@mail.com/tdx.acme.com
+   * @param  {string} options.targetServer - the TDX to be trusted, e.g. tdx.nqminds.com
+   * @param  {string} options.targetOwner - the account on the target TDX that is trusted, 
+   * e.g. alice@mail.com/tdx.nqminds.com.
+   */
   addTrustedExchange(options) {
-    const request = this.buildCommandRequest("trustedConnection/create", options);
+    const request = buildCommandRequest.call(this, "trustedConnection/create", options);
     return fetch(request)
       .catch((err) => {
         errLog("TDXApi.addTrustedExchange: %s", err.message);
@@ -173,8 +224,48 @@ class TDXApi {
       .then(checkResponse.bind(null, "addTrustedExchange"));
   }
 
+  /**
+   * Adds a resource to the TDX.
+   * @param  {object} options - details of the resource to be added.
+   * @param  {string} [options.basedOnSchema=dataset] - the id of the schema on which this resource will be based.
+   * @param  {object} [options.derived] - definition of derived filter, implying this resource is a view on an existing
+   * dataset.
+   * @param  {object} [options.derived.filter] - the (read) filter to apply, in mongodb query format,
+   * e.g. `{"temperature": {"$gt": 15}}` will mean that only data with a temperature value greater than 15 will be
+   * available in this view. The filter can be any arbitrarily complex mongodb query. Use the placeholder 
+   * "@@_identity_@@" to indicate that the identity of the currently authenticated user should be substituted.
+   * For example, if the user "bob@acme.com/tdx.acme.com" is currently authenticated, a filter of `{"username":
+   *  "@@_identity_@@"}` will resolve at runtime to `{"username": "bob@acme.com/tdx.acme.com"}`.
+   * @param  {object} [options.derived.projection] - the (read) projection to apply, in mongodb projection format,
+   * e.g. `{"timestamp": 1, "temperature": 1}` implies only the 'timestamp' and 'temperature' properties will be
+   * returned.
+   * @param  {string} [options.derived.source] - the id of the source dataset on which to apply the filters and
+   * projections.
+   * @param  {object} [options.derived.writeFilter] - the write filter to apply, in mongodb query format. This
+   * controls what data can be written to the underlying source dataset. For example, a write filter of 
+   * `{"temperature": {"$lt": 40}}` means that attempts to write a temperature value greater than or equal to 40
+   * will fail. The filter can be any arbitrarily complex mongodb query.
+   * @param  {object} [options.derived.writeProjection] - the write projection to apply, in mongodb projection format.
+   * This controls what properties can be written to the underlying dataset. For example, a write projection of
+   * `{"temperature": 1}` means that only the temperature field can be written, and attempts to write data to other
+   * properties will fail. To allow a view to create new data in the underlying dataset, the primary key fields
+   * must be included in the write projection.
+   * @param  {string} [options.description] - a description for the resource.
+   * @param  {string} [options.id] - the requested ID of the new resource. Must be unique. Will be auto-generated if 
+   * omitted (recommended).
+   * @param  {string} options.name - the name of the resource. Must be unique in the parent folder.
+   * @param  {object} [options.meta] - a free-form object for storing metadata associated with this resource.
+   * @param  {string} [options.parentId] - the id of the parent resource. If omitted, will default to the appropriate root
+   * folder based on the type of resource being created.
+   * @param  {string} [options.provenance] - a description of the provenance of the resource. Markdown format is supported.
+   * @param  {object} [options.schema] - optional schema definition.
+   * @param  {string} [options.shareMode] - the share mode assigned to the new resource. One of [`"pw"`, `"pr"`,
+   * `"tr"`], corresponding to "public read/write", "public read/trusted write", "trusted only".
+   * @param  {string[]} [options.tags] - a list of tags to associate with the resource.
+   * @param  {bool} [wait=false] - indicates if the call should wait for the index to be built before it returns.
+   */
   addResource(options, wait) {
-    const request = this.buildCommandRequest("resource/create", options);
+    const request = buildCommandRequest.call(this, "resource/create", options);
     return fetch(request)
       .catch((err) => {
         errLog("TDXApi.addResource: %s", err.message);
@@ -193,8 +284,13 @@ class TDXApi {
       });
   }
 
+  /**
+   * Modify one or more of the metadata associated with the resource.
+   * @param  {} resourceId
+   * @param  {} update
+   */
   updateResource(resourceId, update) {
-    const request = this.buildCommandRequest("resource/update", {id: resourceId, ...update});
+    const request = buildCommandRequest.call(this, "resource/update", {id: resourceId, ...update});
     return fetch(request)
       .catch((err) => {
         errLog("TDXApi.updateResource: %s", err.message);
@@ -204,7 +300,7 @@ class TDXApi {
   }
 
   moveResource(id, fromParentId, toParentId) {
-    const request = this.buildCommandRequest("resource/move", {id, fromParentId, toParentId});
+    const request = buildCommandRequest.call(this, "resource/move", {id, fromParentId, toParentId});
     return fetch(request)
       .catch((err) => {
         errLog("TDXApi.moveResource: %s", err.message);
@@ -214,7 +310,7 @@ class TDXApi {
   }
 
   deleteResource(resourceId) {
-    const request = this.buildCommandRequest("resource/delete", {id: resourceId});
+    const request = buildCommandRequest.call(this, "resource/delete", {id: resourceId});
     return fetch(request)
       .catch((err) => {
         errLog("TDXApi.deleteResource: %s", err.message);
@@ -224,7 +320,7 @@ class TDXApi {
   }
 
   rebuildResourceIndex(resourceId) {
-    const request = this.buildCommandRequest("resource/index/rebuild", {id: resourceId});
+    const request = buildCommandRequest.call(this, "resource/index/rebuild", {id: resourceId});
     let result;
     return fetch(request)
       .catch((err) => {
@@ -242,7 +338,7 @@ class TDXApi {
   }
 
   suspendResourceIndex(resourceId) {
-    const request = this.buildCommandRequest("resource/index/suspend", {id: resourceId});
+    const request = buildCommandRequest.call(this, "resource/index/suspend", {id: resourceId});
     let result;
     return fetch(request)
       .catch((err) => {
@@ -260,7 +356,7 @@ class TDXApi {
   }
 
   addResourceAccess(resourceId, accountId, sourceId, access) {
-    const request = this.buildCommandRequest("resourceAccess/add", {
+    const request = buildCommandRequest.call(this, "resourceAccess/add", {
       rid: resourceId,
       aid: accountId,
       src: sourceId,
@@ -275,7 +371,7 @@ class TDXApi {
   }
 
   removeResourceAccess(resourceId, accountId, addedBy, sourceId, access) {
-    const request = this.buildCommandRequest("resourceAccess/delete", {
+    const request = buildCommandRequest.call(this, "resourceAccess/delete", {
       rid: resourceId,
       aid: accountId,
       by: addedBy,
@@ -291,7 +387,7 @@ class TDXApi {
   }
 
   setResourceShareMode(resourceId, shareMode) {
-    const request = this.buildCommandRequest("resource/setShareMode", {id: resourceId, shareMode});
+    const request = buildCommandRequest.call(this, "resource/setShareMode", {id: resourceId, shareMode});
     return fetch(request)
       .catch((err) => {
         errLog("TDXApi.setResourceShareMode: %s", err.message);
@@ -301,7 +397,7 @@ class TDXApi {
   }
 
   setResourcePermissiveShare(resourceId, allowPermissive) {
-    const request = this.buildCommandRequest("resource/setPermissiveShare", {
+    const request = buildCommandRequest.call(this, "resource/setPermissiveShare", {
       id: resourceId,
       permissiveShare: allowPermissive ? "r" : "",
     });
@@ -314,7 +410,7 @@ class TDXApi {
   }
 
   truncateResource(resourceId) {
-    const request = this.buildCommandRequest("resource/truncate", {id: resourceId});
+    const request = buildCommandRequest.call(this, "resource/truncate", {id: resourceId});
     return fetch(request)
       .catch((err) => {
         errLog("TDXApi.truncateResource: %s", err.message);
@@ -334,7 +430,7 @@ class TDXApi {
       datasetId,
       payload: [].concat(data),
     };
-    const request = this.buildCommandRequest("dataset/data/createMany", postData);
+    const request = buildCommandRequest.call(this, "dataset/data/createMany", postData);
     return fetch(request)
       .catch((err) => {
         errLog("TDXApi.createData: %s", err.message);
@@ -349,7 +445,7 @@ class TDXApi {
       payload: [].concat(data),
       __upsert: !!upsert,
     };
-    const request = this.buildCommandRequest("dataset/data/updateMany", postData);
+    const request = buildCommandRequest.call(this, "dataset/data/updateMany", postData);
     return fetch(request)
       .catch((err) => {
         errLog("TDXApi.updateData: %s", err.message);
@@ -363,7 +459,7 @@ class TDXApi {
       datasetId,
       payload: [].concat(data),
     };
-    const request = this.buildCommandRequest("dataset/data/upsertMany", postData);
+    const request = buildCommandRequest.call(this, "dataset/data/upsertMany", postData);
     return fetch(request)
       .catch((err) => {
         errLog("TDXApi.patchData: %s", err.message);
@@ -377,7 +473,7 @@ class TDXApi {
       datasetId,
       payload: [].concat(data),
     };
-    const request = this.buildCommandRequest("dataset/data/deleteMany", postData);
+    const request = buildCommandRequest.call(this, "dataset/data/deleteMany", postData);
     return fetch(request)
       .catch((err) => {
         errLog("TDXApi.deleteData: %s", err.message);
@@ -391,7 +487,7 @@ class TDXApi {
       datasetId,
       query,
     };
-    const request = this.buildCommandRequest("dataset/data/deleteQuery", postData);
+    const request = buildCommandRequest.call(this, "dataset/data/deleteQuery", postData);
     return fetch(request)
       .catch((err) => {
         errLog("TDXApi.deleteDataByQuery: %s", err.message);
@@ -446,7 +542,7 @@ class TDXApi {
       databotId,
       instanceData: payload,
     };
-    const request = this.buildCommandRequest("databot/startInstance", postData);
+    const request = buildCommandRequest.call(this, "databot/startInstance", postData);
     return fetch(request)
       .catch((err) => {
         errLog("TDXApi.startDatabotInstance: %s", err.message);
@@ -460,7 +556,7 @@ class TDXApi {
       instanceId,
       mode,
     };
-    const request = this.buildCommandRequest("databot/stopInstance", postData);
+    const request = buildCommandRequest.call(this, "databot/stopInstance", postData);
     return fetch(request)
       .catch((err) => {
         errLog("TDXApi.stopDatabotInstance: %s", err.message);
@@ -473,7 +569,7 @@ class TDXApi {
     const postData = {
       instanceId,
     };
-    const request = this.buildCommandRequest("databot/deleteInstance", postData);
+    const request = buildCommandRequest.call(this, "databot/deleteInstance", postData);
     return fetch(request)
       .catch((err) => {
         errLog("TDXApi.deleteDatabotInstance: %s", err.message);
@@ -489,7 +585,7 @@ class TDXApi {
       hostPort,
       command,
     };
-    const request = this.buildCommandRequest("databot/host/command", postData);
+    const request = buildCommandRequest.call(this, "databot/host/command", postData);
     return fetch(request)
       .catch((err) => {
         errLog("TDXApi.sendDatabotHostCommand: %s", err.message);

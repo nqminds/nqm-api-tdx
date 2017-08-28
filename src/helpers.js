@@ -18,6 +18,56 @@ const handleError = function(source, failure, code) {
   return new TDXApiError(JSON.stringify(internal), (new Error()).stack);
 };
 
+/**
+ * Builds a Request object for the given command bound to the TDX command service.
+ * @param  {string} command - the target TDX command, e.g. "resource/create"
+ * @param  {object} data - the command payload
+ * @param  {string} [contentType=application/json] - the content type
+ * @param  {bool} [noSync=false] - send command asynchronously
+ */
+const buildCommandRequest = function(command, data, contentType, async) {
+  const commandMode = async ? "command" : "commandSync";
+  contentType = contentType || "application/json";
+  return new Request(`${this.config.commandHost}/${commandMode}/${command}`, {
+    method: "POST",
+    mode: "cors",
+    headers: new Headers({
+      "Authorization": `Bearer ${this.accessToken}`,
+      "Content-Type": contentType,
+    }),
+    body: JSON.stringify(data),
+  });
+}
+
+/**
+ * Builds a Request object for the given query bound to the TDX query engine.
+ * @param  {string} endpoint - the query endpoint, e.g. "resources/DKJF8d8f"
+ * @param  {object} [filter] - a filter expression, e.g. {"temperature": {$gt: 18}}
+ * @param  {object} [projection] - a projection definition defining what data will be returned, e.g. {sensorId: 1, temperature: 1}
+ * @param  {object} [options] - query options, e.g. {limit: 10, sort: {timestamp: -1}}
+ */
+const buildQueryRequest = function(endpoint, filter, projection, options) {
+  filter = filter ? JSON.stringify(filter) : "";
+  projection = projection ? JSON.stringify(projection) : "";
+  options = options ? JSON.stringify(options) : "";
+  let query;
+  if (endpoint.indexOf("?") < 0) {
+    // There is no query portion in the prefix - add one now.
+    query = `${endpoint}?filter=${filter}&proj=${projection}&opts=${options}`;
+  } else {
+    // There is already a query portion, so append the params.
+    query = `${endpoint}&filter=${filter}&proj=${projection}&opts=${options}`;
+  }
+  return new Request(`${this.config.queryHost}${query}`, {
+    method: "GET",
+    mode: "cors",
+    headers: new Headers({
+      "Authorization": `Bearer ${this.accessToken}`,
+      "Content-Type": "application/json",
+    }),
+  });
+}
+
 const checkResponse = function(source, response) {
   return response.json()
     .then((json) => {
