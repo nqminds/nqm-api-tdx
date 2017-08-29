@@ -46,6 +46,15 @@ import TDXApi from "nqm-api-tdx"
     * [.rebuildResourceIndex(resourceId)](#TDXApi+rebuildResourceIndex)
     * [.suspendResourceIndex(resourceId)](#TDXApi+suspendResourceIndex)
     * [.addResourceAccess(resourceId, accountId, sourceId, access)](#TDXApi+addResourceAccess)
+    * [.removeResourceAccess(resourceId, accountId, addedBy, sourceId, access)](#TDXApi+removeResourceAccess)
+    * [.setResourceShareMode(resourceId, shareMode)](#TDXApi+setResourceShareMode)
+    * [.setResourcePermissiveShare(resourceId, allowPermissive)](#TDXApi+setResourcePermissiveShare)
+    * [.truncateResource(resourceId)](#TDXApi+truncateResource)
+    * [.addData(datasetId, data)](#TDXApi+addData)
+    * [.updateData(datasetId, data, [upsert])](#TDXApi+updateData)
+    * [.patchData(datasetId, data)](#TDXApi+patchData)
+    * [.deleteData(datasetId, data)](#TDXApi+deleteData)
+    * [.deleteDataByQuery(datasetId, query)](#TDXApi+deleteDataByQuery)
 
 <a name="new_TDXApi_new"></a>
 
@@ -62,6 +71,11 @@ Create a TDXApi instance
 | [config.databotHost] | <code>string</code> | the URL of the TDX databot service, e.g. https://databot.nqminds.com |
 | [config.accessToken] | <code>string</code> | an access token that will be used to authorise commands and queries. Alternatively you can use the authenticate method to acquire a token. |
 
+**Example** *(standard usage)*  
+```js
+import TDXApi from "nqm-api-tdx";
+const api = new TDXApi({tdxHost: "tdx.acme.com"});
+```
 <a name="TDXApi+authenticate"></a>
 
 ### tdxApi.authenticate(id, secret, [ttl])
@@ -278,14 +292,176 @@ the resource.
 <a name="TDXApi+addResourceAccess"></a>
 
 ### tdxApi.addResourceAccess(resourceId, accountId, sourceId, access)
-Adds read and/or write permission for an account to access a resource.
+Adds read and/or write permission for an account to access a resource. Permission is required
+equivalent to that which is being added, e.g. adding write permission requires existing
+write access.
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| resourceId | <code>string</code> | the resource id |
-| accountId | <code>string</code> | the account id to assign permission to |
-| sourceId | <code>string</code> | the id of the resource acting as the source of the access. This is usually the same as the target resourceId, but can also be a parent resource. For example, if write access is granted with the sourceId set to be a parent, then if the permission is  revoked from the parent resource it will also be revoked from this resource. |
-| access | <code>Array.&lt;string&gt;</code> | the access, one of [`"r"`, `"w"`] |
+| resourceId | <code>string</code> | The resource id |
+| accountId | <code>string</code> | The account id to assign permission to |
+| sourceId | <code>string</code> | The id of the resource acting as the source of the access. This is usually the same as the target `resourceId`, but can also be a parent resource. For example, if write access is granted with the sourceId set to be a parent, then if the permission is  revoked from the parent resource it will also be revoked from this resource. |
+| access | <code>Array.&lt;string&gt;</code> | The access, one or more of [`"r"`, `"w"`]. Can be an array or an individual string. |
 
+**Example** *(add access to an account)*  
+```js
+addResourceAccess(myResourceId, "bob@acme.com/tdx.acme.com", myResourceId, ["r"]);
+```
+<a name="TDXApi+removeResourceAccess"></a>
+
+### tdxApi.removeResourceAccess(resourceId, accountId, addedBy, sourceId, access)
+Removes access for an account to a resource. Permission is required
+equivalent to that which is being added, e.g. adding write permission requires existing
+write access.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| resourceId | <code>string</code> | The resource id. |
+| accountId | <code>string</code> | The account id to remove access from. |
+| addedBy | <code>string</code> | The account id that originally added the access, probably your account id. |
+| sourceId | <code>string</code> | The source of the access, usually the resource itself. |
+| access | <code>Array.&lt;string&gt;</code> | The access, one or more of [`"r"`, `"w"`]. |
+
+<a name="TDXApi+setResourceShareMode"></a>
+
+### tdxApi.setResourceShareMode(resourceId, shareMode)
+Set the share mode for a resource.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| resourceId | <code>string</code> | The resource id. |
+| shareMode | <code>string</code> | The share mode to set, one or [`"pw"`, `"pr"`, `"tr"`] corresponding to 'public read/write', 'public read, trusted write', 'trusted only'. |
+
+<a name="TDXApi+setResourcePermissiveShare"></a>
+
+### tdxApi.setResourcePermissiveShare(resourceId, allowPermissive)
+Sets the permissive share mode of the resource. Permissive share allows anybody with acces to the resource
+to share it with others. If a resource is not in permissive share mode, only the resource owner
+can share it with others.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| resourceId | <code>string</code> | The resource id. |
+| allowPermissive | <code>bool</code> | The required permissive share mode. |
+
+<a name="TDXApi+truncateResource"></a>
+
+### tdxApi.truncateResource(resourceId)
+Removes all data from the resource. Applicable to dataset-based resources only. This can not be
+undone.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| resourceId | <code>string</code> | The resource id to truncate. |
+
+<a name="TDXApi+addData"></a>
+
+### tdxApi.addData(datasetId, data)
+Add data to a dataset resource.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| datasetId | <code>string</code> | The id of the dataset-based resource to add data to. |
+| data | <code>object</code> \| <code>array</code> | The data to add. Must conform to the schema defined by the resource metadata. Supports creating an individual document or many documents. |
+
+**Example** *(create an individual document)*  
+```js
+// Assumes the dataset primary key is 'lsoa'
+tdxApi.addData(myDatasetId, {lsoa: "E0000001", count: 398});
+```
+**Example** *(create multiple documents)*  
+```js
+tdxApi.addData(myDatasetId, [
+ {lsoa: "E0000001", count: 398},
+ {lsoa: "E0000002", count: 1775},
+ {lsoa: "E0000005", count: 4533},
+]);
+```
+<a name="TDXApi+updateData"></a>
+
+### tdxApi.updateData(datasetId, data, [upsert])
+Updates data in a dataset resource.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| datasetId | <code>string</code> |  | The id of the dataset-based resource to update. |
+| data | <code>object</code> \| <code>array</code> |  | The data to update. Must conform to the schema defined by the resource metadata. Supports updating individual or multiple documents. |
+| [upsert] | <code>bool</code> | <code>false</code> | Indicates the data should be created if no document is found matching the primary key. |
+
+**Example** *(update an existing document)*  
+```js
+tdxApi.updateData(myDatasetId, {lsoa: "E000001", count: 488});
+```
+**Example** *(upsert a document)*  
+```js
+// Will create a document if no data exists matching key 'lsoa': "E000004"
+tdxApi.updateData(myDatasetId, {lsoa: "E000004", count: 288, true});
+```
+<a name="TDXApi+patchData"></a>
+
+### tdxApi.patchData(datasetId, data)
+Patches data in a dataset resource. Uses the [JSON patch](https://tools.ietf.org/html/rfc6902) format,
+which involves defining the primary key data followed by a flexible update specification.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| datasetId | <code>string</code> | The id of the dataset-based resource to update. |
+| data | <code>object</code> | The patch definition. |
+| data.__update | <code>object</code> \| <code>array</code> | An array of JSON patch specifications. |
+
+**Example** *(patch a single value in a single document)*  
+```js
+tdxApi.patchData(myDatasetId, {lsoa: "E000001", __update: [{p: "count", m: "r", v: 948}]});
+```
+**Example** *(patch a more than one value in a single document)*  
+```js
+tdxApi.patchData(myDatasetId, {lsoa: "E000001", __update: [
+  {p: "count", m: "r", v: 948}
+  {p: "modified", m: "a", v: Date.now()}
+]});
+```
+<a name="TDXApi+deleteData"></a>
+
+### tdxApi.deleteData(datasetId, data)
+Deletes data from a dataset-based resource.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| datasetId | <code>string</code> | The id of the dataset-based resource to delete data from. |
+| data | <code>object</code> \| <code>array</code> | The primary key data to delete. |
+
+<a name="TDXApi+deleteDataByQuery"></a>
+
+### tdxApi.deleteDataByQuery(datasetId, query)
+Deletes data from a dataset-based resource using a query to specify the documents to be deleted.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| datasetId | <code>string</code> | The id of the dataset-based resource to delete data from. |
+| query | <code>object</code> | The query that specifies the data to delete. All documents matching the query will be deleted. |
+
+**Example**  
+```js
+// Delete all documents where lsoa begins with 'E'
+tdxApi.deleteDataByQuery(myDatasetId, {lsoa: {$regex: "E*"}});
+```

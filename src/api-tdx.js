@@ -24,6 +24,9 @@ class TDXApi {
    * @param  {string} [config.databotHost] - the URL of the TDX databot service, e.g. https://databot.nqminds.com
    * @param  {string} [config.accessToken] - an access token that will be used to authorise commands and queries.
    * Alternatively you can use the authenticate method to acquire a token.
+   * @example <caption>standard usage</caption>
+   * import TDXApi from "nqm-api-tdx";
+   * const api = new TDXApi({tdxHost: "tdx.acme.com"});
    */
   constructor(config) {
     this.config = config;
@@ -386,21 +389,26 @@ class TDXApi {
   }
 
   /**
-   * Adds read and/or write permission for an account to access a resource.
-   * @param  {string} resourceId - the resource id
-   * @param  {string} accountId - the account id to assign permission to
-   * @param  {string} sourceId - the id of the resource acting as the source of the access. This
-   * is usually the same as the target resourceId, but can also be a parent resource. For example,
+   * Adds read and/or write permission for an account to access a resource. Permission is required
+   * equivalent to that which is being added, e.g. adding write permission requires existing
+   * write access.
+   * @param  {string} resourceId - The resource id
+   * @param  {string} accountId - The account id to assign permission to
+   * @param  {string} sourceId - The id of the resource acting as the source of the access. This
+   * is usually the same as the target `resourceId`, but can also be a parent resource. For example,
    * if write access is granted with the sourceId set to be a parent, then if the permission is 
    * revoked from the parent resource it will also be revoked from this resource.
-   * @param  {string[]} access - the access, one of [`"r"`, `"w"`]
+   * @param  {string[]} access - The access, one or more of [`"r"`, `"w"`]. Can be an array or an individual
+   * string.
+   * @example <caption>add access to an account</caption>
+   * addResourceAccess(myResourceId, "bob@acme.com/tdx.acme.com", myResourceId, ["r"]);
    */
   addResourceAccess(resourceId, accountId, sourceId, access) {
     const request = buildCommandRequest.call(this, "resourceAccess/add", {
       rid: resourceId,
       aid: accountId,
       src: sourceId,
-      acc: access,
+      acc: [].concat(access),
     });
     return fetch(request)
       .catch((err) => {
@@ -410,6 +418,17 @@ class TDXApi {
       .then(checkResponse.bind(null, "addResourceAccess"));
   }
 
+  /**
+   * Removes access for an account to a resource. Permission is required
+   * equivalent to that which is being added, e.g. adding write permission requires existing
+   * write access.
+   * @param  {string} resourceId - The resource id.
+   * @param  {string} accountId - The account id to remove access from.
+   * @param  {string} addedBy - The account id that originally added the access, probably your
+   * account id.
+   * @param  {string} sourceId - The source of the access, usually the resource itself.
+   * @param  {string[]} access - The access, one or more of [`"r"`, `"w"`].
+   */
   removeResourceAccess(resourceId, accountId, addedBy, sourceId, access) {
     const request = buildCommandRequest.call(this, "resourceAccess/delete", {
       rid: resourceId,
@@ -426,6 +445,12 @@ class TDXApi {
       .then(checkResponse.bind(null, "removeResourceAccess"));
   }
 
+  /**
+   * Set the share mode for a resource.
+   * @param  {string} resourceId - The resource id.
+   * @param  {string} shareMode - The share mode to set, one or [`"pw"`, `"pr"`, `"tr"`] corresponding to
+   * 'public read/write', 'public read, trusted write', 'trusted only'.
+   */
   setResourceShareMode(resourceId, shareMode) {
     const request = buildCommandRequest.call(this, "resource/setShareMode", {id: resourceId, shareMode});
     return fetch(request)
@@ -436,6 +461,13 @@ class TDXApi {
       .then(checkResponse.bind(null, "setResourceShareMode"));
   }
 
+  /**
+   * Sets the permissive share mode of the resource. Permissive share allows anybody with acces to the resource
+   * to share it with others. If a resource is not in permissive share mode, only the resource owner
+   * can share it with others.
+   * @param  {string} resourceId - The resource id.
+   * @param  {bool} allowPermissive - The required permissive share mode.
+   */
   setResourcePermissiveShare(resourceId, allowPermissive) {
     const request = buildCommandRequest.call(this, "resource/setPermissiveShare", {
       id: resourceId,
@@ -449,6 +481,11 @@ class TDXApi {
       .then(checkResponse.bind(null, "setResourcePermissiveShare"));
   }
 
+  /**
+   * Removes all data from the resource. Applicable to dataset-based resources only. This can not be
+   * undone.
+   * @param  {string} resourceId - The resource id to truncate.
+   */
   truncateResource(resourceId) {
     const request = buildCommandRequest.call(this, "resource/truncate", {id: resourceId});
     return fetch(request)
@@ -465,6 +502,21 @@ class TDXApi {
    *
    */
 
+   /**
+   * Add data to a dataset resource.
+   * @param  {string} datasetId - The id of the dataset-based resource to add data to.
+   * @param  {object|array} data - The data to add. Must conform to the schema defined by the resource metadata.
+   * Supports creating an individual document or many documents.
+   * @example <caption>create an individual document</caption>
+   * // Assumes the dataset primary key is 'lsoa'
+   * tdxApi.addData(myDatasetId, {lsoa: "E0000001", count: 398});
+   * @example <caption>create multiple documents</caption>
+   * tdxApi.addData(myDatasetId, [
+   *  {lsoa: "E0000001", count: 398},
+   *  {lsoa: "E0000002", count: 1775},
+   *  {lsoa: "E0000005", count: 4533},
+   * ]);
+   */
   addData(datasetId, data) {
     const postData = {
       datasetId,
@@ -479,6 +531,19 @@ class TDXApi {
       .then(checkResponse.bind(null, "updateData"));
   }
 
+  /**
+   * Updates data in a dataset resource.
+   * @param  {string} datasetId - The id of the dataset-based resource to update.
+   * @param  {object|array} data - The data to update. Must conform to the schema defined by the resource metadata.
+   * Supports updating individual or multiple documents.
+   * @param  {bool} [upsert=false] - Indicates the data should be created if no document is found matching the
+   * primary key.
+   * @example <caption>update an existing document</caption>
+   * tdxApi.updateData(myDatasetId, {lsoa: "E000001", count: 488});
+   * @example <caption>upsert a document</caption>
+   * // Will create a document if no data exists matching key 'lsoa': "E000004"
+   * tdxApi.updateData(myDatasetId, {lsoa: "E000004", count: 288, true});
+   */
   updateData(datasetId, data, upsert) {
     const postData = {
       datasetId,
@@ -494,6 +559,20 @@ class TDXApi {
       .then(checkResponse.bind(null, "updateData"));
   }
 
+  /**
+   * Patches data in a dataset resource. Uses the [JSON patch](https://tools.ietf.org/html/rfc6902) format,
+   * which involves defining the primary key data followed by a flexible update specification.
+   * @param  {string} datasetId - The id of the dataset-based resource to update.
+   * @param  {object} data - The patch definition.
+   * @param  {object|array} data.__update - An array of JSON patch specifications.
+   * @example <caption>patch a single value in a single document</caption>
+   * tdxApi.patchData(myDatasetId, {lsoa: "E000001", __update: [{p: "count", m: "r", v: 948}]});
+   * @example <caption>patch a more than one value in a single document</caption>
+   * tdxApi.patchData(myDatasetId, {lsoa: "E000001", __update: [
+   *   {p: "count", m: "r", v: 948}
+   *   {p: "modified", m: "a", v: Date.now()}
+   * ]});
+   */
   patchData(datasetId, data) {
     const postData = {
       datasetId,
@@ -508,6 +587,11 @@ class TDXApi {
       .then(checkResponse.bind(null, "patchData"));
   }
 
+  /**
+   * Deletes data from a dataset-based resource.
+   * @param  {string} datasetId - The id of the dataset-based resource to delete data from.
+   * @param  {object|array} data - The primary key data to delete.
+   */
   deleteData(datasetId, data) {
     const postData = {
       datasetId,
@@ -522,6 +606,15 @@ class TDXApi {
       .then(checkResponse.bind(null, "deleteData"));
   }
 
+  /**
+   * Deletes data from a dataset-based resource using a query to specify the documents to be deleted.
+   * @param  {string} datasetId - The id of the dataset-based resource to delete data from.
+   * @param  {object} query - The query that specifies the data to delete. All documents matching the
+   * query will be deleted.
+   * @example
+   * // Delete all documents where lsoa begins with 'E'
+   * tdxApi.deleteDataByQuery(myDatasetId, {lsoa: {$regex: "E*"}});
+   */
   deleteDataByQuery(datasetId, query) {
     const postData = {
       datasetId,
