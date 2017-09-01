@@ -1,7 +1,14 @@
 import fetch from "isomorphic-fetch";
 import base64 from "base-64";
 import debug from "debug";
-import {buildCommandRequest, buildQueryRequest, checkResponse, handleError, setDefaults} from "./helpers";
+import {
+  buildCommandRequest,
+  buildQueryRequest,
+  checkResponse,
+  handleError,
+  setDefaults,
+  waitForIndex
+} from "./helpers";
 
 const log = debug("nqm-api-tdx");
 const errLog = debug("nqm-api-tdx:error");
@@ -9,6 +16,30 @@ const errLog = debug("nqm-api-tdx:error");
 const pollingRetries = 15;
 const pollingInterval = 1000;
 const waitInfinitely = -1;
+
+/**
+ * @typedef  {object} DatasetData
+ * @property  {object} metaData - The dataset metadata (see `nqmMeta` option in `getDatasetData`).
+ * @property  {string} metaDataUrl - The URL to the dataset metadata (see `nqmMeta` option in `getDatasetData`.
+ * @property  {object[]} data - The dataset documents.
+ */
+
+/**
+ * @typedef  {object} Resource
+ * @property  {string} description
+ * @property  {string} id
+ * @property  {string} name
+ * @property  {string[]} parents
+ * @property  {object} schemaDefinition
+ * @property  {string[]} tags
+ */
+
+/**
+ * @typedef  {object} Zone
+ * @property  {string} accountType
+ * @property  {string} displayName
+ * @property  {string} username
+ */
 
 class TDXApi {
   /**
@@ -276,7 +307,7 @@ class TDXApi {
       .then(checkResponse.bind(null, "addResource"))
       .then((result) => {
         if (wait) {
-          return this.waitForIndex(result.response.id)
+          return waitForIndex.call(this, result.response.id)
             .then(() => {
               return result;
             });
@@ -357,7 +388,7 @@ class TDXApi {
       .then(checkResponse.bind(null, "rebuildIndex"))
       .then((res) => {
         result = res;
-        return this.waitForIndex(result.response.id, "built");
+        return waitForIndex.call(this, result.response.id, "built");
       })
       .then(() => {
         return result;
@@ -381,7 +412,7 @@ class TDXApi {
       .then(checkResponse.bind(null, "suspendIndex"))
       .then((res) => {
         result = res;
-        return this.waitForIndex(result.response.id, "suspended");
+        return waitForIndex.call(this, result.response.id, "suspended");
       })
       .then(() => {
         return result;
@@ -612,7 +643,7 @@ class TDXApi {
    * @param  {object} query - The query that specifies the data to delete. All documents matching the
    * query will be deleted.
    * @example
-   * // Delete all documents where lsoa begins with 'E'
+   * // Delete all documents with English lsoa.
    * tdxApi.deleteDataByQuery(myDatasetId, {lsoa: {$regex: "E*"}});
    */
   deleteDataByQuery(datasetId, query) {
@@ -629,6 +660,13 @@ class TDXApi {
       .then(checkResponse.bind(null, "deleteDataByQuery"));
   }
 
+  /**
+   * Upload a file to a resource.
+   * @param  {string} resourceId - The id of the destination resource.
+   * @param  {object} file - The file to upload, obtained from an `<input type="file">` element.
+   * @param  {bool} [stream=false] - Flag indicating whether the call should return a stream allowing
+   * callees to monitor progress.
+   */
   fileUpload(resourceId, file, stream) {
     const request = new Request(`${this.config.commandHost}/commandSync/resource/${resourceId}/upload`, {
       method: "POST",
@@ -670,6 +708,28 @@ class TDXApi {
    *
    */
 
+  /**
+   * Starts a databot instance.
+   * @param  {string} databotId - The id of the databot definition to start.
+   * @param  {object} payload - The instance input and parameters.
+   * @param  {number} [payload.authTokenTTL] - The time-to-live to use when creating the auth token, in seconds.
+   * Will default to the TDX-configured default if not given (usually 1 hour).
+   * @param  {number} [payload.chunks=1] - The number of processes to instantiate. Each will be given the same input
+   * data, with only the chunk number varying.
+   * @param  {bool} [payload.debugMode=false] - Flag indicating this instance should be run in debug mode, meaning
+   * all debug output will be captured and stored on the TDX. n.b. setting this will also restrict the hosts available
+   * to run the instance to those that are willing to run in debug mode.
+   * @param  {string} [payload.description] - The description for this instance.
+   * @param  {object} [payload.inputs] - The input data. A free-form object that should conform to the
+   * specification in the associated databot definition.
+   * @param  {string} [payload.name] - The name to associate with this instance, e.g. "Male population
+   * projection 2017"
+   * @param  {string} [payload.overwriteExisting] - The id of an existing instance that should be overwritten.
+   * @param  {number} [payload.priority] - The priority to assign this instance. Reserved for system use.
+   * @param  {string} payload.shareKeyId - The share key to run the databot under.
+   * @param  {string} [payload.shareKeySecret] - The secret of the share key. Ignored if the share key id refers to a
+   * user-based account.
+   */
   startDatabotInstance(databotId, payload) {
     const postData = {
       databotId,
@@ -684,6 +744,11 @@ class TDXApi {
       .then(checkResponse.bind(null, "startDatabotInstance"));
   }
 
+  /**
+   * Terminates or pauses a running databot instance.
+   * @param  {string} instanceId - The id of the instance to terminate or pause.
+   * @param  {string} mode - One of [`"stop"`, `"pause"`, `"resume"`]
+   */
   stopDatabotInstance(instanceId, mode) {
     const postData = {
       instanceId,
@@ -698,6 +763,10 @@ class TDXApi {
       .then(checkResponse.bind(null, "stopDatabotInstance"));
   }
 
+  /**
+   * Deletes a databot instance and all output/debug data associated with it. 
+   * @param  {string} instanceId - The id of the instance to delete.
+   */
   deleteDatabotInstance(instanceId) {
     const postData = {
       instanceId,
@@ -711,6 +780,16 @@ class TDXApi {
       .then(checkResponse.bind(null, "deleteDatabotInstance"));
   }
 
+  /**
+   * Sends a command to a databot host. Reserved for system use.
+   * @param  {string} command - The command to send. Must be one of ["stopHost", "updateHost", "runInstance",
+   * "stopInstance", "clearInstance"]
+   * @param  {string} hostId - The id of the host.
+   * @param  {string} [hostIp] - The ip address of the host. If omitted, the command will be sent to all
+   * host ip addresses.
+   * @param  {number} [hostPort] - The port number of the host. If omitted, the command will be sent to
+   * all host ports.
+   */
   sendDatabotHostCommand(command, hostId, hostIp, hostPort) {
     const postData = {
       hostId,
@@ -726,14 +805,20 @@ class TDXApi {
       })
       .then(checkResponse.bind(null, "sendDatabotHostCommand"));
   }
+
   /*
    *
    *  QUERIES
    *
    */
 
-  getZone(zoneId) {
-    const request = this.buildQueryRequest("zones", {username: zoneId});
+  /**
+   * Gets the details for a given zone (account) id.
+   * @param  {string} accountId - the id of the zone to be retrieved.
+   * @return  {Zone} zone
+   */
+  getZone(accountId) {
+    const request = this.buildQueryRequest("zones", {username: accountId});
     return fetch(request)
       .catch((err) => {
         errLog("TDXApi.getZone: %s", err.message);
@@ -742,6 +827,13 @@ class TDXApi {
       .then(checkResponse.bind(null, "getZone"));
   }
 
+  /**
+   * Gets the details for a given resource id.
+   * @param  {string} resourceId - The id of the resource to retrieve.
+   * @param  {bool} [noThrow=false] - If set, the call won't reject or throw if the resource doesn't exist.
+   * @return  {Resource}
+   * @exception  Will throw if the resource is not found (see `noThrow` flag) or permission is denied.
+   */
   getResource(resourceId, noThrow) {
     const request = this.buildQueryRequest(`resources/${resourceId}`);
     return fetch(request)
@@ -765,6 +857,14 @@ class TDXApi {
       });
   }
 
+  /**
+   * Gets the details of all resources that match the given filter.
+   * @param  {object} [filter] - A mongodb filter definition
+   * @param  {object} [projection] - A mongodb projection definition, can be used to restrict which properties are
+   * returned thereby limiting the payload.
+   * @param  {object} [options] - A mongodb options definition, can be used for limit, skip, sorting etc.
+   * @return  {Resource[]}
+   */
   getResources(filter, projection, options) {
     const request = this.buildQueryRequest("resources", filter, projection, options);
     return fetch(request)
@@ -775,11 +875,21 @@ class TDXApi {
       .then(checkResponse.bind(null, "getResources"));
   }
 
+  /**
+   * Retrieves all resources that have an immediate ancestor of the given schema id.
+   * @param  {string} schemaId - The id of the schema to match, e.g. `"geojson"`.
+   * @return  {Resource[]}
+   */
   getResourcesWithSchema(schemaId) {
     const filter = {"schemaDefinition.parent": schemaId};
     return this.getResources(filter);
   }
 
+  /**
+   * Gets all resources that are ancestors of the given resource.
+   * @param  {string} resourceId - The id of the resource whose parents are to be retrieved.
+   * @return  {Resource[]}
+   */
   getResourceAncestors(resourceId) {
     const request = this.buildQueryRequest(`datasets/${resourceId}/ancestors`);
     return fetch(request)
@@ -790,6 +900,18 @@ class TDXApi {
       .then(checkResponse.bind(null, "getResourceAncestors"));
   }
 
+  /**
+   * Gets all data from the given dataset that matches the filter provided.
+   * @param  {string} datasetId - The id of the dataset-based resource.
+   * @param  {object} [filter] - A mongodb filter object. If omitted, all data will be retrieved.
+   * @param  {object} [projection] - A mongodb projection object. Should be used to restrict the payload to the
+   * minimum properties needed if a lot of data is being retrieved.
+   * @param  {object} [options] - A mongodb options object. Can be used to limit, skip, sort etc. Note a default
+   * `limit` of 1000 is applied if none is given here.
+   * @param  {bool} [options.nqmMeta] - When set, the resource metadata will be returned along with the dataset
+   * data. Can be used to avoid a second call to `getResource`. Otherwise a URL to the metadata is provided.
+   * @return  {DatasetData}
+   */
   getDatasetData(datasetId, filter, projection, options) {
     const request = this.buildQueryRequest(`datasets/${datasetId}/data`, filter, projection, options);
     return fetch(request)
@@ -800,6 +922,11 @@ class TDXApi {
       .then(checkResponse.bind(null, "getDatasetData"));
   }
 
+  /**
+   * Gets a count of the data in a dataset-based resource, after applying the given filter.
+   * @param  {string} datasetId - The id of the dataset-based resource.
+   * @param  {object} [filter] - An optional mongodb filter to apply before counting the data.
+   */
   getDatasetDataCount(datasetId, filter) {
     const request = this.buildQueryRequest(`datasets/${datasetId}/count`, filter);
     return fetch(request)
@@ -810,6 +937,13 @@ class TDXApi {
       .then(checkResponse.bind(null, "getDatasetDataCount"));
   }
 
+  /**
+   * Gets a list of distinct values for a given property in a dataset-based resource.
+   * @param  {string} datasetId - The id of the dataset-based resource.
+   * @param  {string} key - The name of the property to use. Can be a property path, e.g. `"address.postcode"`.
+   * @param  {object} [filter] - An optional mongodb filter to apply.
+   * @return  {object[]} - The distinct values.
+   */
   getDistinct(datasetId, key, filter, projection, options) {
     const request = this.buildQueryRequest(`datasets/${datasetId}/distinct?key=${key}`, filter, projection, options);
     return fetch(request)
@@ -820,6 +954,11 @@ class TDXApi {
       .then(checkResponse.bind(null, "getDatasetData"));
   }
 
+  /**
+   * Retrieves an authorisation token for the given TDX instance
+   * @param  {string} tdx - The TDX instance name, e.g. `"tdx.acme.com"`.
+   * @return  {string}
+   */
   getTDXToken(tdx) {
     const request = this.buildQueryRequest(`tdx-token/${tdx}`);
     return fetch(request)
@@ -828,112 +967,6 @@ class TDXApi {
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
       .then(checkResponse.bind(null, "getTDXToken"));
-  }
-
-  waitForResource(resourceId, check, retryCount, maxRetries) {
-    retryCount = retryCount || 0;
-    return this.getResource(resourceId)
-      .then((resource) => {
-        const checkResult = check(resource, retryCount);
-        if (checkResult instanceof Error) {
-          log("waitForResource - check failed with error [%s]", checkResult.message);
-          return Promise.reject(checkResult);
-        }
-
-        if (!checkResult) {
-          // A negative maxRetries value will retry indefinitely.
-          if (maxRetries >= 0 && retryCount > maxRetries) {
-            log("waitForResource - giving up after %d attempts", retryCount);
-            return Promise.reject(new Error(`gave up waiting for ${resourceId} after ${retryCount} attempts`));
-          }
-
-          // Try again after a delay.
-          log("waitForResource - waiting for %d msec", pollingInterval);
-          return new Promise((resolve) => {
-            setTimeout(() => {
-              log("waitForResource - trying again");
-              resolve(this.waitForResource(resourceId, check, retryCount + 1, maxRetries));
-            }, pollingInterval);
-          });
-        } else {
-          return resource;
-        }
-      })
-      .catch((err) => {
-        if (err.name !== "TDXApiError") {
-          return Promise.reject(err);
-        } else {
-          try {
-            const parseError = JSON.parse(err.message);
-            const failure = JSON.parse(parseError.failure);
-            if (failure.code === "NotFoundError" || failure.code === "UnauthorizedError") {
-              // Ignore resource not found and not authorized errors here, they are probably caused by
-              // waiting for the projections to catch up (esp. in debug environments) by falling through
-              // we will still be limited by the retry count, so won't loop forever.
-              log("waitForResource - ignoring error %s", err.message);
-              return new Promise((resolve) => {
-                setTimeout(() => {
-                  resolve(this.waitForResource(resourceId, check, retryCount + 1, maxRetries));
-                }, pollingInterval);
-              });
-            } else {
-              // All other errors are fatal.
-              return Promise.reject(err);
-            }
-          } catch (parseEx) {
-            // Failed to parse TDX error - re-throw the original error.
-            log("waitForResource failure: [%s]", parseEx.message);
-            return Promise.reject(err);
-          }
-        }
-      });
-  }
-
-  waitForIndex(datasetId, status, maxRetries) {
-    // The argument maxRetries is optional.
-    if (typeof maxRetries === "undefined") {
-      maxRetries = waitInfinitely;
-    }
-    status = status || "built";
-
-    let initialStatus = "";
-
-    const builtIndexCheck = function(dataset, retryCount) {
-      log("builtIndexCheck: %s", dataset ? dataset.indexStatus : "no dataset");
-
-      let continueWaiting;
-
-      // Handle "error" index status.
-      if (dataset && dataset.indexStatus === "error") {
-        if (!initialStatus) {
-          // Haven't got an initial status yet, so can't make a judgment as to whether or not the error status
-          // is new, or the index was already in an error state.
-          continueWaiting = true;
-        } else if (initialStatus !== "error") {
-          // The index status has transitioned from non-error to error => abort
-          continueWaiting = new Error("index entered error status");
-        } else {
-          // The index status started as an error and is still an error => allow a limited number of retries
-          // irrespective of the requested maxRetries.
-          if (retryCount > Math.min(maxRetries, pollingRetries)) {
-            continueWaiting = new Error(`index still in error status after ${retryCount} retries`);
-          } else {
-            continueWaiting = true;
-          }
-        }
-      } else {
-        continueWaiting = !!dataset && dataset.indexStatus === status;
-      }
-
-      // Cache the first index status we see.
-      if (dataset && !initialStatus) {
-        initialStatus = dataset.indexStatus;
-      }
-
-      return continueWaiting;
-    };
-
-    return this.waitForResource(datasetId, builtIndexCheck, 0, maxRetries);
   }
 }
 

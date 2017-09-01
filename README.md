@@ -24,6 +24,24 @@ import TDXApi from "nqm-api-tdx"
 ```
 
 ## API
+## Classes
+
+<dl>
+<dt><a href="#TDXApi">TDXApi</a></dt>
+<dd></dd>
+</dl>
+
+## Typedefs
+
+<dl>
+<dt><a href="#DatasetData">DatasetData</a> : <code>object</code></dt>
+<dd></dd>
+<dt><a href="#Resource">Resource</a> : <code>object</code></dt>
+<dd></dd>
+<dt><a href="#Zone">Zone</a> : <code>object</code></dt>
+<dd></dd>
+</dl>
+
 <a name="TDXApi"></a>
 
 ## TDXApi
@@ -55,6 +73,20 @@ import TDXApi from "nqm-api-tdx"
     * [.patchData(datasetId, data)](#TDXApi+patchData)
     * [.deleteData(datasetId, data)](#TDXApi+deleteData)
     * [.deleteDataByQuery(datasetId, query)](#TDXApi+deleteDataByQuery)
+    * [.fileUpload(resourceId, file, [stream])](#TDXApi+fileUpload)
+    * [.startDatabotInstance(databotId, payload)](#TDXApi+startDatabotInstance)
+    * [.stopDatabotInstance(instanceId, mode)](#TDXApi+stopDatabotInstance)
+    * [.deleteDatabotInstance(instanceId)](#TDXApi+deleteDatabotInstance)
+    * [.sendDatabotHostCommand(command, hostId, [hostIp], [hostPort])](#TDXApi+sendDatabotHostCommand)
+    * [.getZone(accountId)](#TDXApi+getZone) ⇒ [<code>Zone</code>](#Zone)
+    * [.getResource(resourceId, [noThrow])](#TDXApi+getResource) ⇒ [<code>Resource</code>](#Resource)
+    * [.getResources([filter], [projection], [options])](#TDXApi+getResources) ⇒ [<code>Array.&lt;Resource&gt;</code>](#Resource)
+    * [.getResourcesWithSchema(schemaId)](#TDXApi+getResourcesWithSchema) ⇒ [<code>Array.&lt;Resource&gt;</code>](#Resource)
+    * [.getResourceAncestors(resourceId)](#TDXApi+getResourceAncestors) ⇒ [<code>Array.&lt;Resource&gt;</code>](#Resource)
+    * [.getDatasetData(datasetId, [filter], [projection], [options])](#TDXApi+getDatasetData) ⇒ [<code>DatasetData</code>](#DatasetData)
+    * [.getDatasetDataCount(datasetId, [filter])](#TDXApi+getDatasetDataCount)
+    * [.getDistinct(datasetId, key, [filter])](#TDXApi+getDistinct) ⇒ <code>Array.&lt;object&gt;</code>
+    * [.getTDXToken(tdx)](#TDXApi+getTDXToken) ⇒ <code>string</code>
 
 <a name="new_TDXApi_new"></a>
 
@@ -462,6 +494,232 @@ Deletes data from a dataset-based resource using a query to specify the document
 
 **Example**  
 ```js
-// Delete all documents where lsoa begins with 'E'
+// Delete all documents with English lsoa.
 tdxApi.deleteDataByQuery(myDatasetId, {lsoa: {$regex: "E*"}});
 ```
+<a name="TDXApi+fileUpload"></a>
+
+### tdxApi.fileUpload(resourceId, file, [stream])
+Upload a file to a resource.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| resourceId | <code>string</code> |  | The id of the destination resource. |
+| file | <code>object</code> |  | The file to upload, obtained from an `<input type="file">` element. |
+| [stream] | <code>bool</code> | <code>false</code> | Flag indicating whether the call should return a stream allowing callees to monitor progress. |
+
+<a name="TDXApi+startDatabotInstance"></a>
+
+### tdxApi.startDatabotInstance(databotId, payload)
+Starts a databot instance.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| databotId | <code>string</code> |  | The id of the databot definition to start. |
+| payload | <code>object</code> |  | The instance input and parameters. |
+| [payload.authTokenTTL] | <code>number</code> |  | The time-to-live to use when creating the auth token, in seconds. Will default to the TDX-configured default if not given (usually 1 hour). |
+| [payload.chunks] | <code>number</code> | <code>1</code> | The number of processes to instantiate. Each will be given the same input data, with only the chunk number varying. |
+| [payload.debugMode] | <code>bool</code> | <code>false</code> | Flag indicating this instance should be run in debug mode, meaning all debug output will be captured and stored on the TDX. n.b. setting this will also restrict the hosts available to run the instance to those that are willing to run in debug mode. |
+| [payload.description] | <code>string</code> |  | The description for this instance. |
+| [payload.inputs] | <code>object</code> |  | The input data. A free-form object that should conform to the specification in the associated databot definition. |
+| [payload.name] | <code>string</code> |  | The name to associate with this instance, e.g. "Male population projection 2017" |
+| [payload.overwriteExisting] | <code>string</code> |  | The id of an existing instance that should be overwritten. |
+| [payload.priority] | <code>number</code> |  | The priority to assign this instance. Reserved for system use. |
+| payload.shareKeyId | <code>string</code> |  | The share key to run the databot under. |
+| [payload.shareKeySecret] | <code>string</code> |  | The secret of the share key. Ignored if the share key id refers to a user-based account. |
+
+<a name="TDXApi+stopDatabotInstance"></a>
+
+### tdxApi.stopDatabotInstance(instanceId, mode)
+Terminates or pauses a running databot instance.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| instanceId | <code>string</code> | The id of the instance to terminate or pause. |
+| mode | <code>string</code> | One of [`"stop"`, `"pause"`, `"resume"`] |
+
+<a name="TDXApi+deleteDatabotInstance"></a>
+
+### tdxApi.deleteDatabotInstance(instanceId)
+Deletes a databot instance and all output/debug data associated with it.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| instanceId | <code>string</code> | The id of the instance to delete. |
+
+<a name="TDXApi+sendDatabotHostCommand"></a>
+
+### tdxApi.sendDatabotHostCommand(command, hostId, [hostIp], [hostPort])
+Sends a command to a databot host. Reserved for system use.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| command | <code>string</code> | The command to send. Must be one of ["stopHost", "updateHost", "runInstance", "stopInstance", "clearInstance"] |
+| hostId | <code>string</code> | The id of the host. |
+| [hostIp] | <code>string</code> | The ip address of the host. If omitted, the command will be sent to all host ip addresses. |
+| [hostPort] | <code>number</code> | The port number of the host. If omitted, the command will be sent to all host ports. |
+
+<a name="TDXApi+getZone"></a>
+
+### tdxApi.getZone(accountId) ⇒ [<code>Zone</code>](#Zone)
+Gets the details for a given zone (account) id.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+**Returns**: [<code>Zone</code>](#Zone) - zone  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| accountId | <code>string</code> | the id of the zone to be retrieved. |
+
+<a name="TDXApi+getResource"></a>
+
+### tdxApi.getResource(resourceId, [noThrow]) ⇒ [<code>Resource</code>](#Resource)
+Gets the details for a given resource id.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+**Throws**:
+
+- Will throw if the resource is not found (see `noThrow` flag) or permission is denied.
+
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| resourceId | <code>string</code> |  | The id of the resource to retrieve. |
+| [noThrow] | <code>bool</code> | <code>false</code> | If set, the call won't reject or throw if the resource doesn't exist. |
+
+<a name="TDXApi+getResources"></a>
+
+### tdxApi.getResources([filter], [projection], [options]) ⇒ [<code>Array.&lt;Resource&gt;</code>](#Resource)
+Gets the details of all resources that match the given filter.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| [filter] | <code>object</code> | A mongodb filter definition |
+| [projection] | <code>object</code> | A mongodb projection definition, can be used to restrict which properties are returned thereby limiting the payload. |
+| [options] | <code>object</code> | A mongodb options definition, can be used for limit, skip, sorting etc. |
+
+<a name="TDXApi+getResourcesWithSchema"></a>
+
+### tdxApi.getResourcesWithSchema(schemaId) ⇒ [<code>Array.&lt;Resource&gt;</code>](#Resource)
+Retrieves all resources that have an immediate ancestor of the given schema id.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| schemaId | <code>string</code> | The id of the schema to match, e.g. `"geojson"`. |
+
+<a name="TDXApi+getResourceAncestors"></a>
+
+### tdxApi.getResourceAncestors(resourceId) ⇒ [<code>Array.&lt;Resource&gt;</code>](#Resource)
+Gets all resources that are ancestors of the given resource.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| resourceId | <code>string</code> | The id of the resource whose parents are to be retrieved. |
+
+<a name="TDXApi+getDatasetData"></a>
+
+### tdxApi.getDatasetData(datasetId, [filter], [projection], [options]) ⇒ [<code>DatasetData</code>](#DatasetData)
+Gets all data from the given dataset that matches the filter provided.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| datasetId | <code>string</code> | The id of the dataset-based resource. |
+| [filter] | <code>object</code> | A mongodb filter object. If omitted, all data will be retrieved. |
+| [projection] | <code>object</code> | A mongodb projection object. Should be used to restrict the payload to the minimum properties needed if a lot of data is being retrieved. |
+| [options] | <code>object</code> | A mongodb options object. Can be used to limit, skip, sort etc. Note a default `limit` of 1000 is applied if none is given here. |
+| [options.nqmMeta] | <code>bool</code> | When set, the resource metadata will be returned along with the dataset data. Can be used to avoid a second call to `getResource`. Otherwise a URL to the metadata is provided. |
+
+<a name="TDXApi+getDatasetDataCount"></a>
+
+### tdxApi.getDatasetDataCount(datasetId, [filter])
+Gets a count of the data in a dataset-based resource, after applying the given filter.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| datasetId | <code>string</code> | The id of the dataset-based resource. |
+| [filter] | <code>object</code> | An optional mongodb filter to apply before counting the data. |
+
+<a name="TDXApi+getDistinct"></a>
+
+### tdxApi.getDistinct(datasetId, key, [filter]) ⇒ <code>Array.&lt;object&gt;</code>
+Gets a list of distinct values for a given property in a dataset-based resource.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+**Returns**: <code>Array.&lt;object&gt;</code> - - The distinct values.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| datasetId | <code>string</code> | The id of the dataset-based resource. |
+| key | <code>string</code> | The name of the property to use. Can be a property path, e.g. `"address.postcode"`. |
+| [filter] | <code>object</code> | An optional mongodb filter to apply. |
+
+<a name="TDXApi+getTDXToken"></a>
+
+### tdxApi.getTDXToken(tdx) ⇒ <code>string</code>
+Retrieves an authorisation token for the given TDX instance
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| tdx | <code>string</code> | The TDX instance name, e.g. `"tdx.acme.com"`. |
+
+<a name="DatasetData"></a>
+
+## DatasetData : <code>object</code>
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| metaData | <code>object</code> | The dataset metadata (see `nqmMeta` option in `getDatasetData`). |
+| metaDataUrl | <code>string</code> | The URL to the dataset metadata (see `nqmMeta` option in `getDatasetData`. |
+| data | <code>Array.&lt;object&gt;</code> | The dataset documents. |
+
+<a name="Resource"></a>
+
+## Resource : <code>object</code>
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type |
+| --- | --- |
+| description | <code>string</code> | 
+| id | <code>string</code> | 
+| name | <code>string</code> | 
+| parents | <code>Array.&lt;string&gt;</code> | 
+| schemaDefinition | <code>object</code> | 
+| tags | <code>Array.&lt;string&gt;</code> | 
+
+<a name="Zone"></a>
+
+## Zone : <code>object</code>
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type |
+| --- | --- |
+| accountType | <code>string</code> | 
+| displayName | <code>string</code> | 
+| username | <code>string</code> | 
+

@@ -111,6 +111,112 @@ const setDefaults = function(config) {
   }
 };
 
+const waitForResource = function(resourceId, check, retryCount, maxRetries) {
+  retryCount = retryCount || 0;
+  return this.getResource(resourceId)
+    .then((resource) => {
+      const checkResult = check(resource, retryCount);
+      if (checkResult instanceof Error) {
+        log("waitForResource - check failed with error [%s]", checkResult.message);
+        return Promise.reject(checkResult);
+      }
+
+      if (!checkResult) {
+        // A negative maxRetries value will retry indefinitely.
+        if (maxRetries >= 0 && retryCount > maxRetries) {
+          log("waitForResource - giving up after %d attempts", retryCount);
+          return Promise.reject(new Error(`gave up waiting for ${resourceId} after ${retryCount} attempts`));
+        }
+
+        // Try again after a delay.
+        log("waitForResource - waiting for %d msec", pollingInterval);
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            log("waitForResource - trying again");
+            resolve(waitForResource.call(this, resourceId, check, retryCount + 1, maxRetries));
+          }, pollingInterval);
+        });
+      } else {
+        return resource;
+      }
+    })
+    .catch((err) => {
+      if (err.name !== "TDXApiError") {
+        return Promise.reject(err);
+      } else {
+        try {
+          const parseError = JSON.parse(err.message);
+          const failure = JSON.parse(parseError.failure);
+          if (failure.code === "NotFoundError" || failure.code === "UnauthorizedError") {
+            // Ignore resource not found and not authorized errors here, they are probably caused by
+            // waiting for the projections to catch up (esp. in debug environments) by falling through
+            // we will still be limited by the retry count, so won't loop forever.
+            log("waitForResource - ignoring error %s", err.message);
+            return new Promise((resolve) => {
+              setTimeout(() => {
+                resolve(waitForResource.call(this, resourceId, check, retryCount + 1, maxRetries));
+              }, pollingInterval);
+            });
+          } else {
+            // All other errors are fatal.
+            return Promise.reject(err);
+          }
+        } catch (parseEx) {
+          // Failed to parse TDX error - re-throw the original error.
+          log("waitForResource failure: [%s]", parseEx.message);
+          return Promise.reject(err);
+        }
+      }
+    });
+};
+
+const waitForIndex = function(datasetId, status, maxRetries) {
+  // The argument maxRetries is optional.
+  if (typeof maxRetries === "undefined") {
+    maxRetries = waitInfinitely;
+  }
+  status = status || "built";
+
+  let initialStatus = "";
+
+  const builtIndexCheck = function(dataset, retryCount) {
+    log("builtIndexCheck: %s", dataset ? dataset.indexStatus : "no dataset");
+
+    let continueWaiting;
+
+    // Handle "error" index status.
+    if (dataset && dataset.indexStatus === "error") {
+      if (!initialStatus) {
+        // Haven't got an initial status yet, so can't make a judgment as to whether or not the error status
+        // is new, or the index was already in an error state.
+        continueWaiting = true;
+      } else if (initialStatus !== "error") {
+        // The index status has transitioned from non-error to error => abort
+        continueWaiting = new Error("index entered error status");
+      } else {
+        // The index status started as an error and is still an error => allow a limited number of retries
+        // irrespective of the requested maxRetries.
+        if (retryCount > Math.min(maxRetries, pollingRetries)) {
+          continueWaiting = new Error(`index still in error status after ${retryCount} retries`);
+        } else {
+          continueWaiting = true;
+        }
+      }
+    } else {
+      continueWaiting = !!dataset && dataset.indexStatus === status;
+    }
+
+    // Cache the first index status we see.
+    if (dataset && !initialStatus) {
+      initialStatus = dataset.indexStatus;
+    }
+
+    return continueWaiting;
+  };
+
+  return waitForResource.call(this, datasetId, builtIndexCheck, 0, maxRetries);
+};
+
 export {
   checkResponse,
   handleError,
