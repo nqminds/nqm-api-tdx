@@ -18,6 +18,14 @@ const pollingInterval = 1000;
 const waitInfinitely = -1;
 
 /**
+ * @typedef  {object} CommandResult
+ * @property  {string} commandId - The auto-generated unique id of the command.
+ * @property  {object|string} response - The result of the command. If a command is sent asynchronously, this will
+ * simply be the string `"ack"`. In synchronous mode, this will usually be an object consisting of the primary key
+ * of the data that was affected by the command.
+ */
+
+/**
  * @typedef  {object} DatasetData
  * @property  {object} metaData - The dataset metadata (see `nqmMeta` option in `getDatasetData`).
  * @property  {string} metaDataUrl - The URL to the dataset metadata (see `nqmMeta` option in `getDatasetData`.
@@ -70,6 +78,12 @@ class TDXApi {
    * @param  {string} id - the account id, or a pre-formed credentials string, e.g. "DKJG8dfg:letmein"
    * @param  {string} secret - the account secret
    * @param  {number} [ttl=3600] - the Time-To-Live of the token in seconds, default is 1 hour.
+   * @return  {string} The access token.
+   * @exception Will throw if credentials are invalid or there is a network error contacting the TDX.
+   * @example <caption>authenticate using a share key and secret</caption>
+   * tdxApi.authenticate("DKJG8dfg", "letmein");
+   * @example <caption>authenticate using custom ttl of 2 hours</caption>
+   * tdxApi.authenticate("DKJG8dfg", "letmein", 7200);
    */
   authenticate(id, secret, ttl) {
     let credentials;
@@ -141,6 +155,7 @@ class TDXApi {
    * @param  {bool} [options.verified] - account is pre-verified (reserved for system use only)
    * @param  {string[]} [options.whitelist] - a list of IP addresses. Tokens will only be granted if the requesting
    * IP address is in this list
+   * @return  {CommandResult}
    */
   addAccount(options) {
     const request = buildCommandRequest.call(this, "account/create", options);
@@ -150,6 +165,50 @@ class TDXApi {
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
       .then(checkResponse.bind(null, "addAccount"));
+  }
+
+  /**
+   * Set account approved status. Reserved for system use.
+   * @param  {string} username - the full TDX identity of the account.
+   * @param  {bool} approved - account approved status
+   */
+  approveAccount(username, approved) {
+    const request = buildCommandRequest.call(this, "account/approve", {username, approved});
+    return fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.approveAccount: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "approveAccount"));
+  }
+
+  /**
+   * Delete an account
+   * @param  {string} username - the full TDX identity of the account to delete.
+   */
+  deleteAccount(username) {
+    const request = buildCommandRequest.call(this, "account/delete", {username});
+    return fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.deleteAccount: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "deleteAccount"));
+  }
+
+  /**
+   * Change account secret.
+   * @param  {string} username - the full TDX identity of the account.
+   * @param  {string} key - the new secret
+   */
+  resetAccount(username, key) {
+    const request = buildCommandRequest.call(this, "account/reset", {username, key});
+    return fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.resetAccount: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "resetAccount"));
   }
 
   /**
@@ -174,36 +233,6 @@ class TDXApi {
   }
 
   /**
-   * Set account approved status. Reserved for system use.
-   * @param  {string} username - the full TDX identity of the account.
-   * @param  {bool} approved - account approved status
-   */
-  approveAccount(username, approved) {
-    const request = buildCommandRequest.call(this, "account/approve", {username, approved});
-    return fetch(request)
-      .catch((err) => {
-        errLog("TDXApi.approveAccount: %s", err.message);
-        return Promise.reject(new Error(`${err.message} - [network error]`));
-      })
-      .then(checkResponse.bind(null, "approveAccount"));
-  }
-
-  /**
-   * Change account secret.
-   * @param  {string} username - the full TDX identity of the account.
-   * @param  {string} key - the new secret
-   */
-  resetAccount(username, key) {
-    const request = buildCommandRequest.call(this, "account/reset", {username, key});
-    return fetch(request)
-      .catch((err) => {
-        errLog("TDXApi.resetAccount: %s", err.message);
-        return Promise.reject(new Error(`${err.message} - [network error]`));
-      })
-      .then(checkResponse.bind(null, "resetAccount"));
-  }
-
-  /**
    * Set account verified status. Reserved for system use.
    * @param  {string} username - the full TDX identity of the account.
    * @param  {bool} approved - account verified status
@@ -216,20 +245,6 @@ class TDXApi {
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
       .then(checkResponse.bind(null, "verifyAccount"));
-  }
-
-  /**
-   * Delete an account
-   * @param  {string} username - the full TDX identity of the account to delete.
-   */
-  deleteAccount(username) {
-    const request = buildCommandRequest.call(this, "account/delete", {username});
-    return fetch(request)
-      .catch((err) => {
-        errLog("TDXApi.deleteAccount: %s", err.message);
-        return Promise.reject(new Error(`${err.message} - [network error]`));
-      })
-      .then(checkResponse.bind(null, "deleteAccount"));
   }
 
   /*
@@ -318,26 +333,90 @@ class TDXApi {
   }
 
   /**
-   * Modify one or more of the meta data associated with the resource.
-   * @param  {string} resourceId - id of the resource to update
-   * @param  {object} update - object containing the properties to update. Can be one or more of those
-   * listed below. See the {@link TDXApi#addResource} method for semantics and syntax of each property.
-   * @param  {string} [update.derived]
-   * @param  {string} [update.description]
-   * @param  {string} [update.meta]
-   * @param  {string} [update.name]
-   * @param  {string} [update.provenance]
-   * @param  {string} [update.schema]
-   * @param  {string} [update.tags]
+   * Adds read and/or write permission for an account to access a resource. Permission is required
+   * equivalent to that which is being added, e.g. adding write permission requires existing
+   * write access.
+   * @param  {string} resourceId - The resource id
+   * @param  {string} accountId - The account id to assign permission to
+   * @param  {string} sourceId - The id of the resource acting as the source of the access. This
+   * is usually the same as the target `resourceId`, but can also be a parent resource. For example,
+   * if write access is granted with the sourceId set to be a parent, then if the permission is 
+   * revoked from the parent resource it will also be revoked from this resource.
+   * @param  {string[]} access - The access, one or more of [`"r"`, `"w"`]. Can be an array or an individual
+   * string.
+   * @example <caption>add access to an account</caption>
+   * tdxApi.addResourceAccess(myResourceId, "bob@acme.com/tdx.acme.com", myResourceId, ["r"]);
    */
-  updateResource(resourceId, update) {
-    const request = buildCommandRequest.call(this, "resource/update", {id: resourceId, ...update});
+  addResourceAccess(resourceId, accountId, sourceId, access) {
+    const request = buildCommandRequest.call(this, "resourceAccess/add", {
+      rid: resourceId,
+      aid: accountId,
+      src: sourceId,
+      acc: [].concat(access),
+    });
     return fetch(request)
       .catch((err) => {
-        errLog("TDXApi.updateResource: %s", err.message);
+        errLog("TDXApi.addResourceAccess: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "updateResource"));
+      .then(checkResponse.bind(null, "addResourceAccess"));
+  }
+
+  /**
+   * Permanently deletes a resource.
+   * @param  {string} resourceId - the id of the resource to delete. Requires write permission
+   * to the resource.
+   */
+  deleteResource(resourceId) {
+    const request = buildCommandRequest.call(this, "resource/delete", {id: resourceId});
+    return fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.deleteResource: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "deleteResource"));
+  }
+
+  /**
+   * Upload a file to a resource.
+   * @param  {string} resourceId - The id of the destination resource.
+   * @param  {object} file - The file to upload, obtained from an `<input type="file">` element.
+   * @param  {bool} [stream=false] - Flag indicating whether the call should return a stream allowing
+   * callees to monitor progress.
+   */
+  fileUpload(resourceId, file, stream) {
+    const request = new Request(`${this.config.commandHost}/commandSync/resource/${resourceId}/upload`, {
+      method: "POST",
+      mode: "cors",
+      headers: new Headers({
+        "Authorization": `Bearer ${this.accessToken}`,
+        "Content-Disposition": `attachment; filename="${file.name}"`,
+        "Content-Length": file.size,
+      }),
+      body: file,
+    });
+
+    const response = fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.fileUpload: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      });
+
+    if (stream) {
+      return response;
+    } else {
+      return response
+      .then((response) => {
+        return [response, response.text()];
+      })
+      .spread((response, text) => {
+        if (response.ok) {
+          return Promise.resolve(text);
+        } else {
+          return Promise.reject(handleError("fileUpload", {code: "failure", message: text}));
+        }
+      });
+    }
   }
 
   /**
@@ -355,21 +434,6 @@ class TDXApi {
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
       .then(checkResponse.bind(null, "moveResource"));
-  }
-
-  /**
-   * Permanently deletes a resource.
-   * @param  {string} resourceId - the id of the resource to delete. Requires write permission
-   * to the resource.
-   */
-  deleteResource(resourceId) {
-    const request = buildCommandRequest.call(this, "resource/delete", {id: resourceId});
-    return fetch(request)
-      .catch((err) => {
-        errLog("TDXApi.deleteResource: %s", err.message);
-        return Promise.reject(new Error(`${err.message} - [network error]`));
-      })
-      .then(checkResponse.bind(null, "deleteResource"));
   }
 
   /**
@@ -393,60 +457,6 @@ class TDXApi {
       .then(() => {
         return result;
       });
-  }
-
-  /**
-   * Suspends the resource index. This involves deleting any existing indexes. Requires write permission. When
-   * a resource index is in `suspended` status, it is not possible to run any queries or updates against
-   * the resource.
-   * @param  {string} resourceId - the id of the resource. Requires write permission.
-   */
-  suspendResourceIndex(resourceId) {
-    const request = buildCommandRequest.call(this, "resource/index/suspend", {id: resourceId});
-    let result;
-    return fetch(request)
-      .catch((err) => {
-        errLog("TDXApi.suspendResourceIndex: %s", err.message);
-        return Promise.reject(new Error(`${err.message} - [network error]`));
-      })
-      .then(checkResponse.bind(null, "suspendIndex"))
-      .then((res) => {
-        result = res;
-        return waitForIndex.call(this, result.response.id, "suspended");
-      })
-      .then(() => {
-        return result;
-      });
-  }
-
-  /**
-   * Adds read and/or write permission for an account to access a resource. Permission is required
-   * equivalent to that which is being added, e.g. adding write permission requires existing
-   * write access.
-   * @param  {string} resourceId - The resource id
-   * @param  {string} accountId - The account id to assign permission to
-   * @param  {string} sourceId - The id of the resource acting as the source of the access. This
-   * is usually the same as the target `resourceId`, but can also be a parent resource. For example,
-   * if write access is granted with the sourceId set to be a parent, then if the permission is 
-   * revoked from the parent resource it will also be revoked from this resource.
-   * @param  {string[]} access - The access, one or more of [`"r"`, `"w"`]. Can be an array or an individual
-   * string.
-   * @example <caption>add access to an account</caption>
-   * addResourceAccess(myResourceId, "bob@acme.com/tdx.acme.com", myResourceId, ["r"]);
-   */
-  addResourceAccess(resourceId, accountId, sourceId, access) {
-    const request = buildCommandRequest.call(this, "resourceAccess/add", {
-      rid: resourceId,
-      aid: accountId,
-      src: sourceId,
-      acc: [].concat(access),
-    });
-    return fetch(request)
-      .catch((err) => {
-        errLog("TDXApi.addResourceAccess: %s", err.message);
-        return Promise.reject(new Error(`${err.message} - [network error]`));
-      })
-      .then(checkResponse.bind(null, "addResourceAccess"));
   }
 
   /**
@@ -513,6 +523,30 @@ class TDXApi {
   }
 
   /**
+   * Suspends the resource index. This involves deleting any existing indexes. Requires write permission. When
+   * a resource index is in `suspended` status, it is not possible to run any queries or updates against
+   * the resource.
+   * @param  {string} resourceId - the id of the resource. Requires write permission.
+   */
+  suspendResourceIndex(resourceId) {
+    const request = buildCommandRequest.call(this, "resource/index/suspend", {id: resourceId});
+    let result;
+    return fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.suspendResourceIndex: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "suspendIndex"))
+      .then((res) => {
+        result = res;
+        return waitForIndex.call(this, result.response.id, "suspended");
+      })
+      .then(() => {
+        return result;
+      });
+  }
+
+  /**
    * Removes all data from the resource. Applicable to dataset-based resources only. This can not be
    * undone.
    * @param  {string} resourceId - The resource id to truncate.
@@ -525,6 +559,29 @@ class TDXApi {
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
       .then(checkResponse.bind(null, "truncateResource"));
+  }
+
+  /**
+   * Modify one or more of the meta data associated with the resource.
+   * @param  {string} resourceId - id of the resource to update
+   * @param  {object} update - object containing the properties to update. Can be one or more of those
+   * listed below. See the {@link TDXApi#addResource} method for semantics and syntax of each property.
+   * @param  {string} [update.derived]
+   * @param  {string} [update.description]
+   * @param  {string} [update.meta]
+   * @param  {string} [update.name]
+   * @param  {string} [update.provenance]
+   * @param  {string} [update.schema]
+   * @param  {string} [update.tags]
+   */
+  updateResource(resourceId, update) {
+    const request = buildCommandRequest.call(this, "resource/update", {id: resourceId, ...update});
+    return fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.updateResource: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "updateResource"));
   }
 
   /*
@@ -560,62 +617,6 @@ class TDXApi {
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
       .then(checkResponse.bind(null, "updateData"));
-  }
-
-  /**
-   * Updates data in a dataset resource.
-   * @param  {string} datasetId - The id of the dataset-based resource to update.
-   * @param  {object|array} data - The data to update. Must conform to the schema defined by the resource metadata.
-   * Supports updating individual or multiple documents.
-   * @param  {bool} [upsert=false] - Indicates the data should be created if no document is found matching the
-   * primary key.
-   * @example <caption>update an existing document</caption>
-   * tdxApi.updateData(myDatasetId, {lsoa: "E000001", count: 488});
-   * @example <caption>upsert a document</caption>
-   * // Will create a document if no data exists matching key 'lsoa': "E000004"
-   * tdxApi.updateData(myDatasetId, {lsoa: "E000004", count: 288, true});
-   */
-  updateData(datasetId, data, upsert) {
-    const postData = {
-      datasetId,
-      payload: [].concat(data),
-      __upsert: !!upsert,
-    };
-    const request = buildCommandRequest.call(this, "dataset/data/updateMany", postData);
-    return fetch(request)
-      .catch((err) => {
-        errLog("TDXApi.updateData: %s", err.message);
-        return Promise.reject(new Error(`${err.message} - [network error]`));
-      })
-      .then(checkResponse.bind(null, "updateData"));
-  }
-
-  /**
-   * Patches data in a dataset resource. Uses the [JSON patch](https://tools.ietf.org/html/rfc6902) format,
-   * which involves defining the primary key data followed by a flexible update specification.
-   * @param  {string} datasetId - The id of the dataset-based resource to update.
-   * @param  {object} data - The patch definition.
-   * @param  {object|array} data.__update - An array of JSON patch specifications.
-   * @example <caption>patch a single value in a single document</caption>
-   * tdxApi.patchData(myDatasetId, {lsoa: "E000001", __update: [{p: "count", m: "r", v: 948}]});
-   * @example <caption>patch a more than one value in a single document</caption>
-   * tdxApi.patchData(myDatasetId, {lsoa: "E000001", __update: [
-   *   {p: "count", m: "r", v: 948}
-   *   {p: "modified", m: "a", v: Date.now()}
-   * ]});
-   */
-  patchData(datasetId, data) {
-    const postData = {
-      datasetId,
-      payload: [].concat(data),
-    };
-    const request = buildCommandRequest.call(this, "dataset/data/upsertMany", postData);
-    return fetch(request)
-      .catch((err) => {
-        errLog("TDXApi.patchData: %s", err.message);
-        return Promise.reject(new Error(`${err.message} - [network error]`));
-      })
-      .then(checkResponse.bind(null, "patchData"));
   }
 
   /**
@@ -661,45 +662,59 @@ class TDXApi {
   }
 
   /**
-   * Upload a file to a resource.
-   * @param  {string} resourceId - The id of the destination resource.
-   * @param  {object} file - The file to upload, obtained from an `<input type="file">` element.
-   * @param  {bool} [stream=false] - Flag indicating whether the call should return a stream allowing
-   * callees to monitor progress.
+   * Patches data in a dataset resource. Uses the [JSON patch](https://tools.ietf.org/html/rfc6902) format,
+   * which involves defining the primary key data followed by a flexible update specification.
+   * @param  {string} datasetId - The id of the dataset-based resource to update.
+   * @param  {object} data - The patch definition.
+   * @param  {object|array} data.__update - An array of JSON patch specifications.
+   * @example <caption>patch a single value in a single document</caption>
+   * tdxApi.patchData(myDatasetId, {lsoa: "E000001", __update: [{p: "count", m: "r", v: 948}]});
+   * @example <caption>patch a more than one value in a single document</caption>
+   * tdxApi.patchData(myDatasetId, {lsoa: "E000001", __update: [
+   *   {p: "count", m: "r", v: 948}
+   *   {p: "modified", m: "a", v: Date.now()}
+   * ]});
    */
-  fileUpload(resourceId, file, stream) {
-    const request = new Request(`${this.config.commandHost}/commandSync/resource/${resourceId}/upload`, {
-      method: "POST",
-      mode: "cors",
-      headers: new Headers({
-        "Authorization": `Bearer ${this.accessToken}`,
-        "Content-Disposition": `attachment; filename="${file.name}"`,
-        "Content-Length": file.size,
-      }),
-      body: file,
-    });
-
-    const response = fetch(request)
+  patchData(datasetId, data) {
+    const postData = {
+      datasetId,
+      payload: [].concat(data),
+    };
+    const request = buildCommandRequest.call(this, "dataset/data/upsertMany", postData);
+    return fetch(request)
       .catch((err) => {
-        errLog("TDXApi.fileUpload: %s", err.message);
+        errLog("TDXApi.patchData: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
-      });
-
-    if (stream) {
-      return response;
-    } else {
-      return response
-      .then((response) => {
-        return [response, response.text()];
       })
-      .spread((response, text) => {
-        if (response.ok) {
-          return Promise.resolve(text);
-        } else {
-          return Promise.reject(handleError("fileUpload", {code: "failure", message: text}));
-        }
-      });
-    }
+      .then(checkResponse.bind(null, "patchData"));
+  }
+
+  /**
+   * Updates data in a dataset resource.
+   * @param  {string} datasetId - The id of the dataset-based resource to update.
+   * @param  {object|array} data - The data to update. Must conform to the schema defined by the resource metadata.
+   * Supports updating individual or multiple documents.
+   * @param  {bool} [upsert=false] - Indicates the data should be created if no document is found matching the
+   * primary key.
+   * @example <caption>update an existing document</caption>
+   * tdxApi.updateData(myDatasetId, {lsoa: "E000001", count: 488});
+   * @example <caption>upsert a document</caption>
+   * // Will create a document if no data exists matching key 'lsoa': "E000004"
+   * tdxApi.updateData(myDatasetId, {lsoa: "E000004", count: 288, true});
+   */
+  updateData(datasetId, data, upsert) {
+    const postData = {
+      datasetId,
+      payload: [].concat(data),
+      __upsert: !!upsert,
+    };
+    const request = buildCommandRequest.call(this, "dataset/data/updateMany", postData);
+    return fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.updateData: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "updateData"));
   }
 
   /*
@@ -707,6 +722,49 @@ class TDXApi {
    *  DATABOT COMMANDS
    *
    */
+
+  /**
+   * Deletes a databot instance and all output/debug data associated with it. 
+   * @param  {string} instanceId - The id of the instance to delete.
+   */
+  deleteDatabotInstance(instanceId) {
+    const postData = {
+      instanceId,
+    };
+    const request = buildCommandRequest.call(this, "databot/deleteInstance", postData);
+    return fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.deleteDatabotInstance: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "deleteDatabotInstance"));
+  }
+
+  /**
+   * Sends a command to a databot host. Reserved for system use.
+   * @param  {string} command - The command to send. Must be one of ["stopHost", "updateHost", "runInstance",
+   * "stopInstance", "clearInstance"]
+   * @param  {string} hostId - The id of the host.
+   * @param  {string} [hostIp] - The ip address of the host. If omitted, the command will be sent to all
+   * host ip addresses.
+   * @param  {number} [hostPort] - The port number of the host. If omitted, the command will be sent to
+   * all host ports.
+   */
+  sendDatabotHostCommand(command, hostId, hostIp, hostPort) {
+    const postData = {
+      hostId,
+      hostIp,
+      hostPort,
+      command,
+    };
+    const request = buildCommandRequest.call(this, "databot/host/command", postData);
+    return fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.sendDatabotHostCommand: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "sendDatabotHostCommand"));
+  }
 
   /**
    * Starts a databot instance.
@@ -763,142 +821,11 @@ class TDXApi {
       .then(checkResponse.bind(null, "stopDatabotInstance"));
   }
 
-  /**
-   * Deletes a databot instance and all output/debug data associated with it. 
-   * @param  {string} instanceId - The id of the instance to delete.
-   */
-  deleteDatabotInstance(instanceId) {
-    const postData = {
-      instanceId,
-    };
-    const request = buildCommandRequest.call(this, "databot/deleteInstance", postData);
-    return fetch(request)
-      .catch((err) => {
-        errLog("TDXApi.deleteDatabotInstance: %s", err.message);
-        return Promise.reject(new Error(`${err.message} - [network error]`));
-      })
-      .then(checkResponse.bind(null, "deleteDatabotInstance"));
-  }
-
-  /**
-   * Sends a command to a databot host. Reserved for system use.
-   * @param  {string} command - The command to send. Must be one of ["stopHost", "updateHost", "runInstance",
-   * "stopInstance", "clearInstance"]
-   * @param  {string} hostId - The id of the host.
-   * @param  {string} [hostIp] - The ip address of the host. If omitted, the command will be sent to all
-   * host ip addresses.
-   * @param  {number} [hostPort] - The port number of the host. If omitted, the command will be sent to
-   * all host ports.
-   */
-  sendDatabotHostCommand(command, hostId, hostIp, hostPort) {
-    const postData = {
-      hostId,
-      hostIp,
-      hostPort,
-      command,
-    };
-    const request = buildCommandRequest.call(this, "databot/host/command", postData);
-    return fetch(request)
-      .catch((err) => {
-        errLog("TDXApi.sendDatabotHostCommand: %s", err.message);
-        return Promise.reject(new Error(`${err.message} - [network error]`));
-      })
-      .then(checkResponse.bind(null, "sendDatabotHostCommand"));
-  }
-
   /*
    *
    *  QUERIES
    *
    */
-
-  /**
-   * Gets the details for a given zone (account) id.
-   * @param  {string} accountId - the id of the zone to be retrieved.
-   * @return  {Zone} zone
-   */
-  getZone(accountId) {
-    const request = this.buildQueryRequest("zones", {username: accountId});
-    return fetch(request)
-      .catch((err) => {
-        errLog("TDXApi.getZone: %s", err.message);
-        return Promise.reject(new Error(`${err.message} - [network error]`));
-      })
-      .then(checkResponse.bind(null, "getZone"));
-  }
-
-  /**
-   * Gets the details for a given resource id.
-   * @param  {string} resourceId - The id of the resource to retrieve.
-   * @param  {bool} [noThrow=false] - If set, the call won't reject or throw if the resource doesn't exist.
-   * @return  {Resource}
-   * @exception  Will throw if the resource is not found (see `noThrow` flag) or permission is denied.
-   */
-  getResource(resourceId, noThrow) {
-    const request = this.buildQueryRequest(`resources/${resourceId}`);
-    return fetch(request)
-      .catch((err) => {
-        errLog("TDXApi.getResource: %s", err.message);
-        return Promise.reject(new Error(`${err.message} - [network error]`));
-      })
-      .then((response) => {
-        if (noThrow) {
-          // If noThrow specified, return null if there is an error fetching the resource, rather than throwing.
-          if (response.ok) {
-            return response.json();
-          } else if (response.status === 404) {
-            return null;
-          } else {
-            return checkResponse("getResource", response);
-          }
-        } else {
-          return checkResponse("getResource", response);
-        }
-      });
-  }
-
-  /**
-   * Gets the details of all resources that match the given filter.
-   * @param  {object} [filter] - A mongodb filter definition
-   * @param  {object} [projection] - A mongodb projection definition, can be used to restrict which properties are
-   * returned thereby limiting the payload.
-   * @param  {object} [options] - A mongodb options definition, can be used for limit, skip, sorting etc.
-   * @return  {Resource[]}
-   */
-  getResources(filter, projection, options) {
-    const request = this.buildQueryRequest("resources", filter, projection, options);
-    return fetch(request)
-      .catch((err) => {
-        errLog("TDXApi.getResource: %s", err.message);
-        return Promise.reject(new Error(`${err.message} - [network error]`));
-      })
-      .then(checkResponse.bind(null, "getResources"));
-  }
-
-  /**
-   * Retrieves all resources that have an immediate ancestor of the given schema id.
-   * @param  {string} schemaId - The id of the schema to match, e.g. `"geojson"`.
-   * @return  {Resource[]}
-   */
-  getResourcesWithSchema(schemaId) {
-    const filter = {"schemaDefinition.parent": schemaId};
-    return this.getResources(filter);
-  }
-
-  /**
-   * Gets all resources that are ancestors of the given resource.
-   * @param  {string} resourceId - The id of the resource whose parents are to be retrieved.
-   * @return  {Resource[]}
-   */
-  getResourceAncestors(resourceId) {
-    const request = this.buildQueryRequest(`datasets/${resourceId}/ancestors`);
-    return fetch(request)
-      .catch((err) => {
-        errLog("TDXApi.getDatasetAncestors: %s", err.message);
-        return Promise.reject(new Error(`${err.message} - [network error]`));
-      })
-      .then(checkResponse.bind(null, "getResourceAncestors"));
-  }
 
   /**
    * Gets all data from the given dataset that matches the filter provided.
@@ -955,6 +882,79 @@ class TDXApi {
   }
 
   /**
+   * Gets the details for a given resource id.
+   * @param  {string} resourceId - The id of the resource to retrieve.
+   * @param  {bool} [noThrow=false] - If set, the call won't reject or throw if the resource doesn't exist.
+   * @return  {Resource}
+   * @exception  Will throw if the resource is not found (see `noThrow` flag) or permission is denied.
+   */
+  getResource(resourceId, noThrow) {
+    const request = this.buildQueryRequest(`resources/${resourceId}`);
+    return fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.getResource: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then((response) => {
+        if (noThrow) {
+          // If noThrow specified, return null if there is an error fetching the resource, rather than throwing.
+          if (response.ok) {
+            return response.json();
+          } else if (response.status === 404) {
+            return null;
+          } else {
+            return checkResponse("getResource", response);
+          }
+        } else {
+          return checkResponse("getResource", response);
+        }
+      });
+  }
+
+  /**
+   * Gets all resources that are ancestors of the given resource.
+   * @param  {string} resourceId - The id of the resource whose parents are to be retrieved.
+   * @return  {Resource[]}
+   */
+  getResourceAncestors(resourceId) {
+    const request = this.buildQueryRequest(`datasets/${resourceId}/ancestors`);
+    return fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.getDatasetAncestors: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "getResourceAncestors"));
+  }
+
+  /**
+   * Gets the details of all resources that match the given filter.
+   * @param  {object} [filter] - A mongodb filter definition
+   * @param  {object} [projection] - A mongodb projection definition, can be used to restrict which properties are
+   * returned thereby limiting the payload.
+   * @param  {object} [options] - A mongodb options definition, can be used for limit, skip, sorting etc.
+   * @return  {Resource[]}
+   */
+  getResources(filter, projection, options) {
+    const request = this.buildQueryRequest("resources", filter, projection, options);
+    return fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.getResource: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "getResources"));
+  }
+
+  /**
+   * Retrieves all resources that have an immediate ancestor of the given schema id.
+   * @param  {string} schemaId - The id of the schema to match, e.g. `"geojson"`.
+   * @return  {Resource[]}
+   */
+  getResourcesWithSchema(schemaId) {
+    const filter = {"schemaDefinition.parent": schemaId};
+    return this.getResources(filter);
+  }
+
+  /**
    * Retrieves an authorisation token for the given TDX instance
    * @param  {string} tdx - The TDX instance name, e.g. `"tdx.acme.com"`.
    * @return  {string}
@@ -967,6 +967,21 @@ class TDXApi {
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
       .then(checkResponse.bind(null, "getTDXToken"));
+  }
+
+  /**
+   * Gets the details for a given zone (account) id.
+   * @param  {string} accountId - the id of the zone to be retrieved.
+   * @return  {Zone} zone
+   */
+  getZone(accountId) {
+    const request = this.buildQueryRequest("zones", {username: accountId});
+    return fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.getZone: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "getZone"));
   }
 }
 

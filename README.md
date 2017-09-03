@@ -34,6 +34,8 @@ import TDXApi from "nqm-api-tdx"
 ## Typedefs
 
 <dl>
+<dt><a href="#CommandResult">CommandResult</a> : <code>object</code></dt>
+<dd></dd>
 <dt><a href="#DatasetData">DatasetData</a> : <code>object</code></dt>
 <dd></dd>
 <dt><a href="#Resource">Resource</a> : <code>object</code></dt>
@@ -49,44 +51,44 @@ import TDXApi from "nqm-api-tdx"
 
 * [TDXApi](#TDXApi)
     * [new TDXApi(config)](#new_TDXApi_new)
-    * [.authenticate(id, secret, [ttl])](#TDXApi+authenticate)
-    * [.addAccount(options)](#TDXApi+addAccount)
-    * [.updateAccount(username, options)](#TDXApi+updateAccount)
+    * [.authenticate(id, secret, [ttl])](#TDXApi+authenticate) ⇒ <code>string</code>
+    * [.addAccount(options)](#TDXApi+addAccount) ⇒ [<code>CommandResult</code>](#CommandResult)
     * [.approveAccount(username, approved)](#TDXApi+approveAccount)
-    * [.resetAccount(username, key)](#TDXApi+resetAccount)
-    * [.verifyAccount(username, approved)](#TDXApi+verifyAccount)
     * [.deleteAccount(username)](#TDXApi+deleteAccount)
+    * [.resetAccount(username, key)](#TDXApi+resetAccount)
+    * [.updateAccount(username, options)](#TDXApi+updateAccount)
+    * [.verifyAccount(username, approved)](#TDXApi+verifyAccount)
     * [.addTrustedExchange(options)](#TDXApi+addTrustedExchange)
     * [.addResource(options, [wait])](#TDXApi+addResource)
-    * [.updateResource(resourceId, update)](#TDXApi+updateResource)
-    * [.moveResource(id, fromParentId, toParentId)](#TDXApi+moveResource)
-    * [.deleteResource(resourceId)](#TDXApi+deleteResource)
-    * [.rebuildResourceIndex(resourceId)](#TDXApi+rebuildResourceIndex)
-    * [.suspendResourceIndex(resourceId)](#TDXApi+suspendResourceIndex)
     * [.addResourceAccess(resourceId, accountId, sourceId, access)](#TDXApi+addResourceAccess)
+    * [.deleteResource(resourceId)](#TDXApi+deleteResource)
+    * [.fileUpload(resourceId, file, [stream])](#TDXApi+fileUpload)
+    * [.moveResource(id, fromParentId, toParentId)](#TDXApi+moveResource)
+    * [.rebuildResourceIndex(resourceId)](#TDXApi+rebuildResourceIndex)
     * [.removeResourceAccess(resourceId, accountId, addedBy, sourceId, access)](#TDXApi+removeResourceAccess)
     * [.setResourceShareMode(resourceId, shareMode)](#TDXApi+setResourceShareMode)
     * [.setResourcePermissiveShare(resourceId, allowPermissive)](#TDXApi+setResourcePermissiveShare)
+    * [.suspendResourceIndex(resourceId)](#TDXApi+suspendResourceIndex)
     * [.truncateResource(resourceId)](#TDXApi+truncateResource)
+    * [.updateResource(resourceId, update)](#TDXApi+updateResource)
     * [.addData(datasetId, data)](#TDXApi+addData)
-    * [.updateData(datasetId, data, [upsert])](#TDXApi+updateData)
-    * [.patchData(datasetId, data)](#TDXApi+patchData)
     * [.deleteData(datasetId, data)](#TDXApi+deleteData)
     * [.deleteDataByQuery(datasetId, query)](#TDXApi+deleteDataByQuery)
-    * [.fileUpload(resourceId, file, [stream])](#TDXApi+fileUpload)
-    * [.startDatabotInstance(databotId, payload)](#TDXApi+startDatabotInstance)
-    * [.stopDatabotInstance(instanceId, mode)](#TDXApi+stopDatabotInstance)
+    * [.patchData(datasetId, data)](#TDXApi+patchData)
+    * [.updateData(datasetId, data, [upsert])](#TDXApi+updateData)
     * [.deleteDatabotInstance(instanceId)](#TDXApi+deleteDatabotInstance)
     * [.sendDatabotHostCommand(command, hostId, [hostIp], [hostPort])](#TDXApi+sendDatabotHostCommand)
-    * [.getZone(accountId)](#TDXApi+getZone) ⇒ [<code>Zone</code>](#Zone)
-    * [.getResource(resourceId, [noThrow])](#TDXApi+getResource) ⇒ [<code>Resource</code>](#Resource)
-    * [.getResources([filter], [projection], [options])](#TDXApi+getResources) ⇒ [<code>Array.&lt;Resource&gt;</code>](#Resource)
-    * [.getResourcesWithSchema(schemaId)](#TDXApi+getResourcesWithSchema) ⇒ [<code>Array.&lt;Resource&gt;</code>](#Resource)
-    * [.getResourceAncestors(resourceId)](#TDXApi+getResourceAncestors) ⇒ [<code>Array.&lt;Resource&gt;</code>](#Resource)
+    * [.startDatabotInstance(databotId, payload)](#TDXApi+startDatabotInstance)
+    * [.stopDatabotInstance(instanceId, mode)](#TDXApi+stopDatabotInstance)
     * [.getDatasetData(datasetId, [filter], [projection], [options])](#TDXApi+getDatasetData) ⇒ [<code>DatasetData</code>](#DatasetData)
     * [.getDatasetDataCount(datasetId, [filter])](#TDXApi+getDatasetDataCount)
     * [.getDistinct(datasetId, key, [filter])](#TDXApi+getDistinct) ⇒ <code>Array.&lt;object&gt;</code>
+    * [.getResource(resourceId, [noThrow])](#TDXApi+getResource) ⇒ [<code>Resource</code>](#Resource)
+    * [.getResourceAncestors(resourceId)](#TDXApi+getResourceAncestors) ⇒ [<code>Array.&lt;Resource&gt;</code>](#Resource)
+    * [.getResources([filter], [projection], [options])](#TDXApi+getResources) ⇒ [<code>Array.&lt;Resource&gt;</code>](#Resource)
+    * [.getResourcesWithSchema(schemaId)](#TDXApi+getResourcesWithSchema) ⇒ [<code>Array.&lt;Resource&gt;</code>](#Resource)
     * [.getTDXToken(tdx)](#TDXApi+getTDXToken) ⇒ <code>string</code>
+    * [.getZone(accountId)](#TDXApi+getZone) ⇒ [<code>Zone</code>](#Zone)
 
 <a name="new_TDXApi_new"></a>
 
@@ -110,10 +112,15 @@ const api = new TDXApi({tdxHost: "tdx.acme.com"});
 ```
 <a name="TDXApi+authenticate"></a>
 
-### tdxApi.authenticate(id, secret, [ttl])
+### tdxApi.authenticate(id, secret, [ttl]) ⇒ <code>string</code>
 Authenticates with the TDX, acquiring an authorisation token.
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+**Returns**: <code>string</code> - The access token.  
+**Throws**:
+
+- Will throw if credentials are invalid or there is a network error contacting the TDX.
+
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -121,9 +128,17 @@ Authenticates with the TDX, acquiring an authorisation token.
 | secret | <code>string</code> |  | the account secret |
 | [ttl] | <code>number</code> | <code>3600</code> | the Time-To-Live of the token in seconds, default is 1 hour. |
 
+**Example** *(authenticate using a share key and secret)*  
+```js
+tdxApi.authenticate("DKJG8dfg", "letmein");
+```
+**Example** *(authenticate using custom ttl of 2 hours)*  
+```js
+tdxApi.authenticate("DKJG8dfg", "letmein", 7200);
+```
 <a name="TDXApi+addAccount"></a>
 
-### tdxApi.addAccount(options)
+### tdxApi.addAccount(options) ⇒ [<code>CommandResult</code>](#CommandResult)
 Adds an account to the TDX. An account can be an e-mail based user account, a share key (token) account,
 a databot host, an application, or an account-set (user group).
 
@@ -145,6 +160,41 @@ a databot host, an application, or an account-set (user group).
 | [options.verified] | <code>bool</code> | account is pre-verified (reserved for system use only) |
 | [options.whitelist] | <code>Array.&lt;string&gt;</code> | a list of IP addresses. Tokens will only be granted if the requesting IP address is in this list |
 
+<a name="TDXApi+approveAccount"></a>
+
+### tdxApi.approveAccount(username, approved)
+Set account approved status. Reserved for system use.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| username | <code>string</code> | the full TDX identity of the account. |
+| approved | <code>bool</code> | account approved status |
+
+<a name="TDXApi+deleteAccount"></a>
+
+### tdxApi.deleteAccount(username)
+Delete an account
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| username | <code>string</code> | the full TDX identity of the account to delete. |
+
+<a name="TDXApi+resetAccount"></a>
+
+### tdxApi.resetAccount(username, key)
+Change account secret.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| username | <code>string</code> | the full TDX identity of the account. |
+| key | <code>string</code> | the new secret |
+
 <a name="TDXApi+updateAccount"></a>
 
 ### tdxApi.updateAccount(username, options)
@@ -163,30 +213,6 @@ each option.
 | [options.settings] | <code>object</code> |  |
 | [options.whitelist] | <code>Array.&lt;string&gt;</code> |  |
 
-<a name="TDXApi+approveAccount"></a>
-
-### tdxApi.approveAccount(username, approved)
-Set account approved status. Reserved for system use.
-
-**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| username | <code>string</code> | the full TDX identity of the account. |
-| approved | <code>bool</code> | account approved status |
-
-<a name="TDXApi+resetAccount"></a>
-
-### tdxApi.resetAccount(username, key)
-Change account secret.
-
-**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| username | <code>string</code> | the full TDX identity of the account. |
-| key | <code>string</code> | the new secret |
-
 <a name="TDXApi+verifyAccount"></a>
 
 ### tdxApi.verifyAccount(username, approved)
@@ -198,17 +224,6 @@ Set account verified status. Reserved for system use.
 | --- | --- | --- |
 | username | <code>string</code> | the full TDX identity of the account. |
 | approved | <code>bool</code> | account verified status |
-
-<a name="TDXApi+deleteAccount"></a>
-
-### tdxApi.deleteAccount(username)
-Delete an account
-
-**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| username | <code>string</code> | the full TDX identity of the account to delete. |
 
 <a name="TDXApi+addTrustedExchange"></a>
 
@@ -252,75 +267,6 @@ Adds a resource to the TDX.
 | [options.tags] | <code>Array.&lt;string&gt;</code> |  | a list of tags to associate with the resource. |
 | [wait] | <code>bool</code> | <code>false</code> | indicates if the call should wait for the index to be built before it returns. |
 
-<a name="TDXApi+updateResource"></a>
-
-### tdxApi.updateResource(resourceId, update)
-Modify one or more of the meta data associated with the resource.
-
-**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| resourceId | <code>string</code> | id of the resource to update |
-| update | <code>object</code> | object containing the properties to update. Can be one or more of those listed below. See the [addResource](#TDXApi+addResource) method for semantics and syntax of each property. |
-| [update.derived] | <code>string</code> |  |
-| [update.description] | <code>string</code> |  |
-| [update.meta] | <code>string</code> |  |
-| [update.name] | <code>string</code> |  |
-| [update.provenance] | <code>string</code> |  |
-| [update.schema] | <code>string</code> |  |
-| [update.tags] | <code>string</code> |  |
-
-<a name="TDXApi+moveResource"></a>
-
-### tdxApi.moveResource(id, fromParentId, toParentId)
-Move resource from one folder to another. Requires write permission on the resource, the
-source parent and the target parent resources.
-
-**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| id | <code>string</code> | the id of the resource to move. |
-| fromParentId | <code>string</code> | the current parent resource to move from. |
-| toParentId | <code>string</code> | the target folder resource to move to. |
-
-<a name="TDXApi+deleteResource"></a>
-
-### tdxApi.deleteResource(resourceId)
-Permanently deletes a resource.
-
-**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| resourceId | <code>string</code> | the id of the resource to delete. Requires write permission to the resource. |
-
-<a name="TDXApi+rebuildResourceIndex"></a>
-
-### tdxApi.rebuildResourceIndex(resourceId)
-Resets the resource index. This involves deleting existing indexes and rebuilding them. May take
-a while depending on the size of any associated dataset and the number and complexity of indexes.
-
-**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| resourceId | <code>string</code> | the id of the resource, requires write permission. |
-
-<a name="TDXApi+suspendResourceIndex"></a>
-
-### tdxApi.suspendResourceIndex(resourceId)
-Suspends the resource index. This involves deleting any existing indexes. Requires write permission. When
-a resource index is in `suspended` status, it is not possible to run any queries or updates against
-the resource.
-
-**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| resourceId | <code>string</code> | the id of the resource. Requires write permission. |
-
 <a name="TDXApi+addResourceAccess"></a>
 
 ### tdxApi.addResourceAccess(resourceId, accountId, sourceId, access)
@@ -339,8 +285,58 @@ write access.
 
 **Example** *(add access to an account)*  
 ```js
-addResourceAccess(myResourceId, "bob@acme.com/tdx.acme.com", myResourceId, ["r"]);
+tdxApi.addResourceAccess(myResourceId, "bob@acme.com/tdx.acme.com", myResourceId, ["r"]);
 ```
+<a name="TDXApi+deleteResource"></a>
+
+### tdxApi.deleteResource(resourceId)
+Permanently deletes a resource.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| resourceId | <code>string</code> | the id of the resource to delete. Requires write permission to the resource. |
+
+<a name="TDXApi+fileUpload"></a>
+
+### tdxApi.fileUpload(resourceId, file, [stream])
+Upload a file to a resource.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| resourceId | <code>string</code> |  | The id of the destination resource. |
+| file | <code>object</code> |  | The file to upload, obtained from an `<input type="file">` element. |
+| [stream] | <code>bool</code> | <code>false</code> | Flag indicating whether the call should return a stream allowing callees to monitor progress. |
+
+<a name="TDXApi+moveResource"></a>
+
+### tdxApi.moveResource(id, fromParentId, toParentId)
+Move resource from one folder to another. Requires write permission on the resource, the
+source parent and the target parent resources.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| id | <code>string</code> | the id of the resource to move. |
+| fromParentId | <code>string</code> | the current parent resource to move from. |
+| toParentId | <code>string</code> | the target folder resource to move to. |
+
+<a name="TDXApi+rebuildResourceIndex"></a>
+
+### tdxApi.rebuildResourceIndex(resourceId)
+Resets the resource index. This involves deleting existing indexes and rebuilding them. May take
+a while depending on the size of any associated dataset and the number and complexity of indexes.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| resourceId | <code>string</code> | the id of the resource, requires write permission. |
+
 <a name="TDXApi+removeResourceAccess"></a>
 
 ### tdxApi.removeResourceAccess(resourceId, accountId, addedBy, sourceId, access)
@@ -384,6 +380,19 @@ can share it with others.
 | resourceId | <code>string</code> | The resource id. |
 | allowPermissive | <code>bool</code> | The required permissive share mode. |
 
+<a name="TDXApi+suspendResourceIndex"></a>
+
+### tdxApi.suspendResourceIndex(resourceId)
+Suspends the resource index. This involves deleting any existing indexes. Requires write permission. When
+a resource index is in `suspended` status, it is not possible to run any queries or updates against
+the resource.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| resourceId | <code>string</code> | the id of the resource. Requires write permission. |
+
 <a name="TDXApi+truncateResource"></a>
 
 ### tdxApi.truncateResource(resourceId)
@@ -395,6 +404,25 @@ undone.
 | Param | Type | Description |
 | --- | --- | --- |
 | resourceId | <code>string</code> | The resource id to truncate. |
+
+<a name="TDXApi+updateResource"></a>
+
+### tdxApi.updateResource(resourceId, update)
+Modify one or more of the meta data associated with the resource.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| resourceId | <code>string</code> | id of the resource to update |
+| update | <code>object</code> | object containing the properties to update. Can be one or more of those listed below. See the [addResource](#TDXApi+addResource) method for semantics and syntax of each property. |
+| [update.derived] | <code>string</code> |  |
+| [update.description] | <code>string</code> |  |
+| [update.meta] | <code>string</code> |  |
+| [update.name] | <code>string</code> |  |
+| [update.provenance] | <code>string</code> |  |
+| [update.schema] | <code>string</code> |  |
+| [update.tags] | <code>string</code> |  |
 
 <a name="TDXApi+addData"></a>
 
@@ -420,53 +448,6 @@ tdxApi.addData(myDatasetId, [
  {lsoa: "E0000002", count: 1775},
  {lsoa: "E0000005", count: 4533},
 ]);
-```
-<a name="TDXApi+updateData"></a>
-
-### tdxApi.updateData(datasetId, data, [upsert])
-Updates data in a dataset resource.
-
-**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| datasetId | <code>string</code> |  | The id of the dataset-based resource to update. |
-| data | <code>object</code> \| <code>array</code> |  | The data to update. Must conform to the schema defined by the resource metadata. Supports updating individual or multiple documents. |
-| [upsert] | <code>bool</code> | <code>false</code> | Indicates the data should be created if no document is found matching the primary key. |
-
-**Example** *(update an existing document)*  
-```js
-tdxApi.updateData(myDatasetId, {lsoa: "E000001", count: 488});
-```
-**Example** *(upsert a document)*  
-```js
-// Will create a document if no data exists matching key 'lsoa': "E000004"
-tdxApi.updateData(myDatasetId, {lsoa: "E000004", count: 288, true});
-```
-<a name="TDXApi+patchData"></a>
-
-### tdxApi.patchData(datasetId, data)
-Patches data in a dataset resource. Uses the [JSON patch](https://tools.ietf.org/html/rfc6902) format,
-which involves defining the primary key data followed by a flexible update specification.
-
-**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| datasetId | <code>string</code> | The id of the dataset-based resource to update. |
-| data | <code>object</code> | The patch definition. |
-| data.__update | <code>object</code> \| <code>array</code> | An array of JSON patch specifications. |
-
-**Example** *(patch a single value in a single document)*  
-```js
-tdxApi.patchData(myDatasetId, {lsoa: "E000001", __update: [{p: "count", m: "r", v: 948}]});
-```
-**Example** *(patch a more than one value in a single document)*  
-```js
-tdxApi.patchData(myDatasetId, {lsoa: "E000001", __update: [
-  {p: "count", m: "r", v: 948}
-  {p: "modified", m: "a", v: Date.now()}
-]});
 ```
 <a name="TDXApi+deleteData"></a>
 
@@ -497,18 +478,77 @@ Deletes data from a dataset-based resource using a query to specify the document
 // Delete all documents with English lsoa.
 tdxApi.deleteDataByQuery(myDatasetId, {lsoa: {$regex: "E*"}});
 ```
-<a name="TDXApi+fileUpload"></a>
+<a name="TDXApi+patchData"></a>
 
-### tdxApi.fileUpload(resourceId, file, [stream])
-Upload a file to a resource.
+### tdxApi.patchData(datasetId, data)
+Patches data in a dataset resource. Uses the [JSON patch](https://tools.ietf.org/html/rfc6902) format,
+which involves defining the primary key data followed by a flexible update specification.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| datasetId | <code>string</code> | The id of the dataset-based resource to update. |
+| data | <code>object</code> | The patch definition. |
+| data.__update | <code>object</code> \| <code>array</code> | An array of JSON patch specifications. |
+
+**Example** *(patch a single value in a single document)*  
+```js
+tdxApi.patchData(myDatasetId, {lsoa: "E000001", __update: [{p: "count", m: "r", v: 948}]});
+```
+**Example** *(patch a more than one value in a single document)*  
+```js
+tdxApi.patchData(myDatasetId, {lsoa: "E000001", __update: [
+  {p: "count", m: "r", v: 948}
+  {p: "modified", m: "a", v: Date.now()}
+]});
+```
+<a name="TDXApi+updateData"></a>
+
+### tdxApi.updateData(datasetId, data, [upsert])
+Updates data in a dataset resource.
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| resourceId | <code>string</code> |  | The id of the destination resource. |
-| file | <code>object</code> |  | The file to upload, obtained from an `<input type="file">` element. |
-| [stream] | <code>bool</code> | <code>false</code> | Flag indicating whether the call should return a stream allowing callees to monitor progress. |
+| datasetId | <code>string</code> |  | The id of the dataset-based resource to update. |
+| data | <code>object</code> \| <code>array</code> |  | The data to update. Must conform to the schema defined by the resource metadata. Supports updating individual or multiple documents. |
+| [upsert] | <code>bool</code> | <code>false</code> | Indicates the data should be created if no document is found matching the primary key. |
+
+**Example** *(update an existing document)*  
+```js
+tdxApi.updateData(myDatasetId, {lsoa: "E000001", count: 488});
+```
+**Example** *(upsert a document)*  
+```js
+// Will create a document if no data exists matching key 'lsoa': "E000004"
+tdxApi.updateData(myDatasetId, {lsoa: "E000004", count: 288, true});
+```
+<a name="TDXApi+deleteDatabotInstance"></a>
+
+### tdxApi.deleteDatabotInstance(instanceId)
+Deletes a databot instance and all output/debug data associated with it.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| instanceId | <code>string</code> | The id of the instance to delete. |
+
+<a name="TDXApi+sendDatabotHostCommand"></a>
+
+### tdxApi.sendDatabotHostCommand(command, hostId, [hostIp], [hostPort])
+Sends a command to a databot host. Reserved for system use.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| command | <code>string</code> | The command to send. Must be one of ["stopHost", "updateHost", "runInstance", "stopInstance", "clearInstance"] |
+| hostId | <code>string</code> | The id of the host. |
+| [hostIp] | <code>string</code> | The ip address of the host. If omitted, the command will be sent to all host ip addresses. |
+| [hostPort] | <code>number</code> | The port number of the host. If omitted, the command will be sent to all host ports. |
 
 <a name="TDXApi+startDatabotInstance"></a>
 
@@ -543,94 +583,6 @@ Terminates or pauses a running databot instance.
 | --- | --- | --- |
 | instanceId | <code>string</code> | The id of the instance to terminate or pause. |
 | mode | <code>string</code> | One of [`"stop"`, `"pause"`, `"resume"`] |
-
-<a name="TDXApi+deleteDatabotInstance"></a>
-
-### tdxApi.deleteDatabotInstance(instanceId)
-Deletes a databot instance and all output/debug data associated with it.
-
-**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| instanceId | <code>string</code> | The id of the instance to delete. |
-
-<a name="TDXApi+sendDatabotHostCommand"></a>
-
-### tdxApi.sendDatabotHostCommand(command, hostId, [hostIp], [hostPort])
-Sends a command to a databot host. Reserved for system use.
-
-**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| command | <code>string</code> | The command to send. Must be one of ["stopHost", "updateHost", "runInstance", "stopInstance", "clearInstance"] |
-| hostId | <code>string</code> | The id of the host. |
-| [hostIp] | <code>string</code> | The ip address of the host. If omitted, the command will be sent to all host ip addresses. |
-| [hostPort] | <code>number</code> | The port number of the host. If omitted, the command will be sent to all host ports. |
-
-<a name="TDXApi+getZone"></a>
-
-### tdxApi.getZone(accountId) ⇒ [<code>Zone</code>](#Zone)
-Gets the details for a given zone (account) id.
-
-**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
-**Returns**: [<code>Zone</code>](#Zone) - zone  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| accountId | <code>string</code> | the id of the zone to be retrieved. |
-
-<a name="TDXApi+getResource"></a>
-
-### tdxApi.getResource(resourceId, [noThrow]) ⇒ [<code>Resource</code>](#Resource)
-Gets the details for a given resource id.
-
-**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
-**Throws**:
-
-- Will throw if the resource is not found (see `noThrow` flag) or permission is denied.
-
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| resourceId | <code>string</code> |  | The id of the resource to retrieve. |
-| [noThrow] | <code>bool</code> | <code>false</code> | If set, the call won't reject or throw if the resource doesn't exist. |
-
-<a name="TDXApi+getResources"></a>
-
-### tdxApi.getResources([filter], [projection], [options]) ⇒ [<code>Array.&lt;Resource&gt;</code>](#Resource)
-Gets the details of all resources that match the given filter.
-
-**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| [filter] | <code>object</code> | A mongodb filter definition |
-| [projection] | <code>object</code> | A mongodb projection definition, can be used to restrict which properties are returned thereby limiting the payload. |
-| [options] | <code>object</code> | A mongodb options definition, can be used for limit, skip, sorting etc. |
-
-<a name="TDXApi+getResourcesWithSchema"></a>
-
-### tdxApi.getResourcesWithSchema(schemaId) ⇒ [<code>Array.&lt;Resource&gt;</code>](#Resource)
-Retrieves all resources that have an immediate ancestor of the given schema id.
-
-**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| schemaId | <code>string</code> | The id of the schema to match, e.g. `"geojson"`. |
-
-<a name="TDXApi+getResourceAncestors"></a>
-
-### tdxApi.getResourceAncestors(resourceId) ⇒ [<code>Array.&lt;Resource&gt;</code>](#Resource)
-Gets all resources that are ancestors of the given resource.
-
-**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| resourceId | <code>string</code> | The id of the resource whose parents are to be retrieved. |
 
 <a name="TDXApi+getDatasetData"></a>
 
@@ -673,6 +625,57 @@ Gets a list of distinct values for a given property in a dataset-based resource.
 | key | <code>string</code> | The name of the property to use. Can be a property path, e.g. `"address.postcode"`. |
 | [filter] | <code>object</code> | An optional mongodb filter to apply. |
 
+<a name="TDXApi+getResource"></a>
+
+### tdxApi.getResource(resourceId, [noThrow]) ⇒ [<code>Resource</code>](#Resource)
+Gets the details for a given resource id.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+**Throws**:
+
+- Will throw if the resource is not found (see `noThrow` flag) or permission is denied.
+
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| resourceId | <code>string</code> |  | The id of the resource to retrieve. |
+| [noThrow] | <code>bool</code> | <code>false</code> | If set, the call won't reject or throw if the resource doesn't exist. |
+
+<a name="TDXApi+getResourceAncestors"></a>
+
+### tdxApi.getResourceAncestors(resourceId) ⇒ [<code>Array.&lt;Resource&gt;</code>](#Resource)
+Gets all resources that are ancestors of the given resource.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| resourceId | <code>string</code> | The id of the resource whose parents are to be retrieved. |
+
+<a name="TDXApi+getResources"></a>
+
+### tdxApi.getResources([filter], [projection], [options]) ⇒ [<code>Array.&lt;Resource&gt;</code>](#Resource)
+Gets the details of all resources that match the given filter.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| [filter] | <code>object</code> | A mongodb filter definition |
+| [projection] | <code>object</code> | A mongodb projection definition, can be used to restrict which properties are returned thereby limiting the payload. |
+| [options] | <code>object</code> | A mongodb options definition, can be used for limit, skip, sorting etc. |
+
+<a name="TDXApi+getResourcesWithSchema"></a>
+
+### tdxApi.getResourcesWithSchema(schemaId) ⇒ [<code>Array.&lt;Resource&gt;</code>](#Resource)
+Retrieves all resources that have an immediate ancestor of the given schema id.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| schemaId | <code>string</code> | The id of the schema to match, e.g. `"geojson"`. |
+
 <a name="TDXApi+getTDXToken"></a>
 
 ### tdxApi.getTDXToken(tdx) ⇒ <code>string</code>
@@ -683,6 +686,29 @@ Retrieves an authorisation token for the given TDX instance
 | Param | Type | Description |
 | --- | --- | --- |
 | tdx | <code>string</code> | The TDX instance name, e.g. `"tdx.acme.com"`. |
+
+<a name="TDXApi+getZone"></a>
+
+### tdxApi.getZone(accountId) ⇒ [<code>Zone</code>](#Zone)
+Gets the details for a given zone (account) id.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+**Returns**: [<code>Zone</code>](#Zone) - zone  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| accountId | <code>string</code> | the id of the zone to be retrieved. |
+
+<a name="CommandResult"></a>
+
+## CommandResult : <code>object</code>
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| commandId | <code>string</code> | The auto-generated unique id of the command. |
+| response | <code>object</code> \| <code>string</code> | The result of the command. If a command is sent asynchronously, this will simply be the string `"ack"`. In synchronous mode, this will usually be an object consisting of the primary key of the data that was affected by the command. |
 
 <a name="DatasetData"></a>
 
