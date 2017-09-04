@@ -853,7 +853,7 @@ class TDXApi {
    * @return  {DatasetData}
    */
   getDatasetData(datasetId, filter, projection, options) {
-    const request = this.buildQueryRequest(`datasets/${datasetId}/data`, filter, projection, options);
+    const request = buildQueryRequest.call(this, `datasets/${datasetId}/data`, filter, projection, options);
     return fetch(request)
       .catch((err) => {
         errLog("TDXApi.getDatasetData: %s", err.message);
@@ -954,7 +954,7 @@ class TDXApi {
    * @return  {Resource[]}
    */
   getResources(filter, projection, options) {
-    const request = this.buildQueryRequest("resources", filter, projection, options);
+    const request = buildQueryRequest.call(this, "resources", filter, projection, options);
     return fetch(request)
       .catch((err) => {
         errLog("TDXApi.getResource: %s", err.message);
