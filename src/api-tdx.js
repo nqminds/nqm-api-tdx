@@ -7,15 +7,11 @@ import {
   checkResponse,
   handleError,
   setDefaults,
-  waitForIndex
+  waitForIndex,
 } from "./helpers";
 
 const log = debug("nqm-api-tdx");
 const errLog = debug("nqm-api-tdx:error");
-
-const pollingRetries = 15;
-const pollingInterval = 1000;
-const waitInfinitely = -1;
 
 /**
  * @typedef  {object} CommandResult
@@ -58,7 +54,7 @@ class TDXApi {
    * e.g. https://[service].[tdx-domain].com. In this case the individual service hosts can be derived from the tdxHost
    * name. Optionally, you can specify each individual service host (see below). Note you only need to provide the host
    * for services you intend to use. For example, if you only need query services, just provide the query host.
-   * @param  {string} [config.commandHost] - the URL of the TDX command service, e.g. https://cmd.nqminds.com 
+   * @param  {string} [config.commandHost] - the URL of the TDX command service, e.g. https://cmd.nqminds.com
    * @param  {string} [config.queryHost] - the URL of the TDX query service, e.g. https://q.nqminds.com
    * @param  {string} [config.databotHost] - the URL of the TDX databot service, e.g. https://databot.nqminds.com
    * @param  {string} [config.accessToken] - an access token that will be used to authorise commands and queries.
@@ -72,7 +68,7 @@ class TDXApi {
     this.accessToken = config.accessToken || "";
     setDefaults(this.config);
   }
-  
+
   /**
    * Authenticates with the TDX, acquiring an authorisation token.
    * @param  {string} id - the account id, or a pre-formed credentials string, e.g. "DKJG8dfg:letmein"
@@ -130,7 +126,7 @@ class TDXApi {
    *  ACCOUNT COMMANDS
    *
    */
-   
+
   /**
    * Adds an account to the TDX. An account can be an e-mail based user account, a share key (token) account,
    * a databot host, an application, or an account-set (user group).
@@ -259,7 +255,7 @@ class TDXApi {
    * @param  {string} options.owner - the account on this TDX to which the trust relates,
    * e.g. `bob@mail.com/tdx.acme.com`
    * @param  {string} options.targetServer - the TDX to be trusted, e.g. `tdx.nqminds.com`
-   * @param  {string} options.targetOwner - the account on the target TDX that is trusted, 
+   * @param  {string} options.targetOwner - the account on the target TDX that is trusted,
    * e.g. `alice@mail.com/tdx.nqminds.com`.
    */
   addTrustedExchange(options) {
@@ -280,7 +276,7 @@ class TDXApi {
    * dataset.
    * @param  {object} [options.derived.filter] - the (read) filter to apply, in mongodb query format,
    * e.g. `{"temperature": {"$gt": 15}}` will mean that only data with a temperature value greater than 15 will be
-   * available in this view. The filter can be any arbitrarily complex mongodb query. Use the placeholder 
+   * available in this view. The filter can be any arbitrarily complex mongodb query. Use the placeholder
    * `"@@_identity_@@"` to indicate that the identity of the currently authenticated user should be substituted.
    * For example, if the user `bob@acme.com/tdx.acme.com` is currently authenticated, a filter of `{"username":
    *  "@@_identity_@@"}` will resolve at runtime to `{"username": "bob@acme.com/tdx.acme.com"}`.
@@ -290,7 +286,7 @@ class TDXApi {
    * @param  {string} [options.derived.source] - the id of the source dataset on which to apply the filters and
    * projections.
    * @param  {object} [options.derived.writeFilter] - the write filter to apply, in mongodb query format. This
-   * controls what data can be written to the underlying source dataset. For example, a write filter of 
+   * controls what data can be written to the underlying source dataset. For example, a write filter of
    * `{"temperature": {"$lt": 40}}` means that attempts to write a temperature value greater than or equal to `40`
    * will fail. The filter can be any arbitrarily complex mongodb query.
    * @param  {object} [options.derived.writeProjection] - the write projection to apply, in mongodb projection format.
@@ -299,13 +295,14 @@ class TDXApi {
    * properties will fail. To allow a view to create new data in the underlying dataset, the primary key fields
    * must be included in the write projection.
    * @param  {string} [options.description] - a description for the resource.
-   * @param  {string} [options.id] - the requested ID of the new resource. Must be unique. Will be auto-generated if 
+   * @param  {string} [options.id] - the requested ID of the new resource. Must be unique. Will be auto-generated if
    * omitted (recommended).
    * @param  {string} options.name - the name of the resource. Must be unique in the parent folder.
    * @param  {object} [options.meta] - a free-form object for storing metadata associated with this resource.
-   * @param  {string} [options.parentId] - the id of the parent resource. If omitted, will default to the appropriate root
-   * folder based on the type of resource being created.
-   * @param  {string} [options.provenance] - a description of the provenance of the resource. Markdown format is supported.
+   * @param  {string} [options.parentId] - the id of the parent resource. If omitted, will default to the appropriate
+   * root folder based on the type of resource being created.
+   * @param  {string} [options.provenance] - a description of the provenance of the resource. Markdown format is
+   * supported.
    * @param  {object} [options.schema] - optional schema definition.
    * @param  {string} [options.shareMode] - the share mode assigned to the new resource. One of [`"pw"`, `"pr"`,
    * `"tr"`], corresponding to "public read/write", "public read/trusted write", "trusted only".
@@ -340,7 +337,7 @@ class TDXApi {
    * @param  {string} accountId - The account id to assign permission to
    * @param  {string} sourceId - The id of the resource acting as the source of the access. This
    * is usually the same as the target `resourceId`, but can also be a parent resource. For example,
-   * if write access is granted with the sourceId set to be a parent, then if the permission is 
+   * if write access is granted with the sourceId set to be a parent, then if the permission is
    * revoked from the parent resource it will also be revoked from this resource.
    * @param  {string[]} access - The access, one or more of [`"r"`, `"w"`]. Can be an array or an individual
    * string.
@@ -484,6 +481,22 @@ class TDXApi {
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
       .then(checkResponse.bind(null, "removeResourceAccess"));
+  }
+
+  /**
+   * Set the resource schema.
+   * @param  {string} resourceId - The id of the dataset-based resource.
+   * @param  {object} schema - The new schema definition. TODO - document
+   * @return  {CommandResult}
+   */
+  setResourceSchema(resourceId, schema) {
+    const request = buildCommandRequest.call(this, "resource/schema/set", {id: resourceId, schema});
+    return fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.setResourceSchema: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "setResourceSchema"));
   }
 
   /**
@@ -724,7 +737,7 @@ class TDXApi {
    */
 
   /**
-   * Deletes a databot instance and all output/debug data associated with it. 
+   * Deletes a databot instance and all output/debug data associated with it.
    * @param  {string} instanceId - The id of the instance to delete.
    */
   deleteDatabotInstance(instanceId) {
@@ -855,7 +868,7 @@ class TDXApi {
    * @param  {object} [filter] - An optional mongodb filter to apply before counting the data.
    */
   getDatasetDataCount(datasetId, filter) {
-    const request = this.buildQueryRequest(`datasets/${datasetId}/count`, filter);
+    const request = buildQueryRequest.call(this, `datasets/${datasetId}/count`, filter);
     return fetch(request)
       .catch((err) => {
         errLog("TDXApi.getDatasetDataCount: %s", err.message);
@@ -872,7 +885,13 @@ class TDXApi {
    * @return  {object[]} - The distinct values.
    */
   getDistinct(datasetId, key, filter, projection, options) {
-    const request = this.buildQueryRequest(`datasets/${datasetId}/distinct?key=${key}`, filter, projection, options);
+    const request = buildQueryRequest.call(
+      this,
+      `datasets/${datasetId}/distinct?key=${key}`,
+      filter,
+      projection,
+      options,
+    );
     return fetch(request)
       .catch((err) => {
         errLog("TDXApi.getDistinct: %s", err.message);
@@ -889,7 +908,7 @@ class TDXApi {
    * @exception  Will throw if the resource is not found (see `noThrow` flag) or permission is denied.
    */
   getResource(resourceId, noThrow) {
-    const request = this.buildQueryRequest(`resources/${resourceId}`);
+    const request = buildQueryRequest.call(this, `resources/${resourceId}`);
     return fetch(request)
       .catch((err) => {
         errLog("TDXApi.getResource: %s", err.message);
@@ -917,7 +936,7 @@ class TDXApi {
    * @return  {Resource[]}
    */
   getResourceAncestors(resourceId) {
-    const request = this.buildQueryRequest(`datasets/${resourceId}/ancestors`);
+    const request = buildQueryRequest.call(this, `datasets/${resourceId}/ancestors`);
     return fetch(request)
       .catch((err) => {
         errLog("TDXApi.getDatasetAncestors: %s", err.message);
@@ -960,7 +979,7 @@ class TDXApi {
    * @return  {string}
    */
   getTDXToken(tdx) {
-    const request = this.buildQueryRequest(`tdx-token/${tdx}`);
+    const request = buildQueryRequest.call(this, `tdx-token/${tdx}`);
     return fetch(request)
       .catch((err) => {
         errLog("TDXApi.getTDXToken: %s", err.message);
@@ -975,7 +994,7 @@ class TDXApi {
    * @return  {Zone} zone
    */
   getZone(accountId) {
-    const request = this.buildQueryRequest("zones", {username: accountId});
+    const request = buildQueryRequest.call(this, "zones", {username: accountId});
     return fetch(request)
       .catch((err) => {
         errLog("TDXApi.getZone: %s", err.message);

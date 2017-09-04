@@ -1,5 +1,9 @@
 import debug from "debug";
 
+const pollingRetries = 15;
+const pollingInterval = 1000;
+const waitInfinitely = -1;
+
 const TDXApiError = function(message, stack) {
   this.name = "TDXApiError";
   this.message = message || "no message given";
@@ -37,13 +41,14 @@ const buildCommandRequest = function(command, data, contentType, async) {
     }),
     body: JSON.stringify(data),
   });
-}
+};
 
 /**
  * Builds a Request object for the given query bound to the TDX query engine.
  * @param  {string} endpoint - the query endpoint, e.g. "resources/DKJF8d8f"
  * @param  {object} [filter] - a filter expression, e.g. {"temperature": {$gt: 18}}
- * @param  {object} [projection] - a projection definition defining what data will be returned, e.g. {sensorId: 1, temperature: 1}
+ * @param  {object} [projection] - a projection definition defining what data will be returned, e.g. {sensorId: 1,
+ * temperature: 1}
  * @param  {object} [options] - query options, e.g. {limit: 10, sort: {timestamp: -1}}
  */
 const buildQueryRequest = function(endpoint, filter, projection, options) {
@@ -66,7 +71,7 @@ const buildQueryRequest = function(endpoint, filter, projection, options) {
       "Content-Type": "application/json",
     }),
   });
-}
+};
 
 const checkResponse = function(source, response) {
   return response.json()
@@ -112,6 +117,7 @@ const setDefaults = function(config) {
 };
 
 const waitForResource = function(resourceId, check, retryCount, maxRetries) {
+  const log = debug("nqm-api-tdx:waitForResource");
   retryCount = retryCount || 0;
   return this.getResource(resourceId)
     .then((resource) => {
@@ -124,15 +130,15 @@ const waitForResource = function(resourceId, check, retryCount, maxRetries) {
       if (!checkResult) {
         // A negative maxRetries value will retry indefinitely.
         if (maxRetries >= 0 && retryCount > maxRetries) {
-          log("waitForResource - giving up after %d attempts", retryCount);
+          log("giving up after %d attempts", retryCount);
           return Promise.reject(new Error(`gave up waiting for ${resourceId} after ${retryCount} attempts`));
         }
 
         // Try again after a delay.
-        log("waitForResource - waiting for %d msec", pollingInterval);
+        log("waiting for %d msec", pollingInterval);
         return new Promise((resolve) => {
           setTimeout(() => {
-            log("waitForResource - trying again");
+            log("trying again");
             resolve(waitForResource.call(this, resourceId, check, retryCount + 1, maxRetries));
           }, pollingInterval);
         });
@@ -151,7 +157,7 @@ const waitForResource = function(resourceId, check, retryCount, maxRetries) {
             // Ignore resource not found and not authorized errors here, they are probably caused by
             // waiting for the projections to catch up (esp. in debug environments) by falling through
             // we will still be limited by the retry count, so won't loop forever.
-            log("waitForResource - ignoring error %s", err.message);
+            log("ignoring error %s", err.message);
             return new Promise((resolve) => {
               setTimeout(() => {
                 resolve(waitForResource.call(this, resourceId, check, retryCount + 1, maxRetries));
@@ -163,7 +169,7 @@ const waitForResource = function(resourceId, check, retryCount, maxRetries) {
           }
         } catch (parseEx) {
           // Failed to parse TDX error - re-throw the original error.
-          log("waitForResource failure: [%s]", parseEx.message);
+          log("failure: [%s]", parseEx.message);
           return Promise.reject(err);
         }
       }
@@ -171,6 +177,8 @@ const waitForResource = function(resourceId, check, retryCount, maxRetries) {
 };
 
 const waitForIndex = function(datasetId, status, maxRetries) {
+  const log = debug("nqm-api-tdx:waitForIndex");
+
   // The argument maxRetries is optional.
   if (typeof maxRetries === "undefined") {
     maxRetries = waitInfinitely;
@@ -218,8 +226,11 @@ const waitForIndex = function(datasetId, status, maxRetries) {
 };
 
 export {
+  buildCommandRequest,
+  buildQueryRequest,
   checkResponse,
   handleError,
   setDefaults,
   TDXApiError,
+  waitForIndex,
 };
