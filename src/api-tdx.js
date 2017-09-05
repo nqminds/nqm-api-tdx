@@ -375,6 +375,22 @@ class TDXApi {
   }
 
   /**
+   * Permanently deletes a list of resources.
+   * Will fail **all** deletes if any of the permission checks fail.
+   * @param  {string[]} resourceIdList - This list of resource ids to delete.
+   * @return  {CommandResult}
+   */
+  deleteManyResources(resourceIdList) {
+    const request = buildCommandRequest.call(this, "resource/deleteMany", {payload: resourceIdList});
+    return fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.deleteManyResources: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "deleteManyResources"));
+  }
+
+  /**
    * Upload a file to a resource.
    * @param  {string} resourceId - The id of the destination resource.
    * @param  {object} file - The file to upload, obtained from an `<input type="file">` element.
