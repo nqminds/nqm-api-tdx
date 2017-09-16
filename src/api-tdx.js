@@ -746,6 +746,30 @@ class TDXApi {
       .then(checkResponse.bind(null, "updateData"));
   }
 
+  /**
+   * Updates data in a dataset-based resource using a query to specify the documents to be updated.
+   * @param  {string} datasetId - The id of the dataset-based resource to update data in.
+   * @param  {object} query - The query that specifies the data to update. All documents matching the
+   * query will be updated.
+   * @example
+   * // Update all documents with English lsoa.
+   * tdxApi.deleteDataByQuery(myDatasetId, {lsoa: {$regex: "E*"}}, {count: 1000});
+   */
+  updateDataByQuery(datasetId, query, update) {
+    const postData = {
+      datasetId,
+      query,
+      update,
+    };
+    const request = buildCommandRequest.call(this, "dataset/data/updateQuery", postData);
+    return fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.updateDataByQuery: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "updateDataByQuery"));
+  }
+
   /*
    *
    *  DATABOT COMMANDS
