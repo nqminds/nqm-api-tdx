@@ -32,7 +32,7 @@ const handleError = function(source, failure, code) {
 const buildCommandRequest = function(command, data, contentType, async) {
   const commandMode = async ? "command" : "commandSync";
   contentType = contentType || "application/json";
-  return new Request(`${this.config.commandHost}/${commandMode}/${command}`, {
+  return new Request(`${this.config.commandServer}/${commandMode}/${command}`, {
     method: "POST",
     mode: "cors",
     headers: new Headers({
@@ -63,7 +63,7 @@ const buildQueryRequest = function(endpoint, filter, projection, options) {
     // There is already a query portion, so append the params.
     query = `${endpoint}&filter=${filter}&proj=${projection}&opts=${options}`;
   }
-  return new Request(`${this.config.queryHost}${query}`, {
+  return new Request(`${this.config.queryServer}${query}`, {
     method: "GET",
     mode: "cors",
     headers: new Headers({
@@ -93,25 +93,32 @@ const checkResponse = function(source, response) {
 
 const setDefaults = function(config) {
   const log = debug("nqm-api-tdx:setDefaults");
-  if (config.tdxHost && (!config.queryHost || !config.commandHost)) {
-    const protocolComponents = config.tdxHost.split("://");
+
+  // Legacy config support.
+  config.tdxServer = config.tdxServer || config.tdxHost;
+  config.commandServer = config.commandServer || config.commandHost;
+  config.databotServer = config.databotServer || config.databotHost;
+  config.queryServer = config.queryServer || config.queryHost;
+
+  if (config.tdxServer && (!config.queryServer || !config.commandServer)) {
+    const protocolComponents = config.tdxServer.split("://");
     if (protocolComponents.length !== 2) {
-      throw new Error(`invalid tdxHost in config - no protocol: ${config.tdxHost}`);
+      throw new Error(`invalid tdxServer in config - no protocol: ${config.tdxServer}`);
     }
     const protocol = protocolComponents[0];
     const hostComponents = protocolComponents[1].split(".");
     if (hostComponents.length < 3) {
-      throw new Error(`invalid tdxHost in config - expected sub.domain.tld: ${config.tdxHost}`);
+      throw new Error(`invalid tdxServer in config - expected sub.domain.tld: ${config.tdxServer}`);
     }
     const hostname = hostComponents.slice(1).join(".");
-    config.commandHost = config.commandHost || `${protocol}://cmd.${hostname}`;
-    config.queryHost = config.queryHost || `${protocol}://q.${hostname}/v1/`;
-    config.databotHost = config.databotHost || `${protocol}://databot.${hostname}`;
+    config.commandServer = config.commandServer || `${protocol}://cmd.${hostname}`;
+    config.queryServer = config.queryServer || `${protocol}://q.${hostname}/v1/`;
+    config.databotServer = config.databotServer || `${protocol}://databot.${hostname}`;
     log(
       "defaulted hosts to %s, %s, %s",
-      config.commandHost,
-      config.queryHost,
-      config.databotHost
+      config.commandServer,
+      config.queryServer,
+      config.databotServer
     );
   }
 };

@@ -49,19 +49,19 @@ class TDXApi {
   /**
    * Create a TDXApi instance
    * @param  {object} config - the TDX configuration for the remote TDX
-   * @param  {string} [config.tdxHost] - the URL of the TDX auth server, e.g. https://tdx.nqminds.com. Usually this
+   * @param  {string} [config.tdxServer] - the URL of the TDX auth server, e.g. https://tdx.nqminds.com. Usually this
    * is the only host parameter needed, as long as the target TDX conforms to the standard service naming conventions
    * e.g. https://[service].[tdx-domain].com. In this case the individual service hosts can be derived from the tdxHost
    * name. Optionally, you can specify each individual service host (see below). Note you only need to provide the host
    * for services you intend to use. For example, if you only need query services, just provide the query host.
-   * @param  {string} [config.commandHost] - the URL of the TDX command service, e.g. https://cmd.nqminds.com
-   * @param  {string} [config.queryHost] - the URL of the TDX query service, e.g. https://q.nqminds.com
-   * @param  {string} [config.databotHost] - the URL of the TDX databot service, e.g. https://databot.nqminds.com
+   * @param  {string} [config.commandServer] - the URL of the TDX command service, e.g. https://cmd.nqminds.com
+   * @param  {string} [config.queryServer] - the URL of the TDX query service, e.g. https://q.nqminds.com
+   * @param  {string} [config.databotServer] - the URL of the TDX databot service, e.g. https://databot.nqminds.com
    * @param  {string} [config.accessToken] - an access token that will be used to authorise commands and queries.
    * Alternatively you can use the authenticate method to acquire a token.
    * @example <caption>standard usage</caption>
    * import TDXApi from "nqm-api-tdx";
-   * const api = new TDXApi({tdxHost: "tdx.acme.com"});
+   * const api = new TDXApi({tdxServer: "https://tdx.acme.com"});
    */
   constructor(config) {
     this.config = config;
