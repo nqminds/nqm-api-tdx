@@ -97,7 +97,7 @@ class TDXApi {
     credentials = base64.encode(credentials);
 
     // We can get a token from any of the TDX services - use the first one we find to build a fetch Request.
-    const uri = `${this.config.tdxHost || this.config.commandHost || this.config.queryHost}/token`;
+    const uri = `${this.config.tdxServer || this.config.commandServer || this.config.queryServer}/token`;
     const request = new Request(uri, {
       method: "POST",
       mode: "cors",
@@ -398,7 +398,7 @@ class TDXApi {
    * callees to monitor progress.
    */
   fileUpload(resourceId, file, stream) {
-    const request = new Request(`${this.config.commandHost}/commandSync/resource/${resourceId}/upload`, {
+    const request = new Request(`${this.config.commandServer}/commandSync/resource/${resourceId}/upload`, {
       method: "POST",
       mode: "cors",
       headers: new Headers({
