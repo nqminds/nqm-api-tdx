@@ -117,10 +117,10 @@ const setDefaults = function(config) {
   }
 
   // Append version qualifier to query path.
-  config.queryServer = `${config.queryServer}/v1/`;
+  config.queryServer = config.queryServer && `${config.queryServer}/v1/`;
 
   log(
-    "using hosts %s, %s, %s, %s",
+    "using hosts: command %s, databot %s, query %s, auth %s",
     config.commandServer,
     config.databotServer,
     config.queryServer,

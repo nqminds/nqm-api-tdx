@@ -1,10 +1,10 @@
 {
-  "name": "nqm-api-tdx",
+  "name": "@nqminds/nqm-api-tdx",
   "repository": {
     "type": "git",
     "url": "https://github.com/nqminds/nqm-api-tdx"
   },
-  "version": "0.2.52",
+  "version": "0.2.53",
   "description": "",
   "main": "lib/nqm-api-tdx.js",
   "scripts": {
@@ -19,7 +19,6 @@
     "url": "https://github.com/nqminds/nqm-api-tdx/issues"
   },
   "homepage": "https://github.com/nqminds/nqm-api-tdx",
-  "private": false,
   "devDependencies": {
     "babel": "^6.23.0",
     "babel-cli": "^6.24.1",
