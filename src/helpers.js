@@ -44,6 +44,24 @@ const buildCommandRequest = function(command, data, contentType, async) {
 };
 
 /**
+ * Builds a Request object for the given command bound to the TDX databot service.
+ * @param  {string} command - the target TDX command, e.g. "register"
+ * @param  {object} data - the command payload
+ * @param  {string} [contentType=application/json] - the content type
+ */
+const buildDatabotHostRequest = function(command, data) {
+  return new Request(`${this.config.databotServer}/host/${command}`, {
+    method: "POST",
+    mode: "cors",
+    headers: new Headers({
+      "Authorization": `Bearer ${this.accessToken}`,
+      "Content-Type": "application/json",
+    }),
+    body: JSON.stringify(data),
+  });
+};
+
+/**
  * Builds a Request object for the given query bound to the TDX query engine.
  * @param  {string} endpoint - the query endpoint, e.g. "resources/DKJF8d8f"
  * @param  {object} [filter] - a filter expression, e.g. {"temperature": {$gt: 18}}
@@ -64,6 +82,21 @@ const buildQueryRequest = function(endpoint, filter, projection, options) {
     query = `${endpoint}&filter=${filter}&proj=${projection}&opts=${options}`;
   }
   return new Request(`${this.config.queryServer}${query}`, {
+    method: "GET",
+    mode: "cors",
+    headers: new Headers({
+      "Authorization": `Bearer ${this.accessToken}`,
+      "Content-Type": "application/json",
+    }),
+  });
+};
+
+/**
+ * Builds a Request object for the given databot instance query bound to the TDX databot server.
+ * @param  {string} endpoint - the databot query endpoint, e.g. "status/jDduieG7"
+ */
+const buildDatabotInstanceRequest = function(endpoint) {
+  return new Request(`${this.config.databotServer}/instance/${endpoint}`, {
     method: "GET",
     mode: "cors",
     headers: new Headers({
@@ -239,6 +272,8 @@ const waitForIndex = function(datasetId, status, maxRetries) {
 
 export {
   buildCommandRequest,
+  buildDatabotHostRequest,
+  buildDatabotInstanceRequest,
   buildQueryRequest,
   checkResponse,
   handleError,

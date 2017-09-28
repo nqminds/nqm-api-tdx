@@ -3,6 +3,8 @@ import base64 from "base-64";
 import debug from "debug";
 import {
   buildCommandRequest,
+  buildDatabotHostRequest,
+  buildDatabotInstanceRequest,
   buildQueryRequest,
   checkResponse,
   handleError,
@@ -794,6 +796,63 @@ class TDXApi {
   }
 
   /**
+   * Gets databot instance data for the given instance id.
+   * @param  {string} instanceId - The id of the instance to retrieve.
+   */
+  getDatabotInstance(instanceId) {
+    const request = buildDatabotInstanceRequest.call(this, instanceId);
+    return fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.getDatabotInstance: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "getDatabotInstance"));
+  }
+
+  /**
+   * Get databot instance output.
+   * @param  {string} instanceId - The instance id to retrieve output for.
+   * @param  {string} [processId] - Optional process id. If omitted, output for all instance processes will be returned.
+   */
+  getDatabotInstanceOutput(instanceId, processId) {
+    const request = buildDatabotInstanceRequest.call(this, `output/${instanceId}/${processId || ""}`);
+    return fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.getDatabotInstanceOutput: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "getDatabotInstanceOutput"));
+  }
+
+  /**
+   * Get databot instance status.
+   * @param  {string} instanceId - The id of the databot instance for which status is retrieved.
+   */
+  getDatabotInstanceStatus(instanceId) {
+    const request = buildDatabotInstanceRequest.call(this, `status/${instanceId}`);
+    return fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.getDatabotInstanceStatus: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "getDatabotInstanceStatus"));
+  }
+
+  /**
+   * Registers a databot host as active with the TDX.
+   * @param  {object} status - The databot host identifier payload.
+   */
+  registerDatabotHost(status) {
+    const request = buildDatabotHostRequest.call(this, "register", status);
+    return fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.registerDatabotHost: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "registerDatabotHost"));
+  }
+
+  /**
    * Sends a command to a databot host. Reserved for system use.
    * @param  {string} command - The command to send. Must be one of ["stopHost", "updateHost", "runInstance",
    * "stopInstance", "clearInstance"]
@@ -872,6 +931,34 @@ class TDXApi {
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
       .then(checkResponse.bind(null, "stopDatabotInstance"));
+  }
+
+  /**
+   * Updates a databot host status.
+   * @param  {object} status - The databot host status payload.
+   */
+  updateDatabotHostStatus(status) {
+    const request = buildDatabotHostRequest.call(this, "status", status);
+    return fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.updateDatabotHostStatus: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "updateDatabotHostStatus"));
+  }
+
+  /**
+   * Stores databot instance output on the TDX.
+   * @param  {object} output - The output payload for the databot instance.
+   */
+  writeDatabotHostInstanceOutput(output) {
+    const request = buildDatabotHostRequest.call(this, "output", output);
+    return fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.writeDatabotHostInstanceOutput: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "writeDatabotHostInstanceOutput"));
   }
 
   /*
