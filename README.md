@@ -3,7 +3,7 @@ nquiringminds Trusted Data Exchange command and query API interface for nodejs a
 
 ## install
 ```
-npm install nqm-api-tdx@^0.2
+npm install @nqminds/nqm-api-tdx
 ```
 
 ## test
@@ -15,12 +15,12 @@ mocha test
 
 ### nodejs
 ```
-const TDXApi = require("nqm-api-tdx");
+const TDXApi = require("@nqminds/nqm-api-tdx");
 ```
 
 ### browser
 ```
-import TDXApi from "nqm-api-tdx"
+import TDXApi from "@nqminds/nqm-api-tdx"
 ```
 
 ## API
