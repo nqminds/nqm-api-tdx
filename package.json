@@ -4,7 +4,7 @@
     "type": "git",
     "url": "https://github.com/nqminds/nqm-api-tdx"
   },
-  "version": "0.2.55",
+  "version": "0.2.56",
   "description": "",
   "main": "lib/nqm-api-tdx.js",
   "scripts": {
