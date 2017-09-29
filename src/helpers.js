@@ -1,4 +1,5 @@
 import debug from "debug";
+import fetch from "isomorphic-fetch";
 
 const pollingRetries = 15;
 const pollingInterval = 1000;
@@ -32,7 +33,7 @@ const handleError = function(source, failure, code) {
 const buildCommandRequest = function(command, data, contentType, async) {
   const commandMode = async ? "command" : "commandSync";
   contentType = contentType || "application/json";
-  return new Request(`${this.config.commandServer}/${commandMode}/${command}`, {
+  return new fetch.Request(`${this.config.commandServer}/${commandMode}/${command}`, {
     method: "POST",
     mode: "cors",
     headers: new Headers({
@@ -50,7 +51,7 @@ const buildCommandRequest = function(command, data, contentType, async) {
  * @param  {string} [contentType=application/json] - the content type
  */
 const buildDatabotHostRequest = function(command, data) {
-  return new Request(`${this.config.databotServer}/host/${command}`, {
+  return new fetch.Request(`${this.config.databotServer}/host/${command}`, {
     method: "POST",
     mode: "cors",
     headers: new Headers({
@@ -81,7 +82,7 @@ const buildQueryRequest = function(endpoint, filter, projection, options) {
     // There is already a query portion, so append the params.
     query = `${endpoint}&filter=${filter}&proj=${projection}&opts=${options}`;
   }
-  return new Request(`${this.config.queryServer}${query}`, {
+  return new fetch.Request(`${this.config.queryServer}${query}`, {
     method: "GET",
     mode: "cors",
     headers: new Headers({
@@ -96,7 +97,7 @@ const buildQueryRequest = function(endpoint, filter, projection, options) {
  * @param  {string} endpoint - the databot query endpoint, e.g. "status/jDduieG7"
  */
 const buildDatabotInstanceRequest = function(endpoint) {
-  return new Request(`${this.config.databotServer}/instance/${endpoint}`, {
+  return new fetch.Request(`${this.config.databotServer}/instance/${endpoint}`, {
     method: "GET",
     mode: "cors",
     headers: new Headers({
