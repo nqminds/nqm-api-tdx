@@ -1043,19 +1043,13 @@ class TDXApi {
    * @return  {object[]} - The distinct values.
    */
   getDistinct(datasetId, key, filter, projection, options) {
-    const request = buildQueryRequest.call(
-      this,
-      `datasets/${datasetId}/distinct?key=${key}`,
-      filter,
-      projection,
-      options,
-    );
+    const request = buildQueryRequest.call(this, `datasets/${datasetId}/distinct?key=${key}`, filter, projection, options); // eslint-disable-line max-len
     return fetch(request)
       .catch((err) => {
         errLog("TDXApi.getDistinct: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "getDatasetData"));
+      .then(checkResponse.bind(null, "getDistinct"));
   }
 
   /**
