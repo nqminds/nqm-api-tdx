@@ -968,6 +968,42 @@ class TDXApi {
    */
 
   /**
+   * Streams the contents of a resource. For dataset-based resources this will stream the dataset contents in newline
+   * delimited JSON (NDJSON). For raw file resources this will stream the raw file contents (zip, raw JSON etc).
+   * @param  {string} resourceId - The id of the resource to be downloaded.
+   * @return {object} - A stream object.
+   */
+  downloadResource(resourceId) {
+    const request = buildQueryRequest.call(this, `resource/${resourceId}`);
+    return fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.downloadResource: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      });
+  }
+
+  /**
+   * Gets all data from the given dataset that matches the filter provided and returns a stream.
+   * @param  {string} datasetId - The id of the dataset-based resource.
+   * @param  {object} [filter] - A mongodb filter object. If omitted, all data will be retrieved.
+   * @param  {object} [projection] - A mongodb projection object. Should be used to restrict the payload to the
+   * minimum properties needed if a lot of data is being retrieved.
+   * @param  {object} [options] - A mongodb options object. Can be used to limit, skip, sort etc. Note a default
+   * `limit` of 1000 is applied if none is given here.
+   * @param  {bool} [options.nqmMeta] - When set, the resource metadata will be returned along with the dataset
+   * data. Can be used to avoid a second call to `getResource`. Otherwise a URL to the metadata is provided.
+   * @return  {object} - A stream object.
+   */
+  getDatasetDataStream(datasetId, filter, projection, options) {
+    const request = buildQueryRequest.call(this, `datasets/${datasetId}/data`, filter, projection, options);
+    return fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.getDatasetDataStream: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      });
+  }
+
+  /**
    * Gets all data from the given dataset that matches the filter provided.
    * @param  {string} datasetId - The id of the dataset-based resource.
    * @param  {object} [filter] - A mongodb filter object. If omitted, all data will be retrieved.
@@ -980,12 +1016,7 @@ class TDXApi {
    * @return  {DatasetData}
    */
   getDatasetData(datasetId, filter, projection, options) {
-    const request = buildQueryRequest.call(this, `datasets/${datasetId}/data`, filter, projection, options);
-    return fetch(request)
-      .catch((err) => {
-        errLog("TDXApi.getDatasetData: %s", err.message);
-        return Promise.reject(new Error(`${err.message} - [network error]`));
-      })
+    return this.getDatasetDataStream(datasetId, filter, projection, options)
       .then(checkResponse.bind(null, "getDatasetData"));
   }
 
