@@ -780,11 +780,12 @@ class TDXApi {
 
   /**
    * Deletes a databot instance and all output/debug data associated with it.
-   * @param  {string} instanceId - The id of the instance to delete.
+   * @param  {string[]} instanceId - The id(s) of the instances to delete. Can be an array of instance ids or an
+   * individual string id
    */
   deleteDatabotInstance(instanceId) {
     const postData = {
-      instanceId,
+      instanceId: [].concat(instanceId),
     };
     const request = buildCommandRequest.call(this, "databot/deleteInstance", postData);
     return fetch(request)
