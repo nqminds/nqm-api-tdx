@@ -779,6 +779,29 @@ class TDXApi {
    */
 
   /**
+   * Deletes one or more hosts, depending on the given parameters. E.g. if just a `hostId` is given, all hosts
+   * will be deleted with that id. If an ip address is also given, all hosts with the id on that ip address will
+   * be deleted and so on. Note that hosts can only be deleted if they are in the `offline` status.
+   * @param  {string} hostId - The id of the hosts to be deleted.
+   * @param  {string} [hostIp] - The optional ip of the hosts to be deleted.
+   * @param  {number} [hostPort] - The optional port number of the host to be deleted.
+   */
+  deleteDatabotHost(hostId, hostIp, hostPort) {
+    const postData = {
+      hostId,
+      hostIp,
+      hostPort,
+    };
+    const request = buildCommandRequest.call(this, "databot/host/delete", postData);
+    return fetch(request)
+      .catch((err) => {
+        errLog("TDXApi.deleteDatabotHost: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "deleteDatabotHost"));
+  }
+
+  /**
    * Deletes a databot instance and all output/debug data associated with it.
    * @param  {string[]} instanceId - The id(s) of the instances to delete. Can be an array of instance ids or an
    * individual string id
