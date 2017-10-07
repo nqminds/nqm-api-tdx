@@ -16,7 +16,7 @@ const fetchWithDeadline = function(request) {
     // Reject the promise if the timeout expires.
     const deadline = setTimeout(
       () => {
-        log("deadline expired after %d ms", this.cofnig.networkTimeout);
+        log("deadline expired after %d ms", this.config.networkTimeout);
         reject(new Error(`deadline expired after ${this.config.networkTimeout} ms`));
       },
       this.config.networkTimeout
