@@ -29,7 +29,7 @@ const fetchWithDeadline = function(request) {
         // Forward response.
         resolve(response);
       },
-      reject // Forward rejections.
+      reject // Blindly forward all rejections.
     );
   });
 };
