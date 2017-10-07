@@ -1,8 +1,38 @@
 import debug from "debug";
+import fetch from "isomorphic-fetch";
 
 const pollingRetries = 15;
 const pollingInterval = 1000;
 const waitInfinitely = -1;
+
+const fetchWithDeadline = function(request) {
+  const log = debug("nqm-api-tdx:fetchWithDeadline");
+
+  //
+  // Implement a timeout. We have to do this manually pending a native fix
+  // on fetch() - see https://github.com/whatwg/fetch/issues/20).
+  //
+  return new Promise((resolve, reject) => {
+    // Reject the promise if the timeout expires.
+    const deadline = setTimeout(
+      () => {
+        log("deadline expired after %d ms", this.cofnig.networkTimeout);
+        reject(new Error(`deadline expired after ${this.config.networkTimeout} ms`));
+      },
+      this.config.networkTimeout
+    );
+
+    fetch(request).then(
+      (response) => {
+        // Cancel pending deadline.
+        clearTimeout(deadline);
+        // Forward response.
+        resolve(response);
+      },
+      reject // Forward rejections.
+    );
+  });
+};
 
 const TDXApiError = function(message, stack) {
   this.name = "TDXApiError";
@@ -13,6 +43,12 @@ const TDXApiError = function(message, stack) {
 TDXApiError.prototype = Object.create(Error.prototype);
 TDXApiError.prototype.constructor = TDXApiError;
 
+/**
+ * Formats a TDXApiError object.
+ * @param  {string} source - The source of the error, usually a function name.
+ * @param  {object} failure - The error details, in the form `{code: xxx, message: yyy}`
+ * @param  {string} code - The error code, usually the response status code, e.g. 422, 401 etc.
+ */
 const handleError = function(source, failure, code) {
   const internal = {
     from: source,
@@ -159,6 +195,9 @@ const setDefaults = function(config) {
     config.queryServer,
     config.tdxServer,
   );
+
+  // Default network timeout to 5 seconds.
+  config.networkTimeout = config.networkTimeout || 5000;
 };
 
 const waitForResource = function(resourceId, check, retryCount, maxRetries) {
@@ -276,6 +315,7 @@ export {
   buildDatabotInstanceRequest,
   buildQueryRequest,
   checkResponse,
+  fetchWithDeadline,
   handleError,
   setDefaults,
   TDXApiError,

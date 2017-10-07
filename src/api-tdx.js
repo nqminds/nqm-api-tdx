@@ -1,4 +1,3 @@
-import fetch from "isomorphic-fetch";
 import base64 from "base-64";
 import debug from "debug";
 import {
@@ -7,6 +6,7 @@ import {
   buildDatabotInstanceRequest,
   buildQueryRequest,
   checkResponse,
+  fetchWithDeadline as fetch,
   handleError,
   setDefaults,
   waitForIndex,
@@ -110,7 +110,7 @@ class TDXApi {
       body: JSON.stringify({grant_type: "client_credentials", ttl: ttl || this.config.accessTokenTTL || 3600}),
     });
 
-    return fetch(request)
+    return fetch.call(this, request)
       .then(checkResponse.bind(null, "authenticate"))
       .then((result) => {
         log(result);
@@ -157,7 +157,7 @@ class TDXApi {
    */
   addAccount(options) {
     const request = buildCommandRequest.call(this, "account/create", options);
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.addAccount: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -172,7 +172,7 @@ class TDXApi {
    */
   approveAccount(username, approved) {
     const request = buildCommandRequest.call(this, "account/approve", {username, approved});
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.approveAccount: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -186,7 +186,7 @@ class TDXApi {
    */
   deleteAccount(username) {
     const request = buildCommandRequest.call(this, "account/delete", {username});
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.deleteAccount: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -201,7 +201,7 @@ class TDXApi {
    */
   resetAccount(username, key) {
     const request = buildCommandRequest.call(this, "account/reset", {username, key});
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.resetAccount: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -222,7 +222,7 @@ class TDXApi {
    */
   updateAccount(username, options) {
     const request = buildCommandRequest.call(this, "account/update", {username, ...options});
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.updateAccount: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -237,7 +237,7 @@ class TDXApi {
    */
   verifyAccount(username, verified) {
     const request = buildCommandRequest.call(this, "account/verify", {username, verified});
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.verifyAccount: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -262,7 +262,7 @@ class TDXApi {
    */
   addTrustedExchange(options) {
     const request = buildCommandRequest.call(this, "trustedConnection/create", options);
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.addTrustedExchange: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -313,7 +313,7 @@ class TDXApi {
    */
   addResource(options, wait) {
     const request = buildCommandRequest.call(this, "resource/create", options);
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.addResource: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -353,7 +353,7 @@ class TDXApi {
       src: sourceId,
       acc: [].concat(access),
     });
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.addResourceAccess: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -368,7 +368,7 @@ class TDXApi {
    */
   deleteResource(resourceId) {
     const request = buildCommandRequest.call(this, "resource/delete", {id: resourceId});
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.deleteResource: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -384,7 +384,7 @@ class TDXApi {
    */
   deleteManyResources(resourceIdList) {
     const request = buildCommandRequest.call(this, "resource/deleteMany", {payload: resourceIdList});
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.deleteManyResources: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -411,7 +411,7 @@ class TDXApi {
       body: file,
     });
 
-    const response = fetch(request)
+    const response = fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.fileUpload: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -443,7 +443,7 @@ class TDXApi {
    */
   moveResource(id, fromParentId, toParentId) {
     const request = buildCommandRequest.call(this, "resource/move", {id, fromParentId, toParentId});
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.moveResource: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -459,7 +459,7 @@ class TDXApi {
   rebuildResourceIndex(resourceId) {
     const request = buildCommandRequest.call(this, "resource/index/rebuild", {id: resourceId});
     let result;
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.rebuildResourceIndex: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -493,7 +493,7 @@ class TDXApi {
       src: sourceId,
       acc: access,
     });
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.removeResourceAccess: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -509,7 +509,7 @@ class TDXApi {
    */
   setResourceSchema(resourceId, schema) {
     const request = buildCommandRequest.call(this, "resource/schema/set", {id: resourceId, schema});
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.setResourceSchema: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -525,7 +525,7 @@ class TDXApi {
    */
   setResourceShareMode(resourceId, shareMode) {
     const request = buildCommandRequest.call(this, "resource/setShareMode", {id: resourceId, shareMode});
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.setResourceShareMode: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -545,7 +545,7 @@ class TDXApi {
       id: resourceId,
       permissiveShare: allowPermissive ? "r" : "",
     });
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.setResourcePermissiveShare: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -562,7 +562,7 @@ class TDXApi {
   suspendResourceIndex(resourceId) {
     const request = buildCommandRequest.call(this, "resource/index/suspend", {id: resourceId});
     let result;
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.suspendResourceIndex: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -584,7 +584,7 @@ class TDXApi {
    */
   truncateResource(resourceId) {
     const request = buildCommandRequest.call(this, "resource/truncate", {id: resourceId});
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.truncateResource: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -607,7 +607,7 @@ class TDXApi {
    */
   updateResource(resourceId, update) {
     const request = buildCommandRequest.call(this, "resource/update", {id: resourceId, ...update});
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.updateResource: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -642,7 +642,7 @@ class TDXApi {
       payload: [].concat(data),
     };
     const request = buildCommandRequest.call(this, "dataset/data/createMany", postData);
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.createData: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -661,7 +661,7 @@ class TDXApi {
       payload: [].concat(data),
     };
     const request = buildCommandRequest.call(this, "dataset/data/deleteMany", postData);
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.deleteData: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -684,7 +684,7 @@ class TDXApi {
       query,
     };
     const request = buildCommandRequest.call(this, "dataset/data/deleteQuery", postData);
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.deleteDataByQuery: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -712,7 +712,7 @@ class TDXApi {
       payload: [].concat(data),
     };
     const request = buildCommandRequest.call(this, "dataset/data/upsertMany", postData);
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.patchData: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -740,7 +740,7 @@ class TDXApi {
       __upsert: !!upsert,
     };
     const request = buildCommandRequest.call(this, "dataset/data/updateMany", postData);
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.updateData: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -764,7 +764,7 @@ class TDXApi {
       update,
     };
     const request = buildCommandRequest.call(this, "dataset/data/updateQuery", postData);
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.updateDataByQuery: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -792,7 +792,7 @@ class TDXApi {
       payload,
     };
     const request = buildCommandRequest.call(this, "databot/host/delete", postData);
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.deleteDatabotHost: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -810,7 +810,7 @@ class TDXApi {
       instanceId: [].concat(instanceId),
     };
     const request = buildCommandRequest.call(this, "databot/deleteInstance", postData);
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.deleteDatabotInstance: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -824,7 +824,7 @@ class TDXApi {
    */
   getDatabotInstance(instanceId) {
     const request = buildDatabotInstanceRequest.call(this, instanceId);
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.getDatabotInstance: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -839,7 +839,7 @@ class TDXApi {
    */
   getDatabotInstanceOutput(instanceId, processId) {
     const request = buildDatabotInstanceRequest.call(this, `output/${instanceId}/${processId || ""}`);
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.getDatabotInstanceOutput: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -853,7 +853,7 @@ class TDXApi {
    */
   getDatabotInstanceStatus(instanceId) {
     const request = buildDatabotInstanceRequest.call(this, `status/${instanceId}`);
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.getDatabotInstanceStatus: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -867,7 +867,7 @@ class TDXApi {
    */
   registerDatabotHost(status) {
     const request = buildDatabotHostRequest.call(this, "register", status);
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.registerDatabotHost: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -893,7 +893,7 @@ class TDXApi {
       command,
     };
     const request = buildCommandRequest.call(this, "databot/host/command", postData);
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.sendDatabotHostCommand: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -929,7 +929,7 @@ class TDXApi {
       instanceData: payload,
     };
     const request = buildCommandRequest.call(this, "databot/startInstance", postData);
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.startDatabotInstance: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -948,7 +948,7 @@ class TDXApi {
       mode,
     };
     const request = buildCommandRequest.call(this, "databot/stopInstance", postData);
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.stopDatabotInstance: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -962,7 +962,7 @@ class TDXApi {
    */
   updateDatabotHostStatus(status) {
     const request = buildDatabotHostRequest.call(this, "status", status);
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.updateDatabotHostStatus: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -976,7 +976,7 @@ class TDXApi {
    */
   writeDatabotHostInstanceOutput(output) {
     const request = buildDatabotHostRequest.call(this, "output", output);
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.writeDatabotHostInstanceOutput: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -998,7 +998,7 @@ class TDXApi {
    */
   downloadResource(resourceId) {
     const request = buildQueryRequest.call(this, `resource/${resourceId}`);
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.downloadResource: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -1019,7 +1019,7 @@ class TDXApi {
    */
   getDatasetDataStream(datasetId, filter, projection, options) {
     const request = buildQueryRequest.call(this, `datasets/${datasetId}/data`, filter, projection, options);
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.getDatasetDataStream: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -1050,7 +1050,7 @@ class TDXApi {
    */
   getDatasetDataCount(datasetId, filter) {
     const request = buildQueryRequest.call(this, `datasets/${datasetId}/count`, filter);
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.getDatasetDataCount: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -1067,7 +1067,7 @@ class TDXApi {
    */
   getDistinct(datasetId, key, filter, projection, options) {
     const request = buildQueryRequest.call(this, `datasets/${datasetId}/distinct?key=${key}`, filter, projection, options); // eslint-disable-line max-len
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.getDistinct: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -1084,7 +1084,7 @@ class TDXApi {
    */
   getResource(resourceId, noThrow) {
     const request = buildQueryRequest.call(this, `resources/${resourceId}`);
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.getResource: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -1112,7 +1112,7 @@ class TDXApi {
    */
   getResourceAncestors(resourceId) {
     const request = buildQueryRequest.call(this, `datasets/${resourceId}/ancestors`);
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.getDatasetAncestors: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -1130,7 +1130,7 @@ class TDXApi {
    */
   getResources(filter, projection, options) {
     const request = buildQueryRequest.call(this, "resources", filter, projection, options);
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.getResource: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -1155,7 +1155,7 @@ class TDXApi {
    */
   getTDXToken(tdx) {
     const request = buildQueryRequest.call(this, `tdx-token/${tdx}`);
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.getTDXToken: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
@@ -1170,7 +1170,7 @@ class TDXApi {
    */
   getZone(accountId) {
     const request = buildQueryRequest.call(this, "zones", {username: accountId});
-    return fetch(request)
+    return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.getZone: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
