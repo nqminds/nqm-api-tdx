@@ -1006,6 +1006,40 @@ class TDXApi {
   }
 
   /**
+   * Performs an aggregate query on the given dataset, returning a stream.
+   * @param  {string} datasetId - The id of the dataset-based resource to perform the aggregate query on.
+   * @param  {object|string} pipeline - The aggregate pipeline, as defined in the
+   * [mongodb docs](https://docs.mongodb.com/manual/aggregation/). Can be given as a JSON object or as a stringified
+   * JSON object.
+   * @return  {object} - A stream object.
+   */
+  getAggregateDataStream(datasetId, pipeline) {
+    // Convert pipeline to string if necessary.
+    if (pipeline && typeof pipeline === "object") {
+      pipeline = JSON.stringify(pipeline);
+    }
+    const request = buildQueryRequest.call(this, `datasets/${datasetId}/aggregate?pipeline=${pipeline}`);
+    return fetch.call(this, request)
+    .catch((err) => {
+      errLog("TDXApi.getAggregateData: %s", err.message);
+      return Promise.reject(new Error(`${err.message} - [network error]`));
+    });
+  }
+
+  /**
+   * Performs an aggregate query on the given dataset.
+   * @param  {string} datasetId - The id of the dataset-based resource to perform the aggregate query on.
+   * @param  {object|string} pipeline - The aggregate pipeline, as defined in the
+   * [mongodb docs](https://docs.mongodb.com/manual/aggregation/). Can be given as a JSON object or as a stringified
+   * JSON object.
+   * @return  {DatasetData}
+   */
+  getAggregateData(datasetId, pipeline) {
+    return this.getAggregateDataStream(datasetId, pipeline)
+      .then(checkResponse.bind(null, "getAggregateData"));
+  }
+
+  /**
    * Gets all data from the given dataset that matches the filter provided and returns a stream.
    * @param  {string} datasetId - The id of the dataset-based resource.
    * @param  {object} [filter] - A mongodb filter object. If omitted, all data will be retrieved.
