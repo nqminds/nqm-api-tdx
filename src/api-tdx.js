@@ -66,7 +66,7 @@ class TDXApi {
    * const api = new TDXApi({tdxServer: "https://tdx.acme.com"});
    */
   constructor(config) {
-    this.config = config;
+    this.config = {...config};
     this.accessToken = config.accessToken || "";
     setDefaults(this.config);
   }
