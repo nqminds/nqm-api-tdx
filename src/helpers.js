@@ -1,5 +1,9 @@
 import debug from "debug";
+import Promise from "bluebird";
 import fetch from "isomorphic-fetch";
+
+// Bind to bluebird promise library for now.
+fetch.Promise = Promise;
 
 const pollingRetries = 15;
 const pollingInterval = 1000;
