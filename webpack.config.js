@@ -50,7 +50,7 @@ const config = {
     "base-64": "base-64",
     bluebird: "bluebird",
     debug: "debug",
-    "isomorphic-fetch": "isomorphic-fetch",
+    "@nqminds/isomorphic-fetch": "@nqminds/isomorphic-fetch",
     lodash: {
       commonjs: "lodash",
       commonjs2: "lodash",

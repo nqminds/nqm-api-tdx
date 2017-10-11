@@ -1,6 +1,6 @@
 import debug from "debug";
 import Promise from "bluebird";
-import fetch from "isomorphic-fetch";
+import fetch from "@nqminds/isomorphic-fetch";
 
 // Bind to bluebird promise library for now.
 fetch.Promise = Promise;
