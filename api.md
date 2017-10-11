@@ -53,6 +53,7 @@
     * [.patchData(datasetId, data)](#TDXApi+patchData)
     * [.updateData(datasetId, data, [upsert])](#TDXApi+updateData)
     * [.updateDataByQuery(datasetId, query)](#TDXApi+updateDataByQuery)
+    * [.deleteDatabotHost(payload)](#TDXApi+deleteDatabotHost)
     * [.deleteDatabotInstance(instanceId)](#TDXApi+deleteDatabotInstance)
     * [.getDatabotInstance(instanceId)](#TDXApi+getDatabotInstance)
     * [.getDatabotInstanceOutput(instanceId, [processId])](#TDXApi+getDatabotInstanceOutput)
@@ -64,6 +65,8 @@
     * [.updateDatabotHostStatus(status)](#TDXApi+updateDatabotHostStatus)
     * [.writeDatabotHostInstanceOutput(output)](#TDXApi+writeDatabotHostInstanceOutput)
     * [.downloadResource(resourceId)](#TDXApi+downloadResource) ⇒ <code>object</code>
+    * [.getAggregateDataStream(datasetId, pipeline)](#TDXApi+getAggregateDataStream) ⇒ <code>object</code>
+    * [.getAggregateData(datasetId, pipeline)](#TDXApi+getAggregateData) ⇒ [<code>DatasetData</code>](#DatasetData)
     * [.getDatasetDataStream(datasetId, [filter], [projection], [options])](#TDXApi+getDatasetDataStream) ⇒ <code>object</code>
     * [.getDatasetData(datasetId, [filter], [projection], [options])](#TDXApi+getDatasetData) ⇒ [<code>DatasetData</code>](#DatasetData)
     * [.getDatasetDataCount(datasetId, [filter])](#TDXApi+getDatasetDataCount)
@@ -551,6 +554,22 @@ Updates data in a dataset-based resource using a query to specify the documents 
 // Update all documents with English lsoa.
 tdxApi.deleteDataByQuery(myDatasetId, {lsoa: {$regex: "E*"}}, {count: 1000});
 ```
+<a name="TDXApi+deleteDatabotHost"></a>
+
+### tdxApi.deleteDatabotHost(payload)
+Deletes one or more hosts, depending on the given parameters. E.g. if just a `hostId` is given, all hosts
+will be deleted with that id. If an ip address is also given, all hosts with the id on that ip address will
+be deleted and so on. Note that hosts can only be deleted if they are in the `offline` status.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| payload | <code>object</code> | The definition of the host(s) to delete. Can be an array of objects or a single object |
+| payload.hostId | <code>string</code> | The id of the hosts to be deleted. |
+| [payload.hostIp] | <code>string</code> | The optional ip of the hosts to be deleted. |
+| [payload.hostPort] | <code>number</code> | The optional port number of the host to be deleted. |
+
 <a name="TDXApi+deleteDatabotInstance"></a>
 
 ### tdxApi.deleteDatabotInstance(instanceId)
@@ -560,7 +579,7 @@ Deletes a databot instance and all output/debug data associated with it.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| instanceId | <code>string</code> | The id of the instance to delete. |
+| instanceId | <code>Array.&lt;string&gt;</code> | The id(s) of the instances to delete. Can be an array of instance ids or an individual string id |
 
 <a name="TDXApi+getDatabotInstance"></a>
 
@@ -689,6 +708,31 @@ delimited JSON (NDJSON). For raw file resources this will stream the raw file co
 | Param | Type | Description |
 | --- | --- | --- |
 | resourceId | <code>string</code> | The id of the resource to be downloaded. |
+
+<a name="TDXApi+getAggregateDataStream"></a>
+
+### tdxApi.getAggregateDataStream(datasetId, pipeline) ⇒ <code>object</code>
+Performs an aggregate query on the given dataset, returning a stream.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+**Returns**: <code>object</code> - - A stream object.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| datasetId | <code>string</code> | The id of the dataset-based resource to perform the aggregate query on. |
+| pipeline | <code>object</code> \| <code>string</code> | The aggregate pipeline, as defined in the [mongodb docs](https://docs.mongodb.com/manual/aggregation/). Can be given as a JSON object or as a stringified JSON object. |
+
+<a name="TDXApi+getAggregateData"></a>
+
+### tdxApi.getAggregateData(datasetId, pipeline) ⇒ [<code>DatasetData</code>](#DatasetData)
+Performs an aggregate query on the given dataset.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| datasetId | <code>string</code> | The id of the dataset-based resource to perform the aggregate query on. |
+| pipeline | <code>object</code> \| <code>string</code> | The aggregate pipeline, as defined in the [mongodb docs](https://docs.mongodb.com/manual/aggregation/). Can be given as a JSON object or as a stringified JSON object. |
 
 <a name="TDXApi+getDatasetDataStream"></a>
 

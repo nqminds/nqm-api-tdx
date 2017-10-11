@@ -190,10 +190,10 @@ const setDefaults = function(config) {
 
   log(
     "using hosts: command %s, databot %s, query %s, auth %s",
-    config.commandServer,
-    config.databotServer,
-    config.queryServer,
-    config.tdxServer,
+    config.commandServer || "[n/a]",
+    config.databotServer || "[n/a]",
+    config.queryServer || "[n/a]",
+    config.tdxServer || "[n/a]",
   );
 
   // Default network timeout to 5 seconds.
