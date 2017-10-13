@@ -118,7 +118,7 @@ class TDXApi {
         return this.accessToken;
       })
       .catch((err) => {
-        errLog(`error: ${err.message}`);
+        errLog(`authenticate error: ${err.message}`);
         return Promise.reject(err);
       });
   }

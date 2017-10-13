@@ -201,7 +201,7 @@ const setDefaults = function(config) {
   );
 
   // Default network timeout to 5 seconds.
-  config.networkTimeout = config.networkTimeout || 5000;
+  config.networkTimeout = config.networkTimeout || 120000;
 };
 
 const waitForResource = function(resourceId, check, retryCount, maxRetries) {
