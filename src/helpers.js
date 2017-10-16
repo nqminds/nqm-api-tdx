@@ -241,7 +241,13 @@ const waitForResource = function(resourceId, check, retryCount, maxRetries) {
         try {
           const parseError = JSON.parse(err.message);
           const failure = JSON.parse(parseError.failure);
-          if (failure.code === "NotFoundError" || failure.code === "UnauthorizedError") {
+          // Restify error code had the 'Error' suffix removed post v3.x
+          if (
+            failure.code === "NotFound" ||
+            failure.code === "NotFoundError" ||
+            failure.code === "Unauthorized" ||
+            failure.code === "UnauthorizedError"
+          ) {
             // Ignore resource not found and not authorized errors here, they are probably caused by
             // waiting for the projections to catch up (esp. in debug environments) by falling through
             // we will still be limited by the retry count, so won't loop forever.
