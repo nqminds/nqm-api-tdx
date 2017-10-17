@@ -703,7 +703,7 @@ Streams the contents of a resource. For dataset-based resources this will stream
 delimited JSON (NDJSON). For raw file resources this will stream the raw file contents (zip, raw JSON etc).
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
-**Returns**: <code>object</code> - - A stream object.  
+**Returns**: <code>object</code> - - Response object, where the response body is a stream object.  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -715,7 +715,7 @@ delimited JSON (NDJSON). For raw file resources this will stream the raw file co
 Performs an aggregate query on the given dataset, returning a stream.
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
-**Returns**: <code>object</code> - - A stream object.  
+**Returns**: <code>object</code> - - Response object, where the response body is a stream object.  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -740,7 +740,7 @@ Performs an aggregate query on the given dataset.
 Gets all data from the given dataset that matches the filter provided and returns a stream.
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
-**Returns**: <code>object</code> - - A stream object.  
+**Returns**: <code>object</code> - - Response object, where the response body is a stream object.  
 
 | Param | Type | Description |
 | --- | --- | --- |
