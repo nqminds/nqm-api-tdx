@@ -994,7 +994,7 @@ class TDXApi {
    * Streams the contents of a resource. For dataset-based resources this will stream the dataset contents in newline
    * delimited JSON (NDJSON). For raw file resources this will stream the raw file contents (zip, raw JSON etc).
    * @param  {string} resourceId - The id of the resource to be downloaded.
-   * @return {object} - A stream object.
+   * @return {object} - Response object, where the response body is a stream object.
    */
   downloadResource(resourceId) {
     const request = buildQueryRequest.call(this, `resource/${resourceId}`);
@@ -1006,12 +1006,12 @@ class TDXApi {
   }
 
   /**
-   * Performs an aggregate query on the given dataset, returning a stream.
+   * Performs an aggregate query on the given dataset, returning a response object with stream in the body
    * @param  {string} datasetId - The id of the dataset-based resource to perform the aggregate query on.
    * @param  {object|string} pipeline - The aggregate pipeline, as defined in the
    * [mongodb docs](https://docs.mongodb.com/manual/aggregation/). Can be given as a JSON object or as a stringified
    * JSON object.
-   * @return  {object} - A stream object.
+   * @return  {object} - Response object, where the response body is a stream object.
    */
   getAggregateDataStream(datasetId, pipeline) {
     // Convert pipeline to string if necessary.
@@ -1040,7 +1040,7 @@ class TDXApi {
   }
 
   /**
-   * Gets all data from the given dataset that matches the filter provided and returns a stream.
+   * Gets all data from the given dataset that matches the filter provided and returns a response object with stream in the body.
    * @param  {string} datasetId - The id of the dataset-based resource.
    * @param  {object} [filter] - A mongodb filter object. If omitted, all data will be retrieved.
    * @param  {object} [projection] - A mongodb projection object. Should be used to restrict the payload to the
@@ -1049,7 +1049,7 @@ class TDXApi {
    * `limit` of 1000 is applied if none is given here.
    * @param  {bool} [options.nqmMeta] - When set, the resource metadata will be returned along with the dataset
    * data. Can be used to avoid a second call to `getResource`. Otherwise a URL to the metadata is provided.
-   * @return  {object} - A stream object.
+   * @return  {object} - Response object, where the response body is a stream object.
    */
   getDatasetDataStream(datasetId, filter, projection, options) {
     const request = buildQueryRequest.call(this, `datasets/${datasetId}/data`, filter, projection, options);
