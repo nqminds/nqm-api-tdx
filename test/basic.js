@@ -1,141 +1,110 @@
-var chai = require("chai");
-var expect = chai.expect;
+const chai = require("chai");
+const expect = chai.expect;
 
-var APIModule = require("../lib/api.js");
-var newConfig = {
-  tdxHost: "https://tdx.nqminds.com",
-};
-var api = new APIModule(newConfig);
+const TDXApi = require("../lib/nqm-api-tdx");
+const api = new TDXApi({tdxServer: "https://tdx.nqminds.com"});
 
 describe("authenticate", function() {
-  it("fails to authenticate invalid credentials", function(done) {
-    api.authenticate("foo","bar",function(err, token) {
-      expect(token).to.not.exist;
-      expect(err).to.exist;
-      done();
-    });
-  });
-  it("authenticates valid credentials", function(done) {
-    api.authenticate("ryg94GVkZe","12345",function(err, token) {
+  it("athenticates with valid credentials", function() {
+    return api.authenticate("BylM-U7Lab", "")
+    .then((token) => {
       expect(token).to.exist;
-      expect(err).to.not.exist;
-      done();
     });
   });
 });
 
-describe("query", function() {
-  it("queries dataset data", function(done) {
-    api.query("datasets/NJgMR6EPmg/data", null, null, null, function(err, data) {
-      expect(err).to.not.exist;
+describe("resources", function() {
+  it("adds and then deletes resource", function() {
+    return api.addResource({name: "TestDeleteMe", basedOnSchema: "dataset", parentId:"SygsVtXUT-"})
+    .then(({response}) => {
+      expect(response).to.exist;
+      return api.deleteResource(response.id)
+    })
+    .then(({response}) => {
+      expect(response).to.exist;
+    });
+  });
+
+  it("sets resource share mode", function() {
+    return api.addResource({name: "TestShare", basedOnSchema: "dataset", parentId:"SygsVtXUT-"})
+    .then(({response}) => {
+      expect(response).to.exist;
+      return api.setResourceShareMode(response.id, "pr");
+    })
+    .then(({response}) => {
+      expect(response).to.exist;
+      return api.deleteResource(response.id);
+    })
+    .then((response) => {
+      expect(response).to.exist;
+    });
+  });
+
+  it("suspends and rebuilds index", function() {
+    this.timeout(10000); // Suspending and rebuilding index can take a while
+    return api.suspendResourceIndex("BkjWkNIpW")
+    .then((response) => {
+      expect(response).to.exist;
+      return api.rebuildResourceIndex("BkjWkNIpW");
+    })
+    .then((response) => {
+      expect(response).to.exist;
+    });
+  });
+
+  it("downloads a resource", function() {
+    return api.downloadResource("Byx79TXUTb")
+    .then(({body}) => {
+      expect(body.pipe).to.exist; // If we can pipe it's a stream
+    });
+  });
+});
+
+describe("datasets", function() {
+  it("adds and then deletes a document in a resource", function() {
+    const data = {timestamp: Date.now()};
+    return api.addData("BkjWkNIpW", data)
+    .then((response) => {
+      expect(response).to.exist;
+      return api.deleteData("BkjWkNIpW", data);
+    })
+    .then((response) => {
+      expect(response).to.exist;
+    });
+  });
+  it("deletes documents by query", function() {
+    return api.addData("BkjWkNIpW", {timestamp: Date.now()})
+    .then((response) => {
+      expect(response).to.exist;
+      return api.deleteDataByQuery("BkjWkNIpW", {timestamp: {$lte: Date.now()}});
+    })
+    .then((response) => {
+      expect(response).to.exist;
+    });
+  });
+  it("streams data", function() {
+    return api.getDatasetDataStream("BkjWkNIpW")
+    .then(({body}) => {
+      expect(body.pipe).to.exist; // If we can pipe it's a stream
+    });
+  });
+  it("gets data", function() {
+    return api.getDatasetData("BkjWkNIpW")
+    .then(({data}) => {
       expect(data).to.exist;
-      done();
     });
   });
-});
-
-describe("queryStream", function() {
-  it("queries dataset data and streams the response", function(done) {
-    var request = api.getDatasetData("rJgyaqJrM", function(err,resp) {
-      // Shouldn't get called back when streaming the response.
-      expect(false).to.be.true();
-      done();
-    });
-    var fs = require("fs");
-    request.pipe(fs.createWriteStream("./stream-test.json")).on("finish",function() {
-      var contents = fs.readFileSync("./stream-test.json");
-      // console.log(contents.toString());
-      var data = JSON.parse(contents);
-      expect(data.data.length).to.equal(1000);
-      done();
-    });
-    request.on("error", function(err) {
-      expect(err).to.not.exist;
-    });
-  })
-});
-
-describe("data count", function() {
-  it("queries dataset data count", function(done) {
-    api.getDatasetDataCount("NJgMR6EPmg", function(err, data) {
-      expect(err).to.not.exist;
-      expect(data).to.exist;
-      expect(data.count).to.equal(1520);
-      done();
+  it("counts data", function() {
+    return api.getDatasetDataCount("BkjWkNIpW")
+    .then(({count}) => {
+      expect(typeof count).to.equal("number");
     });
   });
-});
-
-describe("get raw file", function() {
-  it("gets raw file data", function(done) {
-    var request = api.getRawFile("SygmvnAX8");
-    var fs = require("fs");
-    var str = fs.createWriteStream("./raw-file.json");
-    request.pipe(str).on("finish", function() {
-      console.log("got raw file: ");
-      done();
-    });
+  it("truncates resource", function() {
+    return api.truncateResource("BkjWkNIpW")
+    .then((response) => {
+      expect(response).to.exist;
+    })
   });
-});
 
-describe("aggregate", function() {
-  it("aggregate dataset data", function(done) {
-    api.aggregate("datasets/BkWqQQuBo/data", '[{"$match":{"parent_id":"E09000001"}},{"$group":{"_id":null,"id_array":{"$push":"$child_id"}}}]', null, function(err, data) {
-      expect(err).to.not.exist;
-      expect(data).to.exist;
-      done();
-    });
-  });
-});
-
-describe("commands", function() {
-  it("creates dataset", function(done) {
-    var createOptions = {
-      name: "test dataset",
-      parentId: "H1xqLgo2_",
-      basedOnSchema: "dataset"
-    };
-    api.createDataset(createOptions, function(err, id) {
-      expect(err).to.not.exist;
-      done();
-    });
-  });
-});
-
-describe("delete", function() {
-  it("deletes dataset", function(done) {
-    api.deleteDataset("HygNQgNkZx", function(err, response) {
-      console.log(err);
-      expect(err).to.not.exist;
-      done();
-    });
-  });
-});
-
-describe("deleteDatasetData", function() {
-  it("deletes document taking array of primary keys as parameter", function(done) {
-    api.deleteDatasetData("HJl60hiIQx", [{name: "me"}, {id: "delete"}], function (err, response) {
-      expect(err).to.not.exist;
-      done();
-    });
-  });
-});
-
-describe("deleteDatasetData", function() {
-  it("deletes document with singular primary key", function(done) {
-    api.deleteDatasetData("r1lqT7RtY", {timestamp: 1470911605921}, function (err, response) {
-      expect(err).to.not.exist;
-      done();
-    });
-  });
-});
-
-describe("distinct", function() {
-  it("gets unique values of key", function(done) {
-    api.distinct("datasets/SkxbDChh_/distinct", "year", null, null, null,  function(err, data) {
-      expect(err).to.not.exist;
-      expect(data).to.exist;
-      done();
-    });
-  });
 });
