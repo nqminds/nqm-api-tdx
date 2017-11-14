@@ -83,7 +83,7 @@ class TDXApi {
    * @example <caption>authenticate using custom ttl of 2 hours</caption>
    * tdxApi.authenticate("DKJG8dfg", "letmein", 7200);
    */
-  authenticate(id, secret, ttl) {
+  authenticate(id, secret, ttl, ip) {
     let credentials;
 
     if (typeof secret !== "string") {
@@ -107,7 +107,7 @@ class TDXApi {
         "Authorization": `Basic ${credentials}`,
         "Content-Type": "application/json",
       }),
-      body: JSON.stringify({grant_type: "client_credentials", ttl: ttl || this.config.accessTokenTTL || 3600}),
+      body: JSON.stringify({grant_type: "client_credentials", ip, ttl: ttl || this.config.accessTokenTTL || 3600}),
     });
 
     return fetch.call(this, request)
