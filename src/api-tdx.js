@@ -1040,7 +1040,8 @@ class TDXApi {
   }
 
   /**
-   * Gets all data from the given dataset that matches the filter provided and returns a response object with stream in the body.
+   * Gets all data from the given dataset that matches the filter provided and returns a response object with stream
+   * in the body.
    * @param  {string} datasetId - The id of the dataset-based resource.
    * @param  {object} [filter] - A mongodb filter object. If omitted, all data will be retrieved.
    * @param  {object} [projection] - A mongodb projection object. Should be used to restrict the payload to the
