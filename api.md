@@ -72,6 +72,7 @@
     * [.getDatasetDataCount(datasetId, [filter])](#TDXApi+getDatasetDataCount)
     * [.getDistinct(datasetId, key, [filter])](#TDXApi+getDistinct) ⇒ <code>Array.&lt;object&gt;</code>
     * [.getResource(resourceId, [noThrow])](#TDXApi+getResource) ⇒ [<code>Resource</code>](#Resource)
+    * [.getResourceAccess(resourceId)](#TDXApi+getResourceAccess) ⇒ <code>Array.&lt;object&gt;</code>
     * [.getResourceAncestors(resourceId)](#TDXApi+getResourceAncestors) ⇒ [<code>Array.&lt;Resource&gt;</code>](#Resource)
     * [.getResources([filter], [projection], [options])](#TDXApi+getResources) ⇒ [<code>Array.&lt;Resource&gt;</code>](#Resource)
     * [.getResourcesWithSchema(schemaId)](#TDXApi+getResourcesWithSchema) ⇒ [<code>Array.&lt;Resource&gt;</code>](#Resource)
@@ -703,7 +704,7 @@ Streams the contents of a resource. For dataset-based resources this will stream
 delimited JSON (NDJSON). For raw file resources this will stream the raw file contents (zip, raw JSON etc).
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
-**Returns**: <code>object</code> - - A stream object.  
+**Returns**: <code>object</code> - - Response object, where the response body is a stream object.  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -712,10 +713,10 @@ delimited JSON (NDJSON). For raw file resources this will stream the raw file co
 <a name="TDXApi+getAggregateDataStream"></a>
 
 ### tdxApi.getAggregateDataStream(datasetId, pipeline) ⇒ <code>object</code>
-Performs an aggregate query on the given dataset, returning a stream.
+Performs an aggregate query on the given dataset, returning a response object with stream in the body
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
-**Returns**: <code>object</code> - - A stream object.  
+**Returns**: <code>object</code> - - Response object, where the response body is a stream object.  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -737,10 +738,11 @@ Performs an aggregate query on the given dataset.
 <a name="TDXApi+getDatasetDataStream"></a>
 
 ### tdxApi.getDatasetDataStream(datasetId, [filter], [projection], [options]) ⇒ <code>object</code>
-Gets all data from the given dataset that matches the filter provided and returns a stream.
+Gets all data from the given dataset that matches the filter provided and returns a response object with stream
+in the body.
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
-**Returns**: <code>object</code> - - A stream object.  
+**Returns**: <code>object</code> - - Response object, where the response body is a stream object.  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -806,6 +808,18 @@ Gets the details for a given resource id.
 | --- | --- | --- | --- |
 | resourceId | <code>string</code> |  | The id of the resource to retrieve. |
 | [noThrow] | <code>bool</code> | <code>false</code> | If set, the call won't reject or throw if the resource doesn't exist. |
+
+<a name="TDXApi+getResourceAccess"></a>
+
+### tdxApi.getResourceAccess(resourceId) ⇒ <code>Array.&lt;object&gt;</code>
+Gets all access the authenticated has to the given resource id.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+**Returns**: <code>Array.&lt;object&gt;</code> - - Array of access objects.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| resourceId | <code>string</code> | The id of the resource whose access is to be retrieved. |
 
 <a name="TDXApi+getResourceAncestors"></a>
 

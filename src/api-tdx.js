@@ -1141,6 +1141,23 @@ class TDXApi {
   }
 
   /**
+   * Gets all access the authenticated has to the given resource id.
+   * @param  {string} resourceId - The id of the resource whose access is to be retrieved.
+   * @return {object[]} - Array of access objects.
+   */
+  getResourceAccess(resourceId) {
+    const request = buildQueryRequest.call(this, `resources/${resourceId}/access`);
+    return fetch.call(this, request)
+      .catch((err) => {
+        errLog("TDXApi.getResourceAccess: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then((response) => {
+        return checkResponse("getResourceAccess", response);
+      });
+  }
+
+  /**
    * Gets all resources that are ancestors of the given resource.
    * @param  {string} resourceId - The id of the resource whose parents are to be retrieved.
    * @return  {Resource[]}
