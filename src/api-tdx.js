@@ -1141,12 +1141,12 @@ class TDXApi {
   }
 
   /**
-   * Gets all access the authenticated has to the given resource id.
+   * Gets all access the authenticated account has to the given resource id.
    * @param  {string} resourceId - The id of the resource whose access is to be retrieved.
    * @return {object[]} - Array of access objects.
    */
-  getResourceAccess(resourceId) {
-    const request = buildQueryRequest.call(this, `resources/${resourceId}/access`);
+  getResourceAccess(resourceId, filter, projection, options) {
+    const request = buildQueryRequest.call(this, `resources/${resourceId}/access`, filter, projection, options);
     return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.getResourceAccess: %s", err.message);
