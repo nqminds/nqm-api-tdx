@@ -310,6 +310,19 @@ class TDXApi {
    * `"tr"`], corresponding to "public read/write", "public read/trusted write", "trusted only".
    * @param  {string[]} [options.tags] - a list of tags to associate with the resource.
    * @param  {bool} [wait=false] - indicates if the call should wait for the index to be built before it returns.
+   * @example <caption>usage</caption>
+   * // Creates a dataset resource in the authenticated users' scratch folder. The dataset stores key/value pairs
+   * // where the `key` property is the primary key and the `value` property can take any JSON value.
+   * tdxApi.addResource({
+   *   name: "resource #1",
+   *   schema: {
+   *     dataSchema: {
+   *       key: "string",
+   *       value: {}
+   *     },
+   *     uniqueIndex: {key: 1}
+   *   }
+   * })
    */
   addResource(options, wait) {
     const request = buildCommandRequest.call(this, "resource/create", options);
@@ -1228,6 +1241,22 @@ class TDXApi {
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
       .then(checkResponse.bind(null, "getZone"));
+  }
+
+  /**
+   * Validates the given token was signed by this TDX, and returns the decoded token data.
+   * @param  {string} token - The TDX auth server token to validate.
+   * @param  {string} ip - The IP address to validate against.
+   * @return  {object} - The decoded token data.
+   */
+  validateTDXToken(token, ip) {
+    const request = buildQueryRequest.call(this, "tdx-token-validate", {token, ip});
+    return fetch.call(this, request)
+      .catch((err) => {
+        errLog("TDXApi.validateTDXToken: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "getTDXToken"));
   }
 }
 

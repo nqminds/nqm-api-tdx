@@ -78,6 +78,7 @@
     * [.getResourcesWithSchema(schemaId)](#TDXApi+getResourcesWithSchema) ⇒ [<code>Array.&lt;Resource&gt;</code>](#Resource)
     * [.getTDXToken(tdx)](#TDXApi+getTDXToken) ⇒ <code>string</code>
     * [.getZone(accountId)](#TDXApi+getZone) ⇒ [<code>Zone</code>](#Zone)
+    * [.validateTDXToken(token, ip)](#TDXApi+validateTDXToken) ⇒ <code>object</code>
 
 <a name="new_TDXApi_new"></a>
 
@@ -256,6 +257,21 @@ Adds a resource to the TDX.
 | [options.tags] | <code>Array.&lt;string&gt;</code> |  | a list of tags to associate with the resource. |
 | [wait] | <code>bool</code> | <code>false</code> | indicates if the call should wait for the index to be built before it returns. |
 
+**Example** *(usage)*  
+```js
+// Creates a dataset resource in the authenticated users' scratch folder. The dataset stores key/value pairs
+// where the `key` property is the primary key and the `value` property can take any JSON value.
+tdxApi.addResource({
+  name: "resource #1",
+  schema: {
+    dataSchema: {
+      key: "string",
+      value: {}
+    },
+    uniqueIndex: {key: 1}
+  }
+})
+```
 <a name="TDXApi+addResourceAccess"></a>
 
 ### tdxApi.addResourceAccess(resourceId, accountId, sourceId, access)
@@ -812,7 +828,7 @@ Gets the details for a given resource id.
 <a name="TDXApi+getResourceAccess"></a>
 
 ### tdxApi.getResourceAccess(resourceId) ⇒ <code>Array.&lt;object&gt;</code>
-Gets all access the authenticated has to the given resource id.
+Gets all access the authenticated account has to the given resource id.
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
 **Returns**: <code>Array.&lt;object&gt;</code> - - Array of access objects.  
@@ -878,6 +894,19 @@ Gets the details for a given zone (account) id.
 | Param | Type | Description |
 | --- | --- | --- |
 | accountId | <code>string</code> | the id of the zone to be retrieved. |
+
+<a name="TDXApi+validateTDXToken"></a>
+
+### tdxApi.validateTDXToken(token, ip) ⇒ <code>object</code>
+Validates the given token was signed by this TDX, and returns the decoded token data.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+**Returns**: <code>object</code> - - The decoded token data.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| token | <code>string</code> | The TDX auth server token to validate. |
+| ip | <code>string</code> | The IP address to validate against. |
 
 <a name="CommandResult"></a>
 
