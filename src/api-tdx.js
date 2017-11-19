@@ -1256,7 +1256,7 @@ class TDXApi {
         errLog("TDXApi.validateTDXToken: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "getTDXToken"));
+      .then(checkResponse.bind(null, "validateTDXToken"));
   }
 }
 
