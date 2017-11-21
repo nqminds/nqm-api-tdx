@@ -1260,7 +1260,10 @@ class TDXApi {
         errLog("TDXApi.getZone: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "getZone"));
+      .then(checkResponse.bind(null, "getZone"))
+      .then((zoneList) => {
+        return zoneList && zoneList.length ? zoneList[0] : null;
+      });
   }
 
   /**
