@@ -1004,6 +1004,26 @@ class TDXApi {
    */
 
   /**
+   * Exchanges a client user token (e.g. bound to the browser IP) for an application-user token bound to the
+   * currently authenticated token IP. The currently authenticated token ***must*** be an application token, whereby the
+   * application has been authorised by the user and the user has permission to access the application. The returned
+   * token will be bound to the same IP address as the currently authenticated token (i.e the application server IP).
+   *
+   * @param  {string} token - The users' TDX auth server token to validate.
+   * @param  {string} [ip] - The optional IP address to validate the user token against.
+   * @return  {object} - The new token application-user token, bound to the server IP.
+   */
+  exchangeTDXToken(token, ip) {
+    const request = buildQueryRequest.call(this, "token/exchange", {token, ip});
+    return fetch.call(this, request)
+      .catch((err) => {
+        errLog("TDXApi.exchangeTDXToken: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "exchangeTDXToken"));
+  }
+
+  /**
    * Streams the contents of a resource. For dataset-based resources this will stream the dataset contents in newline
    * delimited JSON (NDJSON). For raw file resources this will stream the raw file contents (zip, raw JSON etc).
    * @param  {string} resourceId - The id of the resource to be downloaded.
@@ -1246,11 +1266,11 @@ class TDXApi {
   /**
    * Validates the given token was signed by this TDX, and returns the decoded token data.
    * @param  {string} token - The TDX auth server token to validate.
-   * @param  {string} ip - The IP address to validate against.
+   * @param  {string} [ip] - The optional IP address to validate against.
    * @return  {object} - The decoded token data.
    */
   validateTDXToken(token, ip) {
-    const request = buildQueryRequest.call(this, "tdx-token-validate", {token, ip});
+    const request = buildQueryRequest.call(this, "token/validate", {token, ip});
     return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.validateTDXToken: %s", err.message);
