@@ -89,6 +89,7 @@ class TDXApi {
     if (typeof secret !== "string") {
       // Assume the first argument is a pre-formed credentials string
       credentials = id;
+      ip = ttl;
       ttl = secret;
     } else {
       // uri-encode the username and concatenate with secret.
@@ -1044,14 +1045,16 @@ class TDXApi {
    * @param  {object|string} pipeline - The aggregate pipeline, as defined in the
    * [mongodb docs](https://docs.mongodb.com/manual/aggregation/). Can be given as a JSON object or as a stringified
    * JSON object.
+   * @param  {bool} [ndJSON] - If set, the data is sent in [newline delimited json format](http://ndjson.org/).
    * @return  {object} - Response object, where the response body is a stream object.
    */
-  getAggregateDataStream(datasetId, pipeline) {
+  getAggregateDataStream(datasetId, pipeline, ndJSON) {
     // Convert pipeline to string if necessary.
     if (pipeline && typeof pipeline === "object") {
       pipeline = JSON.stringify(pipeline);
     }
-    const request = buildQueryRequest.call(this, `datasets/${datasetId}/aggregate?pipeline=${pipeline}`);
+    const endpoint = `datasets/${datasetId}/${ndJSON ? "ndaggregate" : "aggregate"}?pipeline=${pipeline}`;
+    const request = buildQueryRequest.call(this, endpoint);
     return fetch.call(this, request)
     .catch((err) => {
       errLog("TDXApi.getAggregateData: %s", err.message);
@@ -1065,10 +1068,11 @@ class TDXApi {
    * @param  {object|string} pipeline - The aggregate pipeline, as defined in the
    * [mongodb docs](https://docs.mongodb.com/manual/aggregation/). Can be given as a JSON object or as a stringified
    * JSON object.
+   * @param  {bool} [ndJSON] - If set, the data is sent in [newline delimited json format](http://ndjson.org/).
    * @return  {DatasetData}
    */
-  getAggregateData(datasetId, pipeline) {
-    return this.getAggregateDataStream(datasetId, pipeline)
+  getAggregateData(datasetId, pipeline, ndJSON) {
+    return this.getAggregateDataStream(datasetId, pipeline, ndJSON)
       .then(checkResponse.bind(null, "getAggregateData"));
   }
 
@@ -1083,10 +1087,12 @@ class TDXApi {
    * `limit` of 1000 is applied if none is given here.
    * @param  {bool} [options.nqmMeta] - When set, the resource metadata will be returned along with the dataset
    * data. Can be used to avoid a second call to `getResource`. Otherwise a URL to the metadata is provided.
+   * @param  {bool} [ndJSON] - If set, the data is sent in [newline delimited json format](http://ndjson.org/).
    * @return  {object} - Response object, where the response body is a stream object.
    */
-  getDatasetDataStream(datasetId, filter, projection, options) {
-    const request = buildQueryRequest.call(this, `datasets/${datasetId}/data`, filter, projection, options);
+  getDatasetDataStream(datasetId, filter, projection, options, ndJSON) {
+    const endpoint = `datasets/${datasetId}/${ndJSON ? "nddata" : "data"}`;
+    const request = buildQueryRequest.call(this, endpoint, filter, projection, options);
     return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.getDatasetDataStream: %s", err.message);
@@ -1104,10 +1110,11 @@ class TDXApi {
    * `limit` of 1000 is applied if none is given here.
    * @param  {bool} [options.nqmMeta] - When set, the resource metadata will be returned along with the dataset
    * data. Can be used to avoid a second call to `getResource`. Otherwise a URL to the metadata is provided.
+   * @param  {bool} [ndJSON] - If set, the data is sent in [newline delimited json format](http://ndjson.org/).
    * @return  {DatasetData}
    */
-  getDatasetData(datasetId, filter, projection, options) {
-    return this.getDatasetDataStream(datasetId, filter, projection, options)
+  getDatasetData(datasetId, filter, projection, options, ndJSON) {
+    return this.getDatasetDataStream(datasetId, filter, projection, options, ndJSON)
       .then(checkResponse.bind(null, "getDatasetData"));
   }
 

@@ -64,11 +64,12 @@
     * [.stopDatabotInstance(instanceId, mode)](#TDXApi+stopDatabotInstance)
     * [.updateDatabotHostStatus(status)](#TDXApi+updateDatabotHostStatus)
     * [.writeDatabotHostInstanceOutput(output)](#TDXApi+writeDatabotHostInstanceOutput)
+    * [.exchangeTDXToken(token, [ip])](#TDXApi+exchangeTDXToken) ⇒ <code>object</code>
     * [.downloadResource(resourceId)](#TDXApi+downloadResource) ⇒ <code>object</code>
-    * [.getAggregateDataStream(datasetId, pipeline)](#TDXApi+getAggregateDataStream) ⇒ <code>object</code>
-    * [.getAggregateData(datasetId, pipeline)](#TDXApi+getAggregateData) ⇒ [<code>DatasetData</code>](#DatasetData)
-    * [.getDatasetDataStream(datasetId, [filter], [projection], [options])](#TDXApi+getDatasetDataStream) ⇒ <code>object</code>
-    * [.getDatasetData(datasetId, [filter], [projection], [options])](#TDXApi+getDatasetData) ⇒ [<code>DatasetData</code>](#DatasetData)
+    * [.getAggregateDataStream(datasetId, pipeline, [ndJSON])](#TDXApi+getAggregateDataStream) ⇒ <code>object</code>
+    * [.getAggregateData(datasetId, pipeline, [ndJSON])](#TDXApi+getAggregateData) ⇒ [<code>DatasetData</code>](#DatasetData)
+    * [.getDatasetDataStream(datasetId, [filter], [projection], [options], [ndJSON])](#TDXApi+getDatasetDataStream) ⇒ <code>object</code>
+    * [.getDatasetData(datasetId, [filter], [projection], [options], [ndJSON])](#TDXApi+getDatasetData) ⇒ [<code>DatasetData</code>](#DatasetData)
     * [.getDatasetDataCount(datasetId, [filter])](#TDXApi+getDatasetDataCount)
     * [.getDistinct(datasetId, key, [filter])](#TDXApi+getDistinct) ⇒ <code>Array.&lt;object&gt;</code>
     * [.getResource(resourceId, [noThrow])](#TDXApi+getResource) ⇒ [<code>Resource</code>](#Resource)
@@ -78,7 +79,7 @@
     * [.getResourcesWithSchema(schemaId)](#TDXApi+getResourcesWithSchema) ⇒ [<code>Array.&lt;Resource&gt;</code>](#Resource)
     * [.getTDXToken(tdx)](#TDXApi+getTDXToken) ⇒ <code>string</code>
     * [.getZone(accountId)](#TDXApi+getZone) ⇒ [<code>Zone</code>](#Zone)
-    * [.validateTDXToken(token, ip)](#TDXApi+validateTDXToken) ⇒ <code>object</code>
+    * [.validateTDXToken(token, [ip])](#TDXApi+validateTDXToken) ⇒ <code>object</code>
 
 <a name="new_TDXApi_new"></a>
 
@@ -713,6 +714,22 @@ Stores databot instance output on the TDX.
 | --- | --- | --- |
 | output | <code>object</code> | The output payload for the databot instance. |
 
+<a name="TDXApi+exchangeTDXToken"></a>
+
+### tdxApi.exchangeTDXToken(token, [ip]) ⇒ <code>object</code>
+Exchanges a client user token (e.g. bound to the browser IP) for an application-user token bound to the
+currently authenticated token IP. The currently authenticated token ***must*** be an application token, whereby the
+application has been authorised by the user and the user has permission to access the application. The returned
+token will be bound to the same IP address as the currently authenticated token (i.e the application server IP).
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+**Returns**: <code>object</code> - - The new token application-user token, bound to the server IP.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| token | <code>string</code> | The users' TDX auth server token to validate. |
+| [ip] | <code>string</code> | The optional IP address to validate the user token against. |
+
 <a name="TDXApi+downloadResource"></a>
 
 ### tdxApi.downloadResource(resourceId) ⇒ <code>object</code>
@@ -728,7 +745,7 @@ delimited JSON (NDJSON). For raw file resources this will stream the raw file co
 
 <a name="TDXApi+getAggregateDataStream"></a>
 
-### tdxApi.getAggregateDataStream(datasetId, pipeline) ⇒ <code>object</code>
+### tdxApi.getAggregateDataStream(datasetId, pipeline, [ndJSON]) ⇒ <code>object</code>
 Performs an aggregate query on the given dataset, returning a response object with stream in the body
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
@@ -738,10 +755,11 @@ Performs an aggregate query on the given dataset, returning a response object wi
 | --- | --- | --- |
 | datasetId | <code>string</code> | The id of the dataset-based resource to perform the aggregate query on. |
 | pipeline | <code>object</code> \| <code>string</code> | The aggregate pipeline, as defined in the [mongodb docs](https://docs.mongodb.com/manual/aggregation/). Can be given as a JSON object or as a stringified JSON object. |
+| [ndJSON] | <code>bool</code> | If set, the data is sent in [newline delimited json format](http://ndjson.org/). |
 
 <a name="TDXApi+getAggregateData"></a>
 
-### tdxApi.getAggregateData(datasetId, pipeline) ⇒ [<code>DatasetData</code>](#DatasetData)
+### tdxApi.getAggregateData(datasetId, pipeline, [ndJSON]) ⇒ [<code>DatasetData</code>](#DatasetData)
 Performs an aggregate query on the given dataset.
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
@@ -750,10 +768,11 @@ Performs an aggregate query on the given dataset.
 | --- | --- | --- |
 | datasetId | <code>string</code> | The id of the dataset-based resource to perform the aggregate query on. |
 | pipeline | <code>object</code> \| <code>string</code> | The aggregate pipeline, as defined in the [mongodb docs](https://docs.mongodb.com/manual/aggregation/). Can be given as a JSON object or as a stringified JSON object. |
+| [ndJSON] | <code>bool</code> | If set, the data is sent in [newline delimited json format](http://ndjson.org/). |
 
 <a name="TDXApi+getDatasetDataStream"></a>
 
-### tdxApi.getDatasetDataStream(datasetId, [filter], [projection], [options]) ⇒ <code>object</code>
+### tdxApi.getDatasetDataStream(datasetId, [filter], [projection], [options], [ndJSON]) ⇒ <code>object</code>
 Gets all data from the given dataset that matches the filter provided and returns a response object with stream
 in the body.
 
@@ -767,10 +786,11 @@ in the body.
 | [projection] | <code>object</code> | A mongodb projection object. Should be used to restrict the payload to the minimum properties needed if a lot of data is being retrieved. |
 | [options] | <code>object</code> | A mongodb options object. Can be used to limit, skip, sort etc. Note a default `limit` of 1000 is applied if none is given here. |
 | [options.nqmMeta] | <code>bool</code> | When set, the resource metadata will be returned along with the dataset data. Can be used to avoid a second call to `getResource`. Otherwise a URL to the metadata is provided. |
+| [ndJSON] | <code>bool</code> | If set, the data is sent in [newline delimited json format](http://ndjson.org/). |
 
 <a name="TDXApi+getDatasetData"></a>
 
-### tdxApi.getDatasetData(datasetId, [filter], [projection], [options]) ⇒ [<code>DatasetData</code>](#DatasetData)
+### tdxApi.getDatasetData(datasetId, [filter], [projection], [options], [ndJSON]) ⇒ [<code>DatasetData</code>](#DatasetData)
 Gets all data from the given dataset that matches the filter provided.
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
@@ -782,6 +802,7 @@ Gets all data from the given dataset that matches the filter provided.
 | [projection] | <code>object</code> | A mongodb projection object. Should be used to restrict the payload to the minimum properties needed if a lot of data is being retrieved. |
 | [options] | <code>object</code> | A mongodb options object. Can be used to limit, skip, sort etc. Note a default `limit` of 1000 is applied if none is given here. |
 | [options.nqmMeta] | <code>bool</code> | When set, the resource metadata will be returned along with the dataset data. Can be used to avoid a second call to `getResource`. Otherwise a URL to the metadata is provided. |
+| [ndJSON] | <code>bool</code> | If set, the data is sent in [newline delimited json format](http://ndjson.org/). |
 
 <a name="TDXApi+getDatasetDataCount"></a>
 
@@ -897,7 +918,7 @@ Gets the details for a given zone (account) id.
 
 <a name="TDXApi+validateTDXToken"></a>
 
-### tdxApi.validateTDXToken(token, ip) ⇒ <code>object</code>
+### tdxApi.validateTDXToken(token, [ip]) ⇒ <code>object</code>
 Validates the given token was signed by this TDX, and returns the decoded token data.
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
@@ -906,7 +927,7 @@ Validates the given token was signed by this TDX, and returns the decoded token 
 | Param | Type | Description |
 | --- | --- | --- |
 | token | <code>string</code> | The TDX auth server token to validate. |
-| ip | <code>string</code> | The IP address to validate against. |
+| [ip] | <code>string</code> | The optional IP address to validate against. |
 
 <a name="CommandResult"></a>
 
