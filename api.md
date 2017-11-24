@@ -64,6 +64,8 @@
     * [.stopDatabotInstance(instanceId, mode)](#TDXApi+stopDatabotInstance)
     * [.updateDatabotHostStatus(status)](#TDXApi+updateDatabotHostStatus)
     * [.writeDatabotHostInstanceOutput(output)](#TDXApi+writeDatabotHostInstanceOutput)
+    * [.addZoneConnection(options)](#TDXApi+addZoneConnection)
+    * [.deleteZoneConnection(id)](#TDXApi+deleteZoneConnection)
     * [.exchangeTDXToken(token, [ip])](#TDXApi+exchangeTDXToken) ⇒ <code>object</code>
     * [.downloadResource(resourceId)](#TDXApi+downloadResource) ⇒ <code>object</code>
     * [.getAggregateDataStream(datasetId, pipeline, [ndJSON])](#TDXApi+getAggregateDataStream) ⇒ <code>object</code>
@@ -713,6 +715,36 @@ Stores databot instance output on the TDX.
 | Param | Type | Description |
 | --- | --- | --- |
 | output | <code>object</code> | The output payload for the databot instance. |
+
+<a name="TDXApi+addZoneConnection"></a>
+
+### tdxApi.addZoneConnection(options)
+Adds a zone connection to a remote TDX. The details for the connection should be retrieved by a call to the
+certificate endpoint for the TDX, e.g. https://tdx.nqminds.com/certficate.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| options | <code>object</code> | The zone connection details |
+| options.owner | <code>string</code> | The owner of the zone connection. Must be the same as the authenticated account. |
+| options.tdxServer | <code>string</code> | The URL of the target TDX auth server, e.g. https://tdx.nqminds.com |
+| [options.commandServer] | <code>string</code> | The URL of the target TDX command server, e.g. https://cmd.nqminds.com |
+| [options.queryServer] | <code>string</code> | The URL of the target TDX query server, e.g. https://q.nqminds.com |
+| [options.ddpServer] | <code>string</code> | The URL of the target TDX ddp server, e.g. https://ddp.nqminds.com |
+| [options.databotServer] | <code>string</code> | The URL of the target TDX databot server, e.g. https://databot.nqminds.com |
+| [options.displayName] | <code>string</code> | The friendly name of the TDX. |
+
+<a name="TDXApi+deleteZoneConnection"></a>
+
+### tdxApi.deleteZoneConnection(id)
+Deletes a zone connection. The authenticated account must own the zone connection.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| id | <code>string</code> | The id of the zone connection to delete. |
 
 <a name="TDXApi+exchangeTDXToken"></a>
 

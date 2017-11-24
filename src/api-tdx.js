@@ -1000,6 +1000,49 @@ class TDXApi {
 
   /*
    *
+   *  ZONE CONNECTION COMMANDS
+   *
+   */
+
+  /**
+   * Adds a zone connection to a remote TDX. The details for the connection should be retrieved by a call to the
+   * certificate endpoint for the TDX, e.g. https://tdx.nqminds.com/certficate.
+   * @param  {object} options - The zone connection details
+   * @param  {string} options.owner - The owner of the zone connection. Must be the same as the authenticated account.
+   * @param  {string} options.tdxServer - The URL of the target TDX auth server, e.g. https://tdx.nqminds.com
+   * @param  {string} [options.commandServer] - The URL of the target TDX command server, e.g. https://cmd.nqminds.com
+   * @param  {string} [options.queryServer] - The URL of the target TDX query server, e.g. https://q.nqminds.com
+   * @param  {string} [options.ddpServer] - The URL of the target TDX ddp server, e.g. https://ddp.nqminds.com
+   * @param  {string} [options.databotServer] - The URL of the target TDX databot server,
+   * e.g. https://databot.nqminds.com
+   * @param  {string} [options.displayName] - The friendly name of the TDX.
+   */
+  addZoneConnection(options) {
+    const request = buildCommandRequest.call(this, "zoneConnection/create", options);
+    return fetch.call(this, request)
+      .catch((err) => {
+        errLog("TDXApi.addZoneConnection: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "addZoneConnection"));
+  }
+
+  /**
+   * Deletes a zone connection. The authenticated account must own the zone connection.
+   * @param  {string} id - The id of the zone connection to delete.
+   */
+  deleteZoneConnection(id) {
+    const request = buildCommandRequest.call(this, "zoneConnection/delete", {id});
+    return fetch.call(this, request)
+      .catch((err) => {
+        errLog("TDXApi.deleteZoneConnection: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "deleteZoneConnection"));
+  }
+
+  /*
+   *
    *  QUERIES
    *
    */
