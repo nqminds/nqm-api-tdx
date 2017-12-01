@@ -17,19 +17,28 @@ const fetchWithDeadline = function(request) {
   // on fetch() - see https://github.com/whatwg/fetch/issues/20).
   //
   return new Promise((resolve, reject) => {
-    // Reject the promise if the timeout expires.
-    const deadline = setTimeout(
-      () => {
-        log("deadline expired after %d ms", this.config.networkTimeout);
-        reject(new Error(`deadline expired after ${this.config.networkTimeout} ms`));
-      },
-      this.config.networkTimeout
-    );
+    let deadline;
+
+    if (this.config.networkTimeout) {
+      // Reject the promise if the timeout expires.
+      const deadline = setTimeout(
+        () => {
+          log("deadline expired after %d ms", this.config.networkTimeout);
+          reject(new Error(`deadline expired after ${this.config.networkTimeout} ms`));
+        },
+        this.config.networkTimeout
+      );
+    } else {
+      // Never timeout.
+      deadline = 0;
+    }
 
     fetch(request).then(
       (response) => {
         // Cancel pending deadline.
-        clearTimeout(deadline);
+        if (deadline) {
+          clearTimeout(deadline);          
+        }
         // Forward response.
         resolve(response);
       },

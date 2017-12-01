@@ -67,7 +67,7 @@ class TDXApi {
    */
   constructor(config) {
     this.config = {...config};
-    this.accessToken = config.accessToken || "";
+    this.accessToken = config.accessToken || config.authToken || "";
     setDefaults(this.config);
   }
 
