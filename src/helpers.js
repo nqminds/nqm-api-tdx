@@ -21,7 +21,7 @@ const fetchWithDeadline = function(request) {
 
     if (this.config.networkTimeout) {
       // Reject the promise if the timeout expires.
-      const deadline = setTimeout(
+      deadline = setTimeout(
         () => {
           log("deadline expired after %d ms", this.config.networkTimeout);
           reject(new Error(`deadline expired after ${this.config.networkTimeout} ms`));
@@ -37,7 +37,7 @@ const fetchWithDeadline = function(request) {
       (response) => {
         // Cancel pending deadline.
         if (deadline) {
-          clearTimeout(deadline);          
+          clearTimeout(deadline);
         }
         // Forward response.
         resolve(response);
