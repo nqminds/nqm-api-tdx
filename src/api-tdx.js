@@ -414,13 +414,13 @@ class TDXApi {
    * callees to monitor progress.
    * @param  {compressed} [boolean=false] - Flag indicating the file should be decompressed after upload. ZIP format
    * only.
-   * @param  {base64} [boolean=false] = Flag indicating the file should be decoded from base64 after upload.
+   * @param  {base64Encoded} [boolean=false] = Flag indicating the file should be decoded from base64 after upload.
    */
-  fileUpload(resourceId, file, stream, compressed = false, base64 = false) {
+  fileUpload(resourceId, file, stream, compressed = false, base64Encoded = false) {
     let endPoint;
     if (compressed) {
       endPoint = "compressedUpload";
-    } else if (base64) {
+    } else if (base64Encoded) {
       endPoint = "base64Upload";
     } else {
       endPoint = "upload";
