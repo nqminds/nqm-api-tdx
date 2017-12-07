@@ -412,9 +412,20 @@ class TDXApi {
    * @param  {object} file - The file to upload, obtained from an `<input type="file">` element.
    * @param  {bool} [stream=false] - Flag indicating whether the call should return a stream allowing
    * callees to monitor progress.
+   * @param  {compressed} [boolean=false] - Flag indicating the file should be decompressed after upload. ZIP format
+   * only.
+   * @param  {base64} [boolean=false] = Flag indicating the file should be decoded from base64 after upload.
    */
-  fileUpload(resourceId, file, stream) {
-    const request = new Request(`${this.config.commandServer}/commandSync/resource/${resourceId}/upload`, {
+  fileUpload(resourceId, file, stream, compressed = false, base64 = false) {
+    let endPoint;
+    if (compressed) {
+      endPoint = "compressedUpload";
+    } else if (base64) {
+      endPoint = "base64Upload";
+    } else {
+      endPoint = "upload";
+    }
+    const request = new Request(`${this.config.commandServer}/commandSync/resource/${resourceId}/${endPoint}`, {
       method: "POST",
       mode: "cors",
       headers: new Headers({
