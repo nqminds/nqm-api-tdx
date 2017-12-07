@@ -1120,6 +1120,20 @@ class TDXApi {
   }
 
   /**
+   * Gets details of the currently authenticated account.
+   * @return  {object} - Details of the authenticated account.
+   */
+  getAuthenticatedAccount() {
+    const request = buildQueryRequest.call(this, "auth-account");
+    return fetch.call(this, request)
+      .catch((err) => {
+        errLog("TDXApi.getAuthenticatedAccount: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "getAuthenticatedAccount"));
+  }
+
+  /**
    * Gets all data from the given dataset that matches the filter provided and returns a response object with stream
    * in the body.
    * @param  {string} datasetId - The id of the dataset-based resource.

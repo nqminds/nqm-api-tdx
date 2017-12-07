@@ -70,6 +70,7 @@
     * [.downloadResource(resourceId)](#TDXApi+downloadResource) ⇒ <code>object</code>
     * [.getAggregateDataStream(datasetId, pipeline, [ndJSON])](#TDXApi+getAggregateDataStream) ⇒ <code>object</code>
     * [.getAggregateData(datasetId, pipeline, [ndJSON])](#TDXApi+getAggregateData) ⇒ [<code>DatasetData</code>](#DatasetData)
+    * [.getAuthenticatedAccount()](#TDXApi+getAuthenticatedAccount) ⇒ <code>object</code>
     * [.getDatasetDataStream(datasetId, [filter], [projection], [options], [ndJSON])](#TDXApi+getDatasetDataStream) ⇒ <code>object</code>
     * [.getDatasetData(datasetId, [filter], [projection], [options], [ndJSON])](#TDXApi+getDatasetData) ⇒ [<code>DatasetData</code>](#DatasetData)
     * [.getDatasetDataCount(datasetId, [filter])](#TDXApi+getDatasetDataCount)
@@ -802,6 +803,13 @@ Performs an aggregate query on the given dataset.
 | pipeline | <code>object</code> \| <code>string</code> | The aggregate pipeline, as defined in the [mongodb docs](https://docs.mongodb.com/manual/aggregation/). Can be given as a JSON object or as a stringified JSON object. |
 | [ndJSON] | <code>bool</code> | If set, the data is sent in [newline delimited json format](http://ndjson.org/). |
 
+<a name="TDXApi+getAuthenticatedAccount"></a>
+
+### tdxApi.getAuthenticatedAccount() ⇒ <code>object</code>
+Gets details of the currently authenticated account.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+**Returns**: <code>object</code> - - Details of the authenticated account.  
 <a name="TDXApi+getDatasetDataStream"></a>
 
 ### tdxApi.getDatasetDataStream(datasetId, [filter], [projection], [options], [ndJSON]) ⇒ <code>object</code>
