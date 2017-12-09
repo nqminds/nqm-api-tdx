@@ -258,7 +258,7 @@ const waitForResource = function(resourceId, check, retryCount, maxRetries) {
             failure.code === "UnauthorizedError"
           ) {
             // Ignore resource not found and not authorized errors here, they are probably caused by
-            // waiting for the projections to catch up (esp. in debug environments) by falling through
+            // waiting for the projections to catch up (esp. in debug environments). By falling through
             // we will still be limited by the retry count, so won't loop forever.
             log("ignoring error %s", err.message);
             return new Promise((resolve) => {
@@ -296,7 +296,10 @@ const waitForIndex = function(datasetId, status, maxRetries) {
     let continueWaiting;
 
     // Handle "error" index status.
-    if (dataset && dataset.indexStatus === "error") {
+    if (dataset && dataset.schemaDefinition && dataset.schemaDefinition.basedOn[0] !== "dataset") {
+      // No need to wait for the index on non-dataset resources.
+      continueWaiting = false;
+    } else if (dataset && dataset.indexStatus === "error") {
       if (!initialStatus) {
         // Haven't got an initial status yet, so can't make a judgment as to whether or not the error status
         // is new, or the index was already in an error state.
