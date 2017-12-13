@@ -209,8 +209,8 @@ const setDefaults = function(config) {
     config.tdxServer || "[n/a]",
   );
 
-  // Default network timeout to 5 seconds.
-  config.networkTimeout = config.networkTimeout || 120000;
+  // Default network timeout to 2 mins.
+  config.networkTimeout = config.networkTimeout === undefined ? 120000 : config.networkTimeout;
 };
 
 const waitForResource = function(resourceId, check, retryCount, maxRetries) {
