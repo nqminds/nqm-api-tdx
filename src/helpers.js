@@ -18,12 +18,15 @@ const fetchWithDeadline = function(request) {
   //
   return new Promise((resolve, reject) => {
     let deadline;
+    let rejected = false;
 
     if (this.config.networkTimeout) {
       // Reject the promise if the timeout expires.
       deadline = setTimeout(
         () => {
           log("deadline expired after %d ms", this.config.networkTimeout);
+          deadline = 0;
+          rejected = true;
           reject(new Error(`deadline expired after ${this.config.networkTimeout} ms`));
         },
         this.config.networkTimeout
@@ -33,17 +36,24 @@ const fetchWithDeadline = function(request) {
       deadline = 0;
     }
 
-    fetch(request).then(
-      (response) => {
+    fetch(request)
+      .then((response) => {
+        // Forward response.
+        resolve(response);
+      })
+      .catch((err) => {
+        if (!rejected) {
+          reject(err);
+        } else {
+          log("already rejected by timeout, ignoring rejection [%s]", err.message);
+        }
+      })
+      .finally(() => {
         // Cancel pending deadline.
         if (deadline) {
           clearTimeout(deadline);
         }
-        // Forward response.
-        resolve(response);
-      },
-      reject // Blindly forward all rejections.
-    );
+      });
   });
 };
 
