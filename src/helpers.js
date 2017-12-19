@@ -36,7 +36,7 @@ const fetchWithDeadline = function(request) {
       deadline = 0;
     }
 
-    fetch(request)
+    Promise.resolve(fetch(request))
       .then((response) => {
         // Forward response.
         resolve(response);
