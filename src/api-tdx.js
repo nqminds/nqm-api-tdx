@@ -1052,6 +1052,20 @@ class TDXApi {
       .then(checkResponse.bind(null, "deleteZoneConnection"));
   }
 
+  /**
+   * AUDIT COMMANDS
+   */
+
+  rollbackCommand(id) {
+    const request = buildCommandRequest.call(this, "rollback", {id});
+    return fetch.call(this, request)
+      .catch((err) => {
+        errLog("TDXApi.rollbackCommand: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "rollbackCommand"));
+  }
+
   /*
    *
    *  QUERIES
