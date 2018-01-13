@@ -706,7 +706,7 @@ class TDXApi {
   deleteDataByQuery(datasetId, query) {
     const postData = {
       datasetId,
-      query,
+      query: JSON.stringify(query),
     };
     const request = buildCommandRequest.call(this, "dataset/data/deleteQuery", postData);
     return fetch.call(this, request)
@@ -779,13 +779,13 @@ class TDXApi {
    * @param  {object} query - The query that specifies the data to update. All documents matching the
    * query will be updated.
    * @example
-   * // Update all documents with English lsoa.
-   * tdxApi.deleteDataByQuery(myDatasetId, {lsoa: {$regex: "E*"}}, {count: 1000});
+   * // Update all documents with English lsoa, setting `count` to 1000.
+   * tdxApi.updateDataByQuery(myDatasetId, {lsoa: {$regex: "E*"}}, {count: 1000});
    */
   updateDataByQuery(datasetId, query, update) {
     const postData = {
       datasetId,
-      query,
+      query: JSON.stringify(query),
       update,
     };
     const request = buildCommandRequest.call(this, "dataset/data/updateQuery", postData);
