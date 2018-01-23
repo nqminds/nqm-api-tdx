@@ -18,9 +18,10 @@ const errLog = debug("nqm-api-tdx:error");
 /**
  * @typedef  {object} CommandResult
  * @property  {string} commandId - The auto-generated unique id of the command.
- * @property  {object|string} response - The result of the command. If a command is sent asynchronously, this will
+ * @property  {object|string} response - The response of the command. If a command is sent asynchronously, this will
  * simply be the string `"ack"`. In synchronous mode, this will usually be an object consisting of the primary key
  * of the data that was affected by the command.
+ * @property  {object} result - Contains detailed error information when available.
  */
 
 /**
@@ -669,10 +670,10 @@ class TDXApi {
     const request = buildCommandRequest.call(this, "dataset/data/createMany", postData);
     return fetch.call(this, request)
       .catch((err) => {
-        errLog("TDXApi.createData: %s", err.message);
+        errLog("TDXApi.addData: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "updateData"));
+      .then(checkResponse.bind(null, "addData"));
   }
 
   /**
@@ -752,6 +753,7 @@ class TDXApi {
    * Supports updating individual or multiple documents.
    * @param  {bool} [upsert=false] - Indicates the data should be created if no document is found matching the
    * primary key.
+   * @return {CommandResult} - Use the result property to check for errors.
    * @example <caption>update an existing document</caption>
    * tdxApi.updateData(myDatasetId, {lsoa: "E000001", count: 488});
    * @example <caption>upsert a document</caption>
@@ -1172,12 +1174,12 @@ class TDXApi {
    * @param  {bool} [ndJSON] - If set, the data is sent in [newline delimited json format](http://ndjson.org/).
    * @return  {object} - Response object, where the response body is a stream object.
    */
-  getDatasetDataStream(datasetId, filter, projection, options, ndJSON) {
+  getDataStream(datasetId, filter, projection, options, ndJSON) {
     const endpoint = `datasets/${datasetId}/${ndJSON ? "nddata" : "data"}`;
     const request = buildQueryRequest.call(this, endpoint, filter, projection, options);
     return fetch.call(this, request)
       .catch((err) => {
-        errLog("TDXApi.getDatasetDataStream: %s", err.message);
+        errLog("TDXApi.getDataStream: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       });
   }
@@ -1195,9 +1197,46 @@ class TDXApi {
    * @param  {bool} [ndJSON] - If set, the data is sent in [newline delimited json format](http://ndjson.org/).
    * @return  {DatasetData}
    */
+  getData(datasetId, filter, projection, options, ndJSON) {
+    return this.getDataStream(datasetId, filter, projection, options, ndJSON)
+      .then(checkResponse.bind(null, "getData"));
+  }
+
+  /**
+   * [DEPRECATED] - use getDataStream
+   * Gets all data from the given dataset that matches the filter provided and returns a response object with stream
+   * in the body.
+   * @param  {string} datasetId - The id of the dataset-based resource.
+   * @param  {object} [filter] - A mongodb filter object. If omitted, all data will be retrieved.
+   * @param  {object} [projection] - A mongodb projection object. Should be used to restrict the payload to the
+   * minimum properties needed if a lot of data is being retrieved.
+   * @param  {object} [options] - A mongodb options object. Can be used to limit, skip, sort etc. Note a default
+   * `limit` of 1000 is applied if none is given here.
+   * @param  {bool} [options.nqmMeta] - When set, the resource metadata will be returned along with the dataset
+   * data. Can be used to avoid a second call to `getResource`. Otherwise a URL to the metadata is provided.
+   * @param  {bool} [ndJSON] - If set, the data is sent in [newline delimited json format](http://ndjson.org/).
+   * @return  {object} - Response object, where the response body is a stream object.
+   */
+  getDatasetDataStream(datasetId, filter, projection, options, ndJSON) {
+    return this.getDataStream(datasetId, filter, projection, options, ndJSON);
+  }
+
+  /**
+   * [DEPRECATED] - use getData
+   * Gets all data from the given dataset that matches the filter provided.
+   * @param  {string} datasetId - The id of the dataset-based resource.
+   * @param  {object} [filter] - A mongodb filter object. If omitted, all data will be retrieved.
+   * @param  {object} [projection] - A mongodb projection object. Should be used to restrict the payload to the
+   * minimum properties needed if a lot of data is being retrieved.
+   * @param  {object} [options] - A mongodb options object. Can be used to limit, skip, sort etc. Note a default
+   * `limit` of 1000 is applied if none is given here.
+   * @param  {bool} [options.nqmMeta] - When set, the resource metadata will be returned along with the dataset
+   * data. Can be used to avoid a second call to `getResource`. Otherwise a URL to the metadata is provided.
+   * @param  {bool} [ndJSON] - If set, the data is sent in [newline delimited json format](http://ndjson.org/).
+   * @return  {DatasetData}
+   */
   getDatasetData(datasetId, filter, projection, options, ndJSON) {
-    return this.getDatasetDataStream(datasetId, filter, projection, options, ndJSON)
-      .then(checkResponse.bind(null, "getDatasetData"));
+    return this.getData(datasetId, filter, projection, options, ndJSON);
   }
 
   /**

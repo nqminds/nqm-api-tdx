@@ -37,7 +37,7 @@
     * [.addResourceAccess(resourceId, accountId, sourceId, access)](#TDXApi+addResourceAccess)
     * [.deleteResource(resourceId)](#TDXApi+deleteResource)
     * [.deleteManyResources(resourceIdList)](#TDXApi+deleteManyResources) ⇒ [<code>CommandResult</code>](#CommandResult)
-    * [.fileUpload(resourceId, file, [stream])](#TDXApi+fileUpload)
+    * [.fileUpload(resourceId, file, [stream], [boolean], [boolean])](#TDXApi+fileUpload)
     * [.moveResource(id, fromParentId, toParentId)](#TDXApi+moveResource)
     * [.rebuildResourceIndex(resourceId)](#TDXApi+rebuildResourceIndex)
     * [.removeResourceAccess(resourceId, accountId, addedBy, sourceId, access)](#TDXApi+removeResourceAccess)
@@ -51,7 +51,7 @@
     * [.deleteData(datasetId, data)](#TDXApi+deleteData)
     * [.deleteDataByQuery(datasetId, query)](#TDXApi+deleteDataByQuery)
     * [.patchData(datasetId, data)](#TDXApi+patchData)
-    * [.updateData(datasetId, data, [upsert])](#TDXApi+updateData)
+    * [.updateData(datasetId, data, [upsert])](#TDXApi+updateData) ⇒ [<code>CommandResult</code>](#CommandResult)
     * [.updateDataByQuery(datasetId, query)](#TDXApi+updateDataByQuery)
     * [.deleteDatabotHost(payload)](#TDXApi+deleteDatabotHost)
     * [.deleteDatabotInstance(instanceId)](#TDXApi+deleteDatabotInstance)
@@ -66,11 +66,14 @@
     * [.writeDatabotHostInstanceOutput(output)](#TDXApi+writeDatabotHostInstanceOutput)
     * [.addZoneConnection(options)](#TDXApi+addZoneConnection)
     * [.deleteZoneConnection(id)](#TDXApi+deleteZoneConnection)
+    * [.rollbackCommand()](#TDXApi+rollbackCommand)
     * [.exchangeTDXToken(token, [ip])](#TDXApi+exchangeTDXToken) ⇒ <code>object</code>
     * [.downloadResource(resourceId)](#TDXApi+downloadResource) ⇒ <code>object</code>
     * [.getAggregateDataStream(datasetId, pipeline, [ndJSON])](#TDXApi+getAggregateDataStream) ⇒ <code>object</code>
     * [.getAggregateData(datasetId, pipeline, [ndJSON])](#TDXApi+getAggregateData) ⇒ [<code>DatasetData</code>](#DatasetData)
     * [.getAuthenticatedAccount()](#TDXApi+getAuthenticatedAccount) ⇒ <code>object</code>
+    * [.getDataStream(datasetId, [filter], [projection], [options], [ndJSON])](#TDXApi+getDataStream) ⇒ <code>object</code>
+    * [.getData(datasetId, [filter], [projection], [options], [ndJSON])](#TDXApi+getData) ⇒ [<code>DatasetData</code>](#DatasetData)
     * [.getDatasetDataStream(datasetId, [filter], [projection], [options], [ndJSON])](#TDXApi+getDatasetDataStream) ⇒ <code>object</code>
     * [.getDatasetData(datasetId, [filter], [projection], [options], [ndJSON])](#TDXApi+getDatasetData) ⇒ [<code>DatasetData</code>](#DatasetData)
     * [.getDatasetDataCount(datasetId, [filter])](#TDXApi+getDatasetDataCount)
@@ -321,7 +324,7 @@ Will fail **all** deletes if any of the permission checks fail.
 
 <a name="TDXApi+fileUpload"></a>
 
-### tdxApi.fileUpload(resourceId, file, [stream])
+### tdxApi.fileUpload(resourceId, file, [stream], [boolean], [boolean])
 Upload a file to a resource.
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
@@ -331,6 +334,8 @@ Upload a file to a resource.
 | resourceId | <code>string</code> |  | The id of the destination resource. |
 | file | <code>object</code> |  | The file to upload, obtained from an `<input type="file">` element. |
 | [stream] | <code>bool</code> | <code>false</code> | Flag indicating whether the call should return a stream allowing callees to monitor progress. |
+| [boolean] | <code>compressed</code> | <code>false</code> | Flag indicating the file should be decompressed after upload. ZIP format only. |
+| [boolean] | <code>base64Encoded</code> | <code>false</code> | = Flag indicating the file should be decoded from base64 after upload. |
 
 <a name="TDXApi+moveResource"></a>
 
@@ -538,10 +543,11 @@ tdxApi.patchData(myDatasetId, {lsoa: "E000001", __update: [
 ```
 <a name="TDXApi+updateData"></a>
 
-### tdxApi.updateData(datasetId, data, [upsert])
+### tdxApi.updateData(datasetId, data, [upsert]) ⇒ [<code>CommandResult</code>](#CommandResult)
 Updates data in a dataset resource.
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+**Returns**: [<code>CommandResult</code>](#CommandResult) - - Use the result property to check for errors.  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -572,8 +578,8 @@ Updates data in a dataset-based resource using a query to specify the documents 
 
 **Example**  
 ```js
-// Update all documents with English lsoa.
-tdxApi.deleteDataByQuery(myDatasetId, {lsoa: {$regex: "E*"}}, {count: 1000});
+// Update all documents with English lsoa, setting `count` to 1000.
+tdxApi.updateDataByQuery(myDatasetId, {lsoa: {$regex: "E*"}}, {count: 1000});
 ```
 <a name="TDXApi+deleteDatabotHost"></a>
 
@@ -747,6 +753,12 @@ Deletes a zone connection. The authenticated account must own the zone connectio
 | --- | --- | --- |
 | id | <code>string</code> | The id of the zone connection to delete. |
 
+<a name="TDXApi+rollbackCommand"></a>
+
+### tdxApi.rollbackCommand()
+AUDIT COMMANDS
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
 <a name="TDXApi+exchangeTDXToken"></a>
 
 ### tdxApi.exchangeTDXToken(token, [ip]) ⇒ <code>object</code>
@@ -810,9 +822,44 @@ Gets details of the currently authenticated account.
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
 **Returns**: <code>object</code> - - Details of the authenticated account.  
+<a name="TDXApi+getDataStream"></a>
+
+### tdxApi.getDataStream(datasetId, [filter], [projection], [options], [ndJSON]) ⇒ <code>object</code>
+Gets all data from the given dataset that matches the filter provided and returns a response object with stream
+in the body.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+**Returns**: <code>object</code> - - Response object, where the response body is a stream object.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| datasetId | <code>string</code> | The id of the dataset-based resource. |
+| [filter] | <code>object</code> | A mongodb filter object. If omitted, all data will be retrieved. |
+| [projection] | <code>object</code> | A mongodb projection object. Should be used to restrict the payload to the minimum properties needed if a lot of data is being retrieved. |
+| [options] | <code>object</code> | A mongodb options object. Can be used to limit, skip, sort etc. Note a default `limit` of 1000 is applied if none is given here. |
+| [options.nqmMeta] | <code>bool</code> | When set, the resource metadata will be returned along with the dataset data. Can be used to avoid a second call to `getResource`. Otherwise a URL to the metadata is provided. |
+| [ndJSON] | <code>bool</code> | If set, the data is sent in [newline delimited json format](http://ndjson.org/). |
+
+<a name="TDXApi+getData"></a>
+
+### tdxApi.getData(datasetId, [filter], [projection], [options], [ndJSON]) ⇒ [<code>DatasetData</code>](#DatasetData)
+Gets all data from the given dataset that matches the filter provided.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| datasetId | <code>string</code> | The id of the dataset-based resource. |
+| [filter] | <code>object</code> | A mongodb filter object. If omitted, all data will be retrieved. |
+| [projection] | <code>object</code> | A mongodb projection object. Should be used to restrict the payload to the minimum properties needed if a lot of data is being retrieved. |
+| [options] | <code>object</code> | A mongodb options object. Can be used to limit, skip, sort etc. Note a default `limit` of 1000 is applied if none is given here. |
+| [options.nqmMeta] | <code>bool</code> | When set, the resource metadata will be returned along with the dataset data. Can be used to avoid a second call to `getResource`. Otherwise a URL to the metadata is provided. |
+| [ndJSON] | <code>bool</code> | If set, the data is sent in [newline delimited json format](http://ndjson.org/). |
+
 <a name="TDXApi+getDatasetDataStream"></a>
 
 ### tdxApi.getDatasetDataStream(datasetId, [filter], [projection], [options], [ndJSON]) ⇒ <code>object</code>
+[DEPRECATED] - use getDataStream
 Gets all data from the given dataset that matches the filter provided and returns a response object with stream
 in the body.
 
@@ -831,6 +878,7 @@ in the body.
 <a name="TDXApi+getDatasetData"></a>
 
 ### tdxApi.getDatasetData(datasetId, [filter], [projection], [options], [ndJSON]) ⇒ [<code>DatasetData</code>](#DatasetData)
+[DEPRECATED] - use getData
 Gets all data from the given dataset that matches the filter provided.
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
@@ -978,7 +1026,8 @@ Validates the given token was signed by this TDX, and returns the decoded token 
 | Name | Type | Description |
 | --- | --- | --- |
 | commandId | <code>string</code> | The auto-generated unique id of the command. |
-| response | <code>object</code> \| <code>string</code> | The result of the command. If a command is sent asynchronously, this will simply be the string `"ack"`. In synchronous mode, this will usually be an object consisting of the primary key of the data that was affected by the command. |
+| response | <code>object</code> \| <code>string</code> | The response of the command. If a command is sent asynchronously, this will simply be the string `"ack"`. In synchronous mode, this will usually be an object consisting of the primary key of the data that was affected by the command. |
+| result | <code>object</code> | Contains detailed error information when available. |
 
 <a name="DatasetData"></a>
 
