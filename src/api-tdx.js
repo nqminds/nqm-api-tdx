@@ -1076,16 +1076,24 @@ class TDXApi {
 
   /**
    * Exchanges a client user token (e.g. bound to the browser IP) for an application-user token bound to the
-   * currently authenticated token IP. The currently authenticated token ***must*** be an application token, whereby the
-   * application has been authorised by the user and the user has permission to access the application. The returned
-   * token will be bound to the same IP address as the currently authenticated token (i.e the application server IP).
+   * given IP or the currently authenticated token IP. The currently authenticated token ***must*** be an application
+   * token, whereby the application has been authorised by the user and the user has permission to access the
+   * application. The returned token will be bound to the given IP or the IP of the currently authenticated token
+   * (i.e the application server IP).
    *
    * @param  {string} token - The users' TDX auth server token to validate.
-   * @param  {string} [ip] - The optional IP address to validate the user token against.
+   * @param  {string} [validateIP] - The optional IP address to validate the user token against.
+   * @param  {string} [exchangeIP] - The optional IP address to bind the new token to.
    * @return  {object} - The new token application-user token, bound to the server IP.
+   * @example <caption>validate against current IP</caption>
+   * tdxApi.exchangeTDXToken(clientToken);
+   * @example <caption>validate against different IP</caption>
+   * tdxApi.exchangeTDXToken(clientToken, newClientIP);
+   * @example <caption>validate against current IP, bind to a new IP</caption>
+   * tdxApi.exchangeTDXToken(clientToken, null, serverIP);
    */
-  exchangeTDXToken(token, ip) {
-    const request = buildQueryRequest.call(this, "token/exchange", {token, ip});
+  exchangeTDXToken(token, validateIP, exchangeIP) {
+    const request = buildQueryRequest.call(this, "token/exchange", {token, ip: validateIP, exchangeIP});
     return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.exchangeTDXToken: %s", err.message);
