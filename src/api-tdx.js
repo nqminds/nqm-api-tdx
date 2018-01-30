@@ -22,6 +22,8 @@ const errLog = debug("nqm-api-tdx:error");
  * simply be the string `"ack"`. In synchronous mode, this will usually be an object consisting of the primary key
  * of the data that was affected by the command.
  * @property  {object} result - Contains detailed error information when available.
+ * @property  {array} result.errors - Will contain error information when appropriate.
+ * @property  {array} result.commit - Contains details of each commited document.
  */
 
 /**
