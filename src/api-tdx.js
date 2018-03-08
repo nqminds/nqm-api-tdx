@@ -1086,6 +1086,7 @@ class TDXApi {
    * @param  {string} token - The users' TDX auth server token to validate.
    * @param  {string} [validateIP] - The optional IP address to validate the user token against.
    * @param  {string} [exchangeIP] - The optional IP address to bind the new token to.
+   * @param  {number} [ttl] - The ttl in seconds.
    * @return  {object} - The new token application-user token, bound to the server IP.
    * @example <caption>validate against current IP</caption>
    * tdxApi.exchangeTDXToken(clientToken);
@@ -1094,8 +1095,8 @@ class TDXApi {
    * @example <caption>validate against current IP, bind to a new IP</caption>
    * tdxApi.exchangeTDXToken(clientToken, null, serverIP);
    */
-  exchangeTDXToken(token, validateIP, exchangeIP) {
-    const request = buildQueryRequest.call(this, "token/exchange", {token, ip: validateIP, exchangeIP});
+  exchangeTDXToken(token, validateIP, exchangeIP, ttl) {
+    const request = buildQueryRequest.call(this, "token/exchange", {token, ip: validateIP, exchangeIP, ttl});
     return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.exchangeTDXToken: %s", err.message);
