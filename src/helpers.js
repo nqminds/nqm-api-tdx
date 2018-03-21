@@ -52,6 +52,7 @@ const fetchWithDeadline = function(request) {
         // Cancel pending deadline.
         if (deadline) {
           clearTimeout(deadline);
+          deadline = 0;
         }
       });
   });
