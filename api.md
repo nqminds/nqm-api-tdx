@@ -67,7 +67,7 @@
     * [.addZoneConnection(options)](#TDXApi+addZoneConnection)
     * [.deleteZoneConnection(id)](#TDXApi+deleteZoneConnection)
     * [.rollbackCommand()](#TDXApi+rollbackCommand)
-    * [.exchangeTDXToken(token, [ip])](#TDXApi+exchangeTDXToken) ⇒ <code>object</code>
+    * [.exchangeTDXToken(token, [validateIP], [exchangeIP], [ttl])](#TDXApi+exchangeTDXToken) ⇒ <code>object</code>
     * [.downloadResource(resourceId)](#TDXApi+downloadResource) ⇒ <code>object</code>
     * [.getAggregateDataStream(datasetId, pipeline, [ndJSON])](#TDXApi+getAggregateDataStream) ⇒ <code>object</code>
     * [.getAggregateData(datasetId, pipeline, [ndJSON])](#TDXApi+getAggregateData) ⇒ [<code>DatasetData</code>](#DatasetData)
@@ -761,11 +761,12 @@ AUDIT COMMANDS
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
 <a name="TDXApi+exchangeTDXToken"></a>
 
-### tdxApi.exchangeTDXToken(token, [ip]) ⇒ <code>object</code>
+### tdxApi.exchangeTDXToken(token, [validateIP], [exchangeIP], [ttl]) ⇒ <code>object</code>
 Exchanges a client user token (e.g. bound to the browser IP) for an application-user token bound to the
-currently authenticated token IP. The currently authenticated token ***must*** be an application token, whereby the
-application has been authorised by the user and the user has permission to access the application. The returned
-token will be bound to the same IP address as the currently authenticated token (i.e the application server IP).
+given IP or the currently authenticated token IP. The currently authenticated token ***must*** be an application
+token, whereby the application has been authorised by the user and the user has permission to access the
+application. The returned token will be bound to the given IP or the IP of the currently authenticated token
+(i.e the application server IP).
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
 **Returns**: <code>object</code> - - The new token application-user token, bound to the server IP.  
@@ -773,8 +774,22 @@ token will be bound to the same IP address as the currently authenticated token 
 | Param | Type | Description |
 | --- | --- | --- |
 | token | <code>string</code> | The users' TDX auth server token to validate. |
-| [ip] | <code>string</code> | The optional IP address to validate the user token against. |
+| [validateIP] | <code>string</code> | The optional IP address to validate the user token against. |
+| [exchangeIP] | <code>string</code> | The optional IP address to bind the new token to. |
+| [ttl] | <code>number</code> | The ttl in seconds. |
 
+**Example** *(validate against current IP)*  
+```js
+tdxApi.exchangeTDXToken(clientToken);
+```
+**Example** *(validate against different IP)*  
+```js
+tdxApi.exchangeTDXToken(clientToken, newClientIP);
+```
+**Example** *(validate against current IP, bind to a new IP)*  
+```js
+tdxApi.exchangeTDXToken(clientToken, null, serverIP);
+```
 <a name="TDXApi+downloadResource"></a>
 
 ### tdxApi.downloadResource(resourceId) ⇒ <code>object</code>
@@ -1028,6 +1043,8 @@ Validates the given token was signed by this TDX, and returns the decoded token 
 | commandId | <code>string</code> | The auto-generated unique id of the command. |
 | response | <code>object</code> \| <code>string</code> | The response of the command. If a command is sent asynchronously, this will simply be the string `"ack"`. In synchronous mode, this will usually be an object consisting of the primary key of the data that was affected by the command. |
 | result | <code>object</code> | Contains detailed error information when available. |
+| result.errors | <code>array</code> | Will contain error information when appropriate. |
+| result.commit | <code>array</code> | Contains details of each commited document. |
 
 <a name="DatasetData"></a>
 
