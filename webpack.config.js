@@ -51,6 +51,7 @@ const config = {
     bluebird: "bluebird",
     debug: "debug",
     "@nqminds/isomorphic-fetch": "@nqminds/isomorphic-fetch",
+    "@nqminds/nqm-core-utils": "@nqminds/nqm-core-utils",
     lodash: {
       commonjs: "lodash",
       commonjs2: "lodash",

@@ -342,6 +342,44 @@ const waitForIndex = function(datasetId, status, maxRetries) {
   return waitForResource.call(this, datasetId, builtIndexCheck, 0, maxRetries);
 };
 
+const waitForAccount = function(accountId, verified, approved, retryCount, maxRetries) {
+  const log = debug("nqm-api-tdx:waitForAccount");
+  retryCount = retryCount || 0;
+  return this.getAccount(accountId)
+    .then((account) => {
+      let retry = false;
+      if (account) {
+        if ((verified && !account.verified) || (approved && !account.approved)) {
+          retry = true;
+        }
+      } else {
+        retry = true;
+      }
+
+      if (retry) {
+        // A negative maxRetries value will retry indefinitely.
+        if (maxRetries >= 0 && retryCount > maxRetries) {
+          log("giving up after %d attempts", retryCount);
+          return Promise.reject(new Error(`gave up waiting for ${accountId} after ${retryCount} attempts`));
+        }
+
+        // Try again after a delay.
+        log("waiting for %d msec", pollingInterval);
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            log("trying again");
+            resolve(waitForAccount.call(this, accountId, verified, approved, retryCount + 1, maxRetries));
+          }, pollingInterval);
+        });
+      } else {
+        return account;
+      }
+    })
+    .catch((err) => {
+      return Promise.reject(err);
+    });
+};
+
 export {
   buildCommandRequest,
   buildDatabotHostRequest,
@@ -352,5 +390,6 @@ export {
   handleError,
   setDefaults,
   TDXApiError,
+  waitForAccount,
   waitForIndex,
 };

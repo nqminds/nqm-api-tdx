@@ -1,5 +1,6 @@
 import base64 from "base-64";
 import debug from "debug";
+import nqmUtils from "@nqminds/nqm-core-utils";
 import {
   buildCommandRequest,
   buildDatabotHostRequest,
@@ -9,6 +10,7 @@ import {
   fetchWithDeadline as fetch,
   handleError,
   setDefaults,
+  waitForAccount,
   waitForIndex,
 } from "./helpers";
 
@@ -159,14 +161,51 @@ class TDXApi {
    * IP address is in this list
    * @return  {CommandResult}
    */
-  addAccount(options) {
+  addAccount(options, wait) {
     const request = buildCommandRequest.call(this, "account/create", options);
     return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.addAccount: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "addAccount"));
+      .then(checkResponse.bind(null, "addAccount"))
+      .then((result) => {
+        if (wait) {
+          return waitForAccount.call(this, options.username, options.verified, options.approved)
+            .then(() => {
+              return result;
+            });
+        } else {
+          return result;
+        }
+      });
+  }
+
+  /**
+   * Adds the application/user connection resource. The authenticated token must belong to the application.
+   * @param {string} accountId - the account id
+   * @param {string} applicationId - the application id
+   * @param {bool} [wait=false] - whether or not to wait for the projection to catch up.
+   */
+  addAccountApplicationConnection(accountId, applicationId, wait) {
+    const request = buildCommandRequest.call(this, "account/connectApplication", {accountId});
+    return fetch.call(this, request)
+      .catch((err) => {
+        errLog("TDXApi.addAccountApplicationConnection: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "addAccountApplicationConnection"))
+      .then((result) => {
+        if (wait) {
+          const applicationUserId = nqmUtils.shortHash(`${applicationId}-${accountId}`);
+          return waitForIndex.call(this, applicationUserId)
+            .then(() => {
+              return result;
+            });
+        } else {
+          return result;
+        }
+      });
   }
 
   /**
@@ -1121,6 +1160,24 @@ class TDXApi {
   }
 
   /**
+   * Gets the details for a given account id.
+   * @param  {string} accountId - the id of the account to be retrieved.
+   * @return  {Zone} zone
+   */
+  getAccount(accountId) {
+    const request = buildQueryRequest.call(this, "zones", {username: accountId});
+    return fetch.call(this, request)
+      .catch((err) => {
+        errLog("TDXApi.getZone: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "getZone"))
+      .then((zoneList) => {
+        return zoneList && zoneList.length ? zoneList[0] : null;
+      });
+  }
+
+   /**
    * Performs an aggregate query on the given dataset, returning a response object with stream in the body
    * @param  {string} datasetId - The id of the dataset-based resource to perform the aggregate query on.
    * @param  {object|string} pipeline - The aggregate pipeline, as defined in the
@@ -1393,15 +1450,23 @@ class TDXApi {
    * @return  {Zone} zone
    */
   getZone(accountId) {
-    const request = buildQueryRequest.call(this, "zones", {username: accountId});
-    return fetch.call(this, request)
-      .catch((err) => {
-        errLog("TDXApi.getZone: %s", err.message);
-        return Promise.reject(new Error(`${err.message} - [network error]`));
-      })
-      .then(checkResponse.bind(null, "getZone"))
-      .then((zoneList) => {
-        return zoneList && zoneList.length ? zoneList[0] : null;
+    return this.getAccount(accountId);
+  }
+
+  /**
+   * Determines if the given account is a member of the given group.
+   * @param {string} accountId - the id of the account
+   * @param {*} groupId - the id of the group
+   */
+  isInGroup(accountId, groupId) {
+    const lookup = {
+      aid: accountId,
+      "r.0": {$exists: true},
+      grp: "m",
+    };
+    return this.getResourceAccess(groupId, lookup)
+      .then((access) => {
+        return !!access.length;
       });
   }
 
