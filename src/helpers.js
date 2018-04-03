@@ -349,8 +349,12 @@ const waitForAccount = function(accountId, verified, approved, retryCount, maxRe
     .then((account) => {
       let retry = false;
       if (account) {
-        if ((verified && !account.verified) || (approved && !account.approved)) {
+        if (verified && !account.verified) {
           retry = true;
+        } else if (approved && !account.approved) {
+          retry = true;
+        } else {
+          retry = false;
         }
       } else {
         retry = true;

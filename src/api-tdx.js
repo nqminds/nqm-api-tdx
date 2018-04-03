@@ -1,6 +1,6 @@
 import base64 from "base-64";
 import debug from "debug";
-import nqmUtils from "@nqminds/nqm-core-utils";
+import {shortHash} from "@nqminds/nqm-core-utils";
 import {
   buildCommandRequest,
   buildDatabotHostRequest,
@@ -197,7 +197,7 @@ class TDXApi {
       .then(checkResponse.bind(null, "addAccountApplicationConnection"))
       .then((result) => {
         if (wait) {
-          const applicationUserId = nqmUtils.shortHash(`${applicationId}-${accountId}`);
+          const applicationUserId = shortHash(`${applicationId}-${accountId}`);
           return waitForIndex.call(this, applicationUserId)
             .then(() => {
               return result;
@@ -1165,15 +1165,15 @@ class TDXApi {
    * @return  {Zone} zone
    */
   getAccount(accountId) {
-    const request = buildQueryRequest.call(this, "zones", {username: accountId});
+    const request = buildQueryRequest.call(this, "accounts", {username: accountId});
     return fetch.call(this, request)
       .catch((err) => {
-        errLog("TDXApi.getZone: %s", err.message);
+        errLog("TDXApi.getAccount: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "getZone"))
-      .then((zoneList) => {
-        return zoneList && zoneList.length ? zoneList[0] : null;
+      .then(checkResponse.bind(null, "getAccount"))
+      .then((accountList) => {
+        return accountList && accountList.length ? accountList[0] : null;
       });
   }
 
