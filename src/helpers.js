@@ -348,7 +348,7 @@ const waitForAccount = function(accountId, verified, approved, retryCount, maxRe
   return this.getAccount(accountId)
     .then((account) => {
       let retry = false;
-      if (account) {
+      if (account && account.initialised) {
         if (verified && !account.verified) {
           retry = true;
         } else if (approved && !account.approved) {

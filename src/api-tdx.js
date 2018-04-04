@@ -1,6 +1,6 @@
 import base64 from "base-64";
 import debug from "debug";
-import {constants, shortHash} from "@nqminds/nqm-core-utils";
+import {shortHash} from "@nqminds/nqm-core-utils";
 import {
   buildCommandRequest,
   buildDatabotHostRequest,
@@ -171,18 +171,10 @@ class TDXApi {
       .then(checkResponse.bind(null, "addAccount"))
       .then((result) => {
         if (wait) {
-          if (options.accountType === constants.userAccountType) {
-            const userGroupsFolderId = shortHash(constants.accountSetRootFolderPrefix + result.response.username);
-            return waitForIndex.call(this, userGroupsFolderId)
-              .then(() => {
-                return result;
-              });
-          } else {
-            return waitForAccount.call(this, options.username, options.verified, options.approved)
-              .then(() => {
-                return result;
-              });
-          }
+          return waitForAccount.call(this, options.username, options.verified, options.approved)
+            .then(() => {
+              return result;
+            });
         } else {
           return result;
         }
