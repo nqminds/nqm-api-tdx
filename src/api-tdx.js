@@ -1,6 +1,6 @@
 import base64 from "base-64";
 import debug from "debug";
-import {constants, resourceUtils, shortHash} from "@nqminds/nqm-core-utils";
+import {shortHash} from "@nqminds/nqm-core-utils";
 import {
   buildCommandRequest,
   buildDatabotHostRequest,
@@ -185,152 +185,26 @@ class TDXApi {
    * Adds the application/user connection resource. The authenticated token must belong to the application.
    * @param {string} accountId - the account id
    * @param {string} applicationId - the application id
-   * @param {bool} [wait=false] - whether or not to wait for the projection to catch up.
+   * @param {bool} [wait=true] - whether or not to wait for the projection to catch up.
    */
-  // addAccountApplicationConnection(accountId, applicationId, wait) {
-  //   const request = buildCommandRequest.call(this, "account/connectApplication", {accountId});
-  //   return fetch.call(this, request)
-  //     .catch((err) => {
-  //       errLog("TDXApi.addAccountApplicationConnection: %s", err.message);
-  //       return Promise.reject(new Error(`${err.message} - [network error]`));
-  //     })
-  //     .then(checkResponse.bind(null, "addAccountApplicationConnection"))
-  //     .then((result) => {
-  //       if (wait) {
-  //         const applicationUserId = shortHash(`${applicationId}-${accountId}`);
-  //         return waitForIndex.call(this, applicationUserId)
-  //           .then(() => {
-  //             return result;
-  //           });
-  //       } else {
-  //         return result;
-  //       }
-  //     });
-  // }
-
-
-  addAccountApplicationConnection(accountId, applicationId, wait) {
-    const applicationUserId = shortHash(`${applicationId}-${accountId}`);
-
-    let application;
-    let user;
-
-    // Get application details.
-    return this.getResource(applicationId)
-      .then((app) => {
-        if (!app) {
-          return Promise.reject(new Error(`application ${applicationId} not found`));
-        }
-        application = app;
-
-        // Get user details.
-        return this.getAccount(accountId);
+  addAccountApplicationConnection(accountId, applicationId, wait = true) {
+    const request = buildCommandRequest.call(this, "applicationConnection/create", {accountId});
+    return fetch.call(this, request)
+      .catch((err) => {
+        errLog("TDXApi.addAccountApplicationConnection: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then((usr) => {
-        if (!usr) {
-          return Promise.reject(new Error(`account ${accountId} not found`));
-        }
-        user = usr;
-
-        // Check if the connection resource already exists.
-        return this.getResource(applicationUserId);
-      })
-      .then((existing) => {
-        if (!existing) {
-          // Parent folder is the users "application data" folder
-          const applicationDataFolderId = resourceUtils.specialFolderId(
-            constants.applicationDataFolderPrefix,
-            user.owner
-          );
-
-          // Create the application user connection resource.
-          // Include the id in the resource name to prevent 'resource with name already exists in folder' errors.
-          const connectionResource = {
-            "id": applicationUserId,
-            "name": `${application.name} data for ${user.displayName} [${applicationUserId}]`,
-            "description": `application '${application.name}' data folder for account ${user.displayName}`,
-            "owner": user.owner,
-            "createdBy": application.id,
-            "basedOnSchema": constants.groupResourceType,
-            "shareMode": constants.trustedShareMode,
-            "parentId": applicationDataFolderId,
-          };
-
-          return this.addResource(connectionResource, wait);
-        } else {
-          return Promise.resolve(existing);
-        }
-      })
-      .then((existing) => {
-        if (!existing) {
-          //
-          // Connection doesn't exist yet => create it now.
-          //
-
-          // Parent folder is the users "application data" folder
-          const applicationDataFolderId = resourceUtils.specialFolderId(
-            constants.applicationDataFolderPrefix,
-            user.owner
-          );
-
-          // Create the application user connection resource.
-          // Include the id in the resource name to prevent 'resource with name already exists in folder' errors.
-          const connectionResource = {
-            "id": applicationUserId,
-            "name": `${application.name} data for ${user.displayName} [${applicationUserId}]`,
-            "description": `application '${application.name}' data folder for account ${user.displayName}`,
-            "owner": user.owner,
-            "createdBy": application.id,
-            "basedOnSchema": constants.groupResourceType,
-            "shareMode": constants.trustedShareMode,
-            "parentId": applicationDataFolderId,
-          };
-
-          // Issue request to create application-user connection.
-          log("creating application-user connection resource");
-          return this.addResource(connectionResource);
-        } else {
-          return Promise.resolve(existing);
-        }
-      })
+      .then(checkResponse.bind(null, "addAccountApplicationConnection"))
       .then((result) => {
-        log("create application-user connection - result: %j", result);
-
-        // Need to add read/write permission for the application to the new folder.
-        return this.addResourceAccess(
-          applicationUserId,
-          application.id,
-          applicationUserId,
-          [constants.readAccess, constants.writeAccess]
-        );
-      })
-      .then((result) => {
-        log("add application access to user connection - result: %j", result);
-
-        if (user.accountType !== constants.userAccountType) {
-          // For non-user (share key) accounts, we need to add read/write permission for the share key,
-          // since the folder is owned by the user who owns the share key.
-          return this.addResourceAccess(
-            applicationUserId,
-            user.username,
-            applicationUserId,
-            [constants.readAccess, constants.writeAccess]
-          );
+        if (wait) {
+          const applicationUserId = shortHash(`${applicationId}-${accountId}`);
+          return waitForIndex.call(this, applicationUserId)
+            .then(() => {
+              return result;
+            });
         } else {
-          return Promise.resolve({});
+          return result;
         }
-      })
-      .then((result) => {
-        log("add user access to user connection - command result: %j", result);
-
-        // Add the user to the application user group.
-        const applicationUserGroupId = shortHash(constants.applicationServerUserGroupPrefix + application.id);
-        return this.addResourceAccess(
-          applicationUserGroupId,
-          user.username,
-          applicationUserGroupId,
-          [constants.readAccess]
-        );
       });
   }
 
