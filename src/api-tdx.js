@@ -1116,6 +1116,32 @@ class TDXApi {
    */
 
   /**
+   * Creates a client user token (e.g. bound to the browser IP) for an application-user token bound to the
+   * given IP or the currently authenticated token IP. The currently authenticated token ***must*** be an application
+   * token, whereby the application has been authorised by the user and the user has permission to access the
+   * application. The returned token will be bound to the given IP or the IP of the currently authenticated token
+   * (i.e the application server IP).
+   *
+   * @param  {string} username - The users' TDX id.
+   * @param  {string} [ip] - The optional IP address to bind the user token to.
+   * @param  {number} [ttl] - The ttl in seconds.
+   * @return  {object} - The new token application-user token, bound to the given IP.
+   * @example <caption>create token bound to server ip with default TDX ttl</caption>
+   * tdxApi.createTDXToken("bob@bob.com/acme.tdx.com");
+   * @example <caption>create for specific IP</caption>
+   * tdxApi.createTDXToken("bob@bob.com/acme.tdx.com", newClientIP);
+   */
+  createTDXToken(username, ip, ttl) {
+    const request = buildQueryRequest.call(this, "token/create", {username, ip, ttl});
+    return fetch.call(this, request)
+      .catch((err) => {
+        errLog("TDXApi.createTDXToken: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "createTDXToken"));
+  }
+
+  /**
    * Exchanges a client user token (e.g. bound to the browser IP) for an application-user token bound to the
    * given IP or the currently authenticated token IP. The currently authenticated token ***must*** be an application
    * token, whereby the application has been authorised by the user and the user has permission to access the
