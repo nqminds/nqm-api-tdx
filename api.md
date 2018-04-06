@@ -27,6 +27,7 @@
     * [new TDXApi(config)](#new_TDXApi_new)
     * [.authenticate(id, secret, [ttl])](#TDXApi+authenticate) ⇒ <code>string</code>
     * [.addAccount(options)](#TDXApi+addAccount) ⇒ [<code>CommandResult</code>](#CommandResult)
+    * [.addAccountApplicationConnection(accountId, applicationId, [wait])](#TDXApi+addAccountApplicationConnection)
     * [.approveAccount(username, approved)](#TDXApi+approveAccount)
     * [.deleteAccount(username)](#TDXApi+deleteAccount)
     * [.resetAccount(username, key)](#TDXApi+resetAccount)
@@ -58,17 +59,19 @@
     * [.getDatabotInstance(instanceId)](#TDXApi+getDatabotInstance)
     * [.getDatabotInstanceOutput(instanceId, [processId])](#TDXApi+getDatabotInstanceOutput)
     * [.getDatabotInstanceStatus(instanceId)](#TDXApi+getDatabotInstanceStatus)
-    * [.registerDatabotHost(status)](#TDXApi+registerDatabotHost)
-    * [.sendDatabotHostCommand(command, hostId, [hostIp], [hostPort])](#TDXApi+sendDatabotHostCommand)
+    * [.registerDatabotHost(payload)](#TDXApi+registerDatabotHost)
+    * [.sendDatabotHostCommand(command, hostId, [hostIp], [hostPort], [payload])](#TDXApi+sendDatabotHostCommand)
     * [.startDatabotInstance(databotId, payload)](#TDXApi+startDatabotInstance)
     * [.stopDatabotInstance(instanceId, mode)](#TDXApi+stopDatabotInstance)
-    * [.updateDatabotHostStatus(status)](#TDXApi+updateDatabotHostStatus)
+    * [.updateDatabotHostStatus(payload)](#TDXApi+updateDatabotHostStatus)
     * [.writeDatabotHostInstanceOutput(output)](#TDXApi+writeDatabotHostInstanceOutput)
     * [.addZoneConnection(options)](#TDXApi+addZoneConnection)
     * [.deleteZoneConnection(id)](#TDXApi+deleteZoneConnection)
     * [.rollbackCommand()](#TDXApi+rollbackCommand)
+    * [.createTDXToken(username, [ip], [ttl])](#TDXApi+createTDXToken) ⇒ <code>object</code>
     * [.exchangeTDXToken(token, [validateIP], [exchangeIP], [ttl])](#TDXApi+exchangeTDXToken) ⇒ <code>object</code>
     * [.downloadResource(resourceId)](#TDXApi+downloadResource) ⇒ <code>object</code>
+    * [.getAccount(accountId)](#TDXApi+getAccount) ⇒ [<code>Zone</code>](#Zone)
     * [.getAggregateDataStream(datasetId, pipeline, [ndJSON])](#TDXApi+getAggregateDataStream) ⇒ <code>object</code>
     * [.getAggregateData(datasetId, pipeline, [ndJSON])](#TDXApi+getAggregateData) ⇒ [<code>DatasetData</code>](#DatasetData)
     * [.getAuthenticatedAccount()](#TDXApi+getAuthenticatedAccount) ⇒ <code>object</code>
@@ -85,6 +88,7 @@
     * [.getResourcesWithSchema(schemaId)](#TDXApi+getResourcesWithSchema) ⇒ [<code>Array.&lt;Resource&gt;</code>](#Resource)
     * [.getTDXToken(tdx)](#TDXApi+getTDXToken) ⇒ <code>string</code>
     * [.getZone(accountId)](#TDXApi+getZone) ⇒ [<code>Zone</code>](#Zone)
+    * [.isInGroup(accountId, groupId)](#TDXApi+isInGroup)
     * [.validateTDXToken(token, [ip])](#TDXApi+validateTDXToken) ⇒ <code>object</code>
 
 <a name="new_TDXApi_new"></a>
@@ -156,6 +160,19 @@ a databot host, an application, or an account-set (user group).
 | [options.username] | <code>string</code> | the username of the new account. Required for user-based accounts, and should be the account e-mail address. Can be omitted for non-user accounts, and will be auto-generated. |
 | [options.verified] | <code>bool</code> | account is pre-verified (reserved for system use only) |
 | [options.whitelist] | <code>Array.&lt;string&gt;</code> | a list of IP addresses. Tokens will only be granted if the requesting IP address is in this list |
+
+<a name="TDXApi+addAccountApplicationConnection"></a>
+
+### tdxApi.addAccountApplicationConnection(accountId, applicationId, [wait])
+Adds the application/user connection resource. The authenticated token must belong to the application.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| accountId | <code>string</code> |  | the account id |
+| applicationId | <code>string</code> |  | the application id |
+| [wait] | <code>bool</code> | <code>true</code> | whether or not to wait for the projection to catch up. |
 
 <a name="TDXApi+approveAccount"></a>
 
@@ -644,18 +661,26 @@ Get databot instance status.
 
 <a name="TDXApi+registerDatabotHost"></a>
 
-### tdxApi.registerDatabotHost(status)
-Registers a databot host as active with the TDX.
+### tdxApi.registerDatabotHost(payload)
+Registers a databot host with the TDX. Once registered, a host is eligible to receive commands from the TDX.
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| status | <code>object</code> | The databot host identifier payload. |
+| payload | <code>object</code> | The databot host identifier payload. |
+| payload.port | <code>number</code> | the port number the host is listening on. |
+| payload.version | <code>string</code> | the databot host software version. |
+| payload.hostStatus | <code>string</code> | the current status of the host, "idle" or "busy". |
+| [payload.ip] | <code>string</code> | optional ip address of the host. Usually the TDX can deduce this from the incoming request. |
 
+**Example** *(register a databot host)*  
+```js
+tdxApi.registerDatabotHost({version: "0.3.11", port: 2312, hostStatus: "idle"});
+```
 <a name="TDXApi+sendDatabotHostCommand"></a>
 
-### tdxApi.sendDatabotHostCommand(command, hostId, [hostIp], [hostPort])
+### tdxApi.sendDatabotHostCommand(command, hostId, [hostIp], [hostPort], [payload])
 Sends a command to a databot host. Reserved for system use.
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
@@ -666,6 +691,7 @@ Sends a command to a databot host. Reserved for system use.
 | hostId | <code>string</code> | The id of the host. |
 | [hostIp] | <code>string</code> | The ip address of the host. If omitted, the command will be sent to all host ip addresses. |
 | [hostPort] | <code>number</code> | The port number of the host. If omitted, the command will be sent to all host ports. |
+| [payload] | <code>object</code> | The command payload. |
 
 <a name="TDXApi+startDatabotInstance"></a>
 
@@ -703,15 +729,24 @@ Terminates or pauses a running databot instance.
 
 <a name="TDXApi+updateDatabotHostStatus"></a>
 
-### tdxApi.updateDatabotHostStatus(status)
+### tdxApi.updateDatabotHostStatus(payload)
 Updates a databot host status.
+n.b. the response to this request will contain any commands from the TDX that the host should action see the
+[command-router](https://github.com/nqminds/nqm-databots/blob/master/packages/nqm-databot-host/lib/command-router.js).
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| status | <code>object</code> | The databot host status payload. |
+| payload | <code>object</code> | The databot host status payload. |
+| payload.port | <code>number</code> | The port number on which the host is listening. |
+| payload.hostStatus | <code>string</code> | The current host status, either "idle" or "busy". |
+| [payload.ip] | <code>string</code> | optional ip address of the host. Usually the TDX can deduce this from the incoming request. |
 
+**Example** *(update databot host status)*  
+```js
+tdxApi.updateDatabotHostStatus({port: 2312, hostStatus: "idle"});
+```
 <a name="TDXApi+writeDatabotHostInstanceOutput"></a>
 
 ### tdxApi.writeDatabotHostInstanceOutput(output)
@@ -759,6 +794,32 @@ Deletes a zone connection. The authenticated account must own the zone connectio
 AUDIT COMMANDS
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+<a name="TDXApi+createTDXToken"></a>
+
+### tdxApi.createTDXToken(username, [ip], [ttl]) ⇒ <code>object</code>
+Creates a client user token (e.g. bound to the browser IP) for an application-user token bound to the
+given IP or the currently authenticated token IP. The currently authenticated token ***must*** be an application
+token, whereby the application has been authorised by the user and the user has permission to access the
+application. The returned token will be bound to the given IP or the IP of the currently authenticated token
+(i.e the application server IP).
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+**Returns**: <code>object</code> - - The new token application-user token, bound to the given IP.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| username | <code>string</code> | The users' TDX id. |
+| [ip] | <code>string</code> | The optional IP address to bind the user token to. |
+| [ttl] | <code>number</code> | The ttl in seconds. |
+
+**Example** *(create token bound to server ip with default TDX ttl)*  
+```js
+tdxApi.createTDXToken("bob@bob.com/acme.tdx.com");
+```
+**Example** *(create for specific IP)*  
+```js
+tdxApi.createTDXToken("bob@bob.com/acme.tdx.com", newClientIP);
+```
 <a name="TDXApi+exchangeTDXToken"></a>
 
 ### tdxApi.exchangeTDXToken(token, [validateIP], [exchangeIP], [ttl]) ⇒ <code>object</code>
@@ -802,6 +863,18 @@ delimited JSON (NDJSON). For raw file resources this will stream the raw file co
 | Param | Type | Description |
 | --- | --- | --- |
 | resourceId | <code>string</code> | The id of the resource to be downloaded. |
+
+<a name="TDXApi+getAccount"></a>
+
+### tdxApi.getAccount(accountId) ⇒ [<code>Zone</code>](#Zone)
+Gets the details for a given account id.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+**Returns**: [<code>Zone</code>](#Zone) - zone  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| accountId | <code>string</code> | the id of the account to be retrieved. |
 
 <a name="TDXApi+getAggregateDataStream"></a>
 
@@ -1018,6 +1091,18 @@ Gets the details for a given zone (account) id.
 | Param | Type | Description |
 | --- | --- | --- |
 | accountId | <code>string</code> | the id of the zone to be retrieved. |
+
+<a name="TDXApi+isInGroup"></a>
+
+### tdxApi.isInGroup(accountId, groupId)
+Determines if the given account is a member of the given group.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| accountId | <code>string</code> | the id of the account |
+| groupId | <code>\*</code> | the id of the group |
 
 <a name="TDXApi+validateTDXToken"></a>
 

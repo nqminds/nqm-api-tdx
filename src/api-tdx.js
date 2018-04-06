@@ -930,11 +930,18 @@ class TDXApi {
   }
 
   /**
-   * Registers a databot host as active with the TDX.
-   * @param  {object} status - The databot host identifier payload.
+   * Registers a databot host with the TDX. Once registered, a host is eligible to receive commands from the TDX.
+   * @param  {object} payload - The databot host identifier payload.
+   * @param  {number} payload.port - the port number the host is listening on.
+   * @param  {string} payload.version - the databot host software version.
+   * @param  {string} payload.hostStatus - the current status of the host, "idle" or "busy".
+   * @param  {string} [payload.ip] - optional ip address of the host. Usually the TDX can deduce this from the incoming
+   * request.
+   * @example <caption>register a databot host</caption>
+   * tdxApi.registerDatabotHost({version: "0.3.11", port: 2312, hostStatus: "idle"});
    */
-  registerDatabotHost(status) {
-    const request = buildDatabotHostRequest.call(this, "register", status);
+  registerDatabotHost(payload) {
+    const request = buildDatabotHostRequest.call(this, "register", payload);
     return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.registerDatabotHost: %s", err.message);
@@ -952,13 +959,15 @@ class TDXApi {
    * host ip addresses.
    * @param  {number} [hostPort] - The port number of the host. If omitted, the command will be sent to
    * all host ports.
+   * @param  {object} [payload] - The command payload.
    */
-  sendDatabotHostCommand(command, hostId, hostIp, hostPort) {
+  sendDatabotHostCommand(command, hostId, hostIp, hostPort, payload) {
     const postData = {
       hostId,
       hostIp,
       hostPort,
       command,
+      payload,
     };
     const request = buildCommandRequest.call(this, "databot/host/command", postData);
     return fetch.call(this, request)
@@ -1026,10 +1035,18 @@ class TDXApi {
 
   /**
    * Updates a databot host status.
-   * @param  {object} status - The databot host status payload.
+   * n.b. the response to this request will contain any commands from the TDX that the host should action see the
+   * [command-router](https://github.com/nqminds/nqm-databots/blob/master/packages/nqm-databot-host/lib/command-router.js).
+   * @param  {object} payload - The databot host status payload.
+   * @param  {number} payload.port - The port number on which the host is listening.
+   * @param  {string} payload.hostStatus - The current host status, either "idle" or "busy".
+   * @param  {string} [payload.ip] - optional ip address of the host. Usually the TDX can deduce this from the incoming
+   * request.
+   * @example <caption>update databot host status</caption>
+   * tdxApi.updateDatabotHostStatus({port: 2312, hostStatus: "idle"});
    */
-  updateDatabotHostStatus(status) {
-    const request = buildDatabotHostRequest.call(this, "status", status);
+  updateDatabotHostStatus(payload) {
+    const request = buildDatabotHostRequest.call(this, "status", payload);
     return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.updateDatabotHostStatus: %s", err.message);
