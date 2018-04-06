@@ -731,8 +731,9 @@ Terminates or pauses a running databot instance.
 
 ### tdxApi.updateDatabotHostStatus(payload)
 Updates a databot host status.
-n.b. the response to this request will contain any commands from the TDX that the host should action see the
-[command-router](https://github.com/nqminds/nqm-databots/blob/master/packages/nqm-databot-host/lib/command-router.js).
+
+n.b. the response to this request will contain any commands from the TDX that the host should action (
+[see commands](https://github.com/nqminds/nqm-databots/tree/master/packages/nqm-databot-host#tdx-command-format)).
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
 

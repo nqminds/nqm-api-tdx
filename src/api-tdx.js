@@ -1035,8 +1035,9 @@ class TDXApi {
 
   /**
    * Updates a databot host status.
-   * n.b. the response to this request will contain any commands from the TDX that the host should action see the
-   * [command-router](https://github.com/nqminds/nqm-databots/blob/master/packages/nqm-databot-host/lib/command-router.js).
+   *
+   * n.b. the response to this request will contain any commands from the TDX that the host should action (
+   * [see commands](https://github.com/nqminds/nqm-databots/tree/master/packages/nqm-databot-host#tdx-command-format)).
    * @param  {object} payload - The databot host status payload.
    * @param  {number} payload.port - The port number on which the host is listening.
    * @param  {string} payload.hostStatus - The current host status, either "idle" or "busy".
