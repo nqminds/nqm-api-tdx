@@ -349,14 +349,18 @@ const waitForAccount = function(accountId, verified, approved, retryCount, maxRe
     .then((account) => {
       let retry = false;
       if (account && account.initialised) {
+        // Account exists and is initialised.
         if (verified && !account.verified) {
+          // If verification is required, wait for account to be verified.
           retry = true;
         } else if (approved && !account.approved) {
+          // If approval is required, wait for account to be approved
           retry = true;
         } else {
           retry = false;
         }
       } else {
+        // Account doesn't exist yet, or it exists but hasn't been initialised properly by the TDX.
         retry = true;
       }
 
@@ -364,7 +368,7 @@ const waitForAccount = function(accountId, verified, approved, retryCount, maxRe
         // A negative maxRetries value will retry indefinitely.
         if (maxRetries >= 0 && retryCount > maxRetries) {
           log("giving up after %d attempts", retryCount);
-          return Promise.reject(new Error(`gave up waiting for ${accountId} after ${retryCount} attempts`));
+          return Promise.reject(new Error(`gave up waiting for account ${accountId} after ${retryCount} attempts`));
         }
 
         // Try again after a delay.

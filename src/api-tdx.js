@@ -159,6 +159,8 @@ class TDXApi {
    * @param  {bool} [options.verified] - account is pre-verified (reserved for system use only)
    * @param  {string[]} [options.whitelist] - a list of IP addresses. Tokens will only be granted if the requesting
    * IP address is in this list
+   * @param  {bool} [wait=false] - flag indicating this method will wait for the account to be fully created before
+   * returning.
    * @return  {CommandResult}
    */
   addAccount(options, wait) {
@@ -207,6 +209,131 @@ class TDXApi {
         }
       });
   }
+
+  // addAccountApplicationConnection(accountId, applicationId, wait) {
+  //   const applicationUserId = shortHash(`${applicationId}-${accountId}`);
+
+  //   let application;
+  //   let user;
+
+  //   // Get application details.
+  //   return this.getResource(applicationId)
+  //     .then((app) => {
+  //       if (!app) {
+  //         return Promise.reject(new Error(`application ${applicationId} not found`));
+  //       }
+  //       application = app;
+
+  //       // Get user details.
+  //       return this.getAccount(accountId);
+  //     })
+  //     .then((usr) => {
+  //       if (!usr) {
+  //         return Promise.reject(new Error(`account ${accountId} not found`));
+  //       }
+  //       user = usr;
+
+  //       // Check if the connection resource already exists.
+  //       return this.getResource(applicationUserId);
+  //     })
+  //     .then((existing) => {
+  //       if (!existing) {
+  //         // Parent folder is the users "application data" folder
+  //         const applicationDataFolderId = resourceUtils.specialFolderId(
+  //           constants.applicationDataFolderPrefix,
+  //           user.owner
+  //         );
+
+  //         // Create the application user connection resource.
+  //         // Include the id in the resource name to prevent 'resource with name already exists in folder' errors.
+  //         const connectionResource = {
+  //           "id": applicationUserId,
+  //           "name": `${application.name} data for ${user.displayName} [${applicationUserId}]`,
+  //           "description": `application '${application.name}' data folder for account ${user.displayName}`,
+  //           "owner": user.owner,
+  //           "createdBy": application.id,
+  //           "basedOnSchema": constants.groupResourceType,
+  //           "shareMode": constants.trustedShareMode,
+  //           "parentId": applicationDataFolderId,
+  //         };
+
+  //         return this.addResource(connectionResource, wait);
+  //       } else {
+  //         return Promise.resolve(existing);
+  //       }
+  //     })
+  //     .then((existing) => {
+  //       if (!existing) {
+  //         //
+  //         // Connection doesn't exist yet => create it now.
+  //         //
+
+  //         // Parent folder is the users "application data" folder
+  //         const applicationDataFolderId = resourceUtils.specialFolderId(
+  //           constants.applicationDataFolderPrefix,
+  //           user.owner
+  //         );
+
+  //         // Create the application user connection resource.
+  //         // Include the id in the resource name to prevent 'resource with name already exists in folder' errors.
+  //         const connectionResource = {
+  //           "id": applicationUserId,
+  //           "name": `${application.name} data for ${user.displayName} [${applicationUserId}]`,
+  //           "description": `application '${application.name}' data folder for account ${user.displayName}`,
+  //           "owner": user.owner,
+  //           "createdBy": application.id,
+  //           "basedOnSchema": constants.groupResourceType,
+  //           "shareMode": constants.trustedShareMode,
+  //           "parentId": applicationDataFolderId,
+  //         };
+
+  //         // Issue request to create application-user connection.
+  //         log("creating application-user connection resource");
+  //         return this.addResource(connectionResource);
+  //       } else {
+  //         return Promise.resolve(existing);
+  //       }
+  //     })
+  //     .then((result) => {
+  //       log("create application-user connection - result: %j", result);
+
+  //       // Need to add read/write permission for the application to the new folder.
+  //       return this.addResourceAccess(
+  //         applicationUserId,
+  //         application.id,
+  //         applicationUserId,
+  //         [constants.readAccess, constants.writeAccess]
+  //       );
+  //     })
+  //     .then((result) => {
+  //       log("add application access to user connection - result: %j", result);
+
+  //       if (user.accountType !== constants.userAccountType) {
+  //         // For non-user (share key) accounts, we need to add read/write permission for the share key,
+  //         // since the folder is owned by the user who owns the share key.
+  //         return this.addResourceAccess(
+  //           applicationUserId,
+  //           user.username,
+  //           applicationUserId,
+  //           [constants.readAccess, constants.writeAccess]
+  //         );
+  //       } else {
+  //         return Promise.resolve({});
+  //       }
+  //     })
+  //     .then((result) => {
+  //       log("add user access to user connection - command result: %j", result);
+
+  //       // Add the user to the application user group.
+  //       const applicationUserGroupId = shortHash(constants.applicationServerUserGroupPrefix + application.id);
+  //       return this.addResourceAccess(
+  //         applicationUserGroupId,
+  //         user.username,
+  //         applicationUserGroupId,
+  //         [constants.readAccess]
+  //       );
+  //     });
+  // }
 
   /**
    * Set account approved status. Reserved for system use.
