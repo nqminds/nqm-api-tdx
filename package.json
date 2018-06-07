@@ -39,7 +39,7 @@
     "yargs": "^8.0.1"
   },
   "dependencies": {
-    "@nqminds/isomorphic-fetch": "^0.1.0",
+    "@nqminds/isomorphic-fetch": "^0.1.2",
     "@nqminds/nqm-core-utils": "^0.4.8",
     "base-64": "^0.1.0",
     "bluebird": "^3.5.1",
