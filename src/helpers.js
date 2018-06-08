@@ -3,6 +3,7 @@ import debug from "debug";
 import Promise from "bluebird";
 
 const FetchRequest = fetch.Request || Request;
+const FetchHeaders = fetch.Headers || Headers;
 
 // Bind to bluebird promise library for now.
 // fetch.Promise = Promise;
@@ -97,7 +98,7 @@ const buildCommandRequest = function(command, data, contentType, async) {
   return new FetchRequest(`${this.config.commandServer}/${commandMode}/${command}`, {
     method: "POST",
     mode: "cors",
-    headers: new Headers({
+    headers: new FetchHeaders({
       "Authorization": `Bearer ${this.accessToken}`,
       "Content-Type": contentType,
     }),
@@ -115,7 +116,7 @@ const buildDatabotHostRequest = function(command, data) {
   return new FetchRequest(`${this.config.databotServer}/host/${command}`, {
     method: "POST",
     mode: "cors",
-    headers: new Headers({
+    headers: new FetchHeaders({
       "Authorization": `Bearer ${this.accessToken}`,
       "Content-Type": "application/json",
     }),
@@ -146,7 +147,7 @@ const buildQueryRequest = function(endpoint, filter, projection, options) {
   return new FetchRequest(`${this.config.queryServer}${query}`, {
     method: "GET",
     mode: "cors",
-    headers: new Headers({
+    headers: new FetchHeaders({
       "Authorization": `Bearer ${this.accessToken}`,
       "Content-Type": "application/json",
     }),
@@ -161,7 +162,7 @@ const buildDatabotInstanceRequest = function(endpoint) {
   return new FetchRequest(`${this.config.databotServer}/instance/${endpoint}`, {
     method: "GET",
     mode: "cors",
-    headers: new Headers({
+    headers: new FetchHeaders({
       "Authorization": `Bearer ${this.accessToken}`,
       "Content-Type": "application/json",
     }),
