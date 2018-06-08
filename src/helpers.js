@@ -91,7 +91,7 @@ const buildAuthenticateRequest = function(credentials, ip, ttl) {
   return new FetchRequest(uri, {
     method: "POST",
     mode: "cors",
-    headers: new Headers({
+    headers: new FetchHeaders({
       "Authorization": `Basic ${credentials}`,
       "Content-Type": "application/json",
     }),
@@ -135,6 +135,27 @@ const buildDatabotHostRequest = function(command, data) {
       "Content-Type": "application/json",
     }),
     body: JSON.stringify(data),
+  });
+};
+
+const buildFileUploadRequest = function(resourceId, compressed, base64Encoded, file) {
+  let endPoint;
+  if (compressed) {
+    endPoint = "compressedUpload";
+  } else if (base64Encoded) {
+    endPoint = "base64Upload";
+  } else {
+    endPoint = "upload";
+  }
+  return new FetchRequest(`${this.config.commandServer}/commandSync/resource/${resourceId}/${endPoint}`, {
+    method: "POST",
+    mode: "cors",
+    headers: new FetchHeaders({
+      "Authorization": `Bearer ${this.accessToken}`,
+      "Content-Disposition": `attachment; filename="${file.name}"`,
+      "Content-Length": file.size,
+    }),
+    body: file,
   });
 };
 
@@ -410,6 +431,7 @@ export {
   buildCommandRequest,
   buildDatabotHostRequest,
   buildDatabotInstanceRequest,
+  buildFileUploadRequest,
   buildQueryRequest,
   checkResponse,
   fetchWithDeadline,

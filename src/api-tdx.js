@@ -6,6 +6,7 @@ import {
   buildCommandRequest,
   buildDatabotHostRequest,
   buildDatabotInstanceRequest,
+  buildFileUploadRequest,
   buildQueryRequest,
   checkResponse,
   fetchWithDeadline as fetch,
@@ -451,25 +452,7 @@ class TDXApi {
    * @param  {base64Encoded} [boolean=false] = Flag indicating the file should be decoded from base64 after upload.
    */
   fileUpload(resourceId, file, stream, compressed = false, base64Encoded = false) {
-    let endPoint;
-    if (compressed) {
-      endPoint = "compressedUpload";
-    } else if (base64Encoded) {
-      endPoint = "base64Upload";
-    } else {
-      endPoint = "upload";
-    }
-    const request = new Request(`${this.config.commandServer}/commandSync/resource/${resourceId}/${endPoint}`, {
-      method: "POST",
-      mode: "cors",
-      headers: new Headers({
-        "Authorization": `Bearer ${this.accessToken}`,
-        "Content-Disposition": `attachment; filename="${file.name}"`,
-        "Content-Length": file.size,
-      }),
-      body: file,
-    });
-
+    const request = buildFileUploadRequest.call(this, resourceId, compressed, base64Encoded, file);
     const response = fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.fileUpload: %s", err.message);
