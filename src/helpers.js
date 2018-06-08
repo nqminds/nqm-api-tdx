@@ -85,6 +85,20 @@ const handleError = function(source, failure, code) {
   return new TDXApiError(JSON.stringify(internal), (new Error()).stack);
 };
 
+const buildAuthenticateRequest = function(credentials, ip, ttl) {
+  // We can get a token from any of the TDX services - use the first one we find to build a fetch Request.
+  const uri = `${this.config.tdxServer || this.config.commandServer || this.config.queryServer}/token`;
+  return new FetchRequest(uri, {
+    method: "POST",
+    mode: "cors",
+    headers: new Headers({
+      "Authorization": `Basic ${credentials}`,
+      "Content-Type": "application/json",
+    }),
+    body: JSON.stringify({grant_type: "client_credentials", ip, ttl: ttl || this.config.accessTokenTTL || 3600}),
+  });
+};
+
 /**
  * Builds a Request object for the given command bound to the TDX command service.
  * @param  {string} command - the target TDX command, e.g. "resource/create"
@@ -392,6 +406,7 @@ const waitForAccount = function(accountId, verified, approved, retryCount, maxRe
 };
 
 export {
+  buildAuthenticateRequest,
   buildCommandRequest,
   buildDatabotHostRequest,
   buildDatabotInstanceRequest,

@@ -2,6 +2,7 @@ import base64 from "base-64";
 import debug from "debug";
 import {shortHash} from "@nqminds/nqm-core-utils";
 import {
+  buildAuthenticateRequest,
   buildCommandRequest,
   buildDatabotHostRequest,
   buildDatabotInstanceRequest,
@@ -104,18 +105,7 @@ class TDXApi {
     // Authorization headers must be base-64 encoded.
     credentials = base64.encode(credentials);
 
-    // We can get a token from any of the TDX services - use the first one we find to build a fetch Request.
-    const uri = `${this.config.tdxServer || this.config.commandServer || this.config.queryServer}/token`;
-    const request = new Request(uri, {
-      method: "POST",
-      mode: "cors",
-      headers: new Headers({
-        "Authorization": `Basic ${credentials}`,
-        "Content-Type": "application/json",
-      }),
-      body: JSON.stringify({grant_type: "client_credentials", ip, ttl: ttl || this.config.accessTokenTTL || 3600}),
-    });
-
+    const request = buildAuthenticateRequest.call(this, credentials, ip, ttl);
     return fetch.call(this, request)
       .then(checkResponse.bind(null, "authenticate"))
       .then((result) => {
