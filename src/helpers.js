@@ -1,4 +1,4 @@
-import "cross-fetch/polyfill";
+import fetch from "cross-fetch";
 import debug from "debug";
 import Promise from "bluebird";
 
