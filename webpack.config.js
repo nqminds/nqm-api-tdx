@@ -49,8 +49,8 @@ const config = {
   externals: {
     "base-64": "base-64",
     bluebird: "bluebird",
+    "cross-fetch": "cross-fetch",
     debug: "debug",
-    "@nqminds/isomorphic-fetch": "@nqminds/isomorphic-fetch",
     "@nqminds/nqm-core-utils": "@nqminds/nqm-core-utils",
     lodash: {
       commonjs: "lodash",

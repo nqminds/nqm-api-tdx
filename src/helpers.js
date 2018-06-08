@@ -1,11 +1,11 @@
-import fetch from "@nqminds/isomorphic-fetch";
+import fetch from "cross-fetch";
 import debug from "debug";
 import Promise from "bluebird";
 
 const FetchRequest = fetch.Request || Request;
 
 // Bind to bluebird promise library for now.
-fetch.Promise = Promise;
+// fetch.Promise = Promise;
 
 const pollingRetries = 15;
 const pollingInterval = 1000;
