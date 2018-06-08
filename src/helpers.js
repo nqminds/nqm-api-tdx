@@ -4,6 +4,7 @@ import Promise from "bluebird";
 
 const FetchRequest = fetch.Request || Request;
 const FetchHeaders = fetch.Headers || Headers;
+const FetchFormData = fetch.FormData || FormData;
 
 // Bind to bluebird promise library for now.
 // fetch.Promise = Promise;
@@ -147,15 +148,18 @@ const buildFileUploadRequest = function(resourceId, compressed, base64Encoded, f
   } else {
     endPoint = "upload";
   }
+
+  const formData = new FetchFormData();
+  formData.append("file", file, file.name);
+
   return new FetchRequest(`${this.config.commandServer}/commandSync/resource/${resourceId}/${endPoint}`, {
     method: "POST",
     mode: "cors",
     headers: new FetchHeaders({
       "Authorization": `Bearer ${this.accessToken}`,
-      "Content-Disposition": `attachment; filename="${file.name}"`,
       "Content-Length": file.size,
     }),
-    body: file,
+    body: formData,
   });
 };
 
