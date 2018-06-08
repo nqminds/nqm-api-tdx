@@ -1,7 +1,7 @@
-import fetch from "cross-fetch";
 import debug from "debug";
 import Promise from "bluebird";
 
+const fetch = require("cross-fetch");
 const FetchRequest = fetch.Request || Request;
 const FetchHeaders = fetch.Headers || Headers;
 
