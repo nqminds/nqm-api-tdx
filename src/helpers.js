@@ -1,10 +1,9 @@
-import fetch from "cross-fetch";
+import "cross-fetch/polyfill";
 import debug from "debug";
 import Promise from "bluebird";
 
 const FetchRequest = fetch.Request || Request;
 const FetchHeaders = fetch.Headers || Headers;
-const FetchFormData = fetch.FormData || FormData;
 
 // Bind to bluebird promise library for now.
 // fetch.Promise = Promise;
@@ -149,7 +148,7 @@ const buildFileUploadRequest = function(resourceId, compressed, base64Encoded, f
     endPoint = "upload";
   }
 
-  const formData = new FetchFormData();
+  const formData = new FormData();
   formData.append("file", file, file.name);
 
   return new FetchRequest(`${this.config.commandServer}/commandSync/resource/${resourceId}/${endPoint}`, {

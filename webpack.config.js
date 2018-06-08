@@ -49,7 +49,7 @@ const config = {
   externals: {
     "base-64": "base-64",
     bluebird: "bluebird",
-    "cross-fetch": "cross-fetch",
+    "cross-fetch/polyfill": "cross-fetch/polyfill",
     debug: "debug",
     "@nqminds/nqm-core-utils": "@nqminds/nqm-core-utils",
     lodash: {
