@@ -157,6 +157,7 @@ const buildFileUploadRequest = function(resourceId, compressed, base64Encoded, f
     headers: new FetchHeaders({
       "Authorization": `Bearer ${this.accessToken}`,
       "Content-Length": file.size,
+      "Content-Disposition": `attachment; filename="${file.name}"`,
     }),
     body: file, // formData,
   });
