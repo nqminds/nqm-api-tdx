@@ -20,14 +20,12 @@
   },
   "homepage": "https://github.com/nqminds/nqm-api-tdx",
   "devDependencies": {
-    "babel": "^6.23.0",
     "babel-cli": "^6.24.1",
-    "babel-core": "^6.24.1",
     "babel-eslint": "^7.2.3",
     "babel-loader": "^7.0.0",
     "babel-plugin-add-module-exports": "^0.2.1",
     "babel-plugin-transform-object-rest-spread": "^6.23.0",
-    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-env": "^1.7.0",
     "chai": "^3.5.0",
     "eslint": "^3.19.0",
     "eslint-loader": "^1.7.1",
@@ -43,7 +41,6 @@
     "base-64": "^0.1.0",
     "bluebird": "^3.5.1",
     "cross-fetch": "^2.2.1",
-    "debug": "^3.1.0",
-    "lodash": "^4.17.4"
+    "debug": "^3.1.0"
   }
 }
