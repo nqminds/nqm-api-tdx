@@ -1,7 +1,8 @@
-import fetch from "cross-fetch";
+import crossFetch from "cross-fetch";
 import debug from "debug";
 import Promise from "bluebird";
 
+const fetch = window && window.fetch ? window.fetch : crossFetch;
 const FetchRequest = fetch.Request || Request;
 const FetchHeaders = fetch.Headers || Headers;
 
@@ -148,9 +149,6 @@ const buildFileUploadRequest = function(resourceId, compressed, base64Encoded, f
     endPoint = "upload";
   }
 
-  // const formData = new FormData();
-  // formData.append("file", file, file.name);
-
   return new FetchRequest(`${this.config.commandServer}/commandSync/resource/${resourceId}/${endPoint}`, {
     method: "POST",
     mode: "cors",
@@ -159,7 +157,7 @@ const buildFileUploadRequest = function(resourceId, compressed, base64Encoded, f
       "Content-Length": file.size,
       "Content-Disposition": `attachment; filename="${file.name}"`,
     }),
-    body: file, // formData,
+    body: file,
   });
 };
 
