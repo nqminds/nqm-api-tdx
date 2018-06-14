@@ -2,7 +2,7 @@ import crossFetch from "cross-fetch";
 import debug from "debug";
 import Promise from "bluebird";
 
-const fetch = window && window.fetch ? window.fetch : crossFetch;
+const fetch = (typeof window !== "undefined" && window.fetch) ? window.fetch : crossFetch;
 const FetchRequest = fetch.Request || Request;
 const FetchHeaders = fetch.Headers || Headers;
 
