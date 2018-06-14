@@ -4,11 +4,12 @@
 const webpack = require("webpack");
 const UglifyJsPlugin = webpack.optimize.UglifyJsPlugin;
 const path = require("path");
-const env  = require("yargs").argv.env; // use --env with webpack 2
+const env = require("yargs").argv.env; // use --env with webpack 2
 
-let libraryName = "nqm-api-tdx";
+const libraryName = "nqm-api-tdx";
 
-let plugins = [], outputFile;
+const plugins = [];
+let outputFile;
 
 if (env === "build") {
   plugins.push(new UglifyJsPlugin({ minimize: true }));
@@ -52,7 +53,7 @@ const config = {
     "cross-fetch": "cross-fetch",
     debug: "debug",
     "@nqminds/nqm-core-utils": "@nqminds/nqm-core-utils",
-    lodash: {
+    lodash: { 
       commonjs: "lodash",
       commonjs2: "lodash",
       amd: "_",
