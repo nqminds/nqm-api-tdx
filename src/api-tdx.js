@@ -789,7 +789,7 @@ class TDXApi {
    * tdxApi.updateData(myDatasetId, {lsoa: "E000001", count: 488});
    * @example <caption>upsert a document</caption>
    * // Will create a document if no data exists matching key 'lsoa': "E000004"
-   * tdxApi.updateData(myDatasetId, {lsoa: "E000004", count: 288, true});
+   * tdxApi.updateData(myDatasetId, {lsoa: "E000004", count: 288}, true);
    */
   updateData(datasetId, data, upsert) {
     const postData = {
