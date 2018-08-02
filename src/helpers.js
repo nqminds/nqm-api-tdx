@@ -1,14 +1,8 @@
 import crossFetch from "cross-fetch";
 import debug from "debug";
-import Promise from "bluebird";
-
 const fetch = (typeof window !== "undefined" && window.fetch) ? window.fetch : crossFetch;
 const FetchRequest = fetch.Request || Request;
 const FetchHeaders = fetch.Headers || Headers;
-
-// Bind to bluebird promise library for now.
-// fetch.Promise = Promise;
-
 const pollingRetries = 15;
 const pollingInterval = 1000;
 const waitInfinitely = -1;
