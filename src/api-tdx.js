@@ -1170,7 +1170,7 @@ class TDXApi {
    * @return {object} - Response object, where the response body is a stream object.
    */
   downloadResource(resourceId) {
-    const request = buildQueryRequest.call(this, `resource/${resourceId}`);
+    const request = buildQueryRequest.call(this, `resources/${resourceId}/download`);
     return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.downloadResource: %s", err.message);
