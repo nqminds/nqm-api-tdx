@@ -1197,7 +1197,7 @@ class TDXApi {
   }
 
    /**
-   * Performs an aggregate query on the given dataset, returning a response object with stream in the body
+   * Performs an aggregate query on the given dataset resource, returning a response object with stream in the body
    * @param  {string} datasetId - The id of the dataset-based resource to perform the aggregate query on.
    * @param  {object|string} pipeline - The aggregate pipeline, as defined in the
    * [mongodb docs](https://docs.mongodb.com/manual/aggregation/). Can be given as a JSON object or as a stringified
@@ -1210,7 +1210,7 @@ class TDXApi {
     if (pipeline && typeof pipeline === "object") {
       pipeline = JSON.stringify(pipeline);
     }
-    const endpoint = `datasets/${datasetId}/${ndJSON ? "ndaggregate" : "aggregate"}?pipeline=${pipeline}`;
+    const endpoint = `resources/${datasetId}/${ndJSON ? "ndaggregate" : "aggregate"}?pipeline=${pipeline}`;
     const request = buildQueryRequest.call(this, endpoint);
     return fetch.call(this, request)
     .catch((err) => {
@@ -1220,7 +1220,7 @@ class TDXApi {
   }
 
   /**
-   * Performs an aggregate query on the given dataset.
+   * Performs an aggregate query on the given dataset resource.
    * @param  {string} datasetId - The id of the dataset-based resource to perform the aggregate query on.
    * @param  {object|string} pipeline - The aggregate pipeline, as defined in the
    * [mongodb docs](https://docs.mongodb.com/manual/aggregation/). Can be given as a JSON object or as a stringified
@@ -1248,8 +1248,8 @@ class TDXApi {
   }
 
   /**
-   * Gets all data from the given dataset that matches the filter provided and returns a response object with stream
-   * in the body.
+   * Gets all data from the given dataset resource that matches the filter provided and returns a response object with
+   * stream in the body.
    * @param  {string} datasetId - The id of the dataset-based resource.
    * @param  {object} [filter] - A mongodb filter object. If omitted, all data will be retrieved.
    * @param  {object} [projection] - A mongodb projection object. Should be used to restrict the payload to the
@@ -1262,7 +1262,7 @@ class TDXApi {
    * @return  {object} - Response object, where the response body is a stream object.
    */
   getDataStream(datasetId, filter, projection, options, ndJSON) {
-    const endpoint = `datasets/${datasetId}/${ndJSON ? "nddata" : "data"}`;
+    const endpoint = `resources/${datasetId}/${ndJSON ? "nddata" : "data"}`;
     const request = buildQueryRequest.call(this, endpoint, filter, projection, options);
     return fetch.call(this, request)
       .catch((err) => {
@@ -1272,7 +1272,7 @@ class TDXApi {
   }
 
   /**
-   * Gets all data from the given dataset that matches the filter provided.
+   * Gets all data from the given dataset resource that matches the filter provided.
    * @param  {string} datasetId - The id of the dataset-based resource.
    * @param  {object} [filter] - A mongodb filter object. If omitted, all data will be retrieved.
    * @param  {object} [projection] - A mongodb projection object. Should be used to restrict the payload to the
@@ -1291,8 +1291,8 @@ class TDXApi {
 
   /**
    * [DEPRECATED] - use getDataStream
-   * Gets all data from the given dataset that matches the filter provided and returns a response object with stream
-   * in the body.
+   * Gets all data from the given dataset resource that matches the filter provided and returns a response object with
+   * stream in the body.
    * @param  {string} datasetId - The id of the dataset-based resource.
    * @param  {object} [filter] - A mongodb filter object. If omitted, all data will be retrieved.
    * @param  {object} [projection] - A mongodb projection object. Should be used to restrict the payload to the
@@ -1310,7 +1310,7 @@ class TDXApi {
 
   /**
    * [DEPRECATED] - use getData
-   * Gets all data from the given dataset that matches the filter provided.
+   * Gets all data from the given dataset resource that matches the filter provided.
    * @param  {string} datasetId - The id of the dataset-based resource.
    * @param  {object} [filter] - A mongodb filter object. If omitted, all data will be retrieved.
    * @param  {object} [projection] - A mongodb projection object. Should be used to restrict the payload to the
@@ -1332,7 +1332,7 @@ class TDXApi {
    * @param  {object} [filter] - An optional mongodb filter to apply before counting the data.
    */
   getDatasetDataCount(datasetId, filter) {
-    const request = buildQueryRequest.call(this, `datasets/${datasetId}/count`, filter);
+    const request = buildQueryRequest.call(this, `resources/${datasetId}/count`, filter);
     return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.getDatasetDataCount: %s", err.message);
@@ -1349,7 +1349,7 @@ class TDXApi {
    * @return  {object[]} - The distinct values.
    */
   getDistinct(datasetId, key, filter, projection, options) {
-    const request = buildQueryRequest.call(this, `datasets/${datasetId}/distinct?key=${key}`, filter, projection, options); // eslint-disable-line max-len
+    const request = buildQueryRequest.call(this, `resources/${datasetId}/distinct?key=${key}`, filter, projection, options); // eslint-disable-line max-len
     return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.getDistinct: %s", err.message);
@@ -1411,7 +1411,7 @@ class TDXApi {
    * @return  {Resource[]}
    */
   getResourceAncestors(resourceId) {
-    const request = buildQueryRequest.call(this, `datasets/${resourceId}/ancestors`);
+    const request = buildQueryRequest.call(this, `resources/${resourceId}/ancestors`);
     return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.getDatasetAncestors: %s", err.message);
