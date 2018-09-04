@@ -24,7 +24,7 @@ import TDXApi from "@nqminds/nqm-api-tdx"
 ```
 
 ## api
-[API reference](https://github.com/nqminds/nqm-api-tdx/blob/v0.2.0/api.md).
+[API reference](https://github.com/nqminds/nqm-api-tdx/blob/v0.4.0/api.md).
 
 ## build
 ```
