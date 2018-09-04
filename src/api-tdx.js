@@ -596,6 +596,21 @@ class TDXApi {
   }
 
   /**
+   * Set the text for a text-content based resource.
+   * @param  {string} resourceId - The resource id.
+   * @param  {string} textContent - The text content to set.
+   */
+  setResourceTextContent(resourceId, textContent) {
+    const request = buildCommandRequest.call(this, "resource/textContent/set", {id: resourceId, textContent});
+    return fetch.call(this, request)
+      .catch((err) => {
+        errLog("TDXApi.setResourceTextContent: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(null, "setResourceTextContent"));
+  }
+
+  /**
    * Suspends the resource index. This involves deleting any existing indexes. Requires write permission. When
    * a resource index is in `suspended` status, it is not possible to run any queries or updates against
    * the resource.
@@ -1331,14 +1346,24 @@ class TDXApi {
    * @param  {string} datasetId - The id of the dataset-based resource.
    * @param  {object} [filter] - An optional mongodb filter to apply before counting the data.
    */
-  getDatasetDataCount(datasetId, filter) {
+  getDataCount(datasetId, filter) {
     const request = buildQueryRequest.call(this, `resources/${datasetId}/count`, filter);
     return fetch.call(this, request)
       .catch((err) => {
-        errLog("TDXApi.getDatasetDataCount: %s", err.message);
+        errLog("TDXApi.getDataCount: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "getDatasetDataCount"));
+      .then(checkResponse.bind(null, "getDataCount"));
+  }
+
+  /**
+   * [DEPRECATED] - use getDataCount
+   * Gets a count of the data in a dataset-based resource, after applying the given filter.
+   * @param  {string} datasetId - The id of the dataset-based resource.
+   * @param  {object} [filter] - An optional mongodb filter to apply before counting the data.
+   */
+  getDatasetDataCount(datasetId, filter) {
+    return this.getDataCount(datasetId, filter);
   }
 
   /**
