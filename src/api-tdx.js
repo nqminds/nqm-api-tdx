@@ -345,6 +345,8 @@ class TDXApi {
    * @param  {string} [options.shareMode] - the share mode assigned to the new resource. One of [`"pw"`, `"pr"`,
    * `"tr"`], corresponding to "public read/write", "public read/trusted write", "trusted only".
    * @param  {string[]} [options.tags] - a list of tags to associate with the resource.
+   * @param  {string} [options.textContent] - the text content for the resource. Only applicable to text content based
+   * resources.
    * @param  {bool} [wait=false] - indicates if the call should wait for the index to be built before it returns.
    * @example <caption>usage</caption>
    * // Creates a dataset resource in the authenticated users' scratch folder. The dataset stores key/value pairs
@@ -599,6 +601,12 @@ class TDXApi {
    * Set the text for a text-content based resource.
    * @param  {string} resourceId - The resource id.
    * @param  {string} textContent - The text content to set.
+   * @example <caption>usage</caption>
+   * // Sets the text content for a text-html resource.
+   * tdxApi.setResourceTextContent(
+   *   "HyeqJgVdJ7",
+   *   "<html><body><p>Hello World</p></body></html>"
+   * );
    */
   setResourceTextContent(resourceId, textContent) {
     const request = buildCommandRequest.call(this, "resource/textContent/set", {id: resourceId, textContent});
@@ -661,6 +669,7 @@ class TDXApi {
    * @param  {string} [update.provenance]
    * @param  {string} [update.schema]
    * @param  {string} [update.tags]
+   * @param  {string} [update.textContent]
    */
   updateResource(resourceId, update) {
     const request = buildCommandRequest.call(this, "resource/update", {id: resourceId, ...update});

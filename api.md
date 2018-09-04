@@ -26,7 +26,7 @@
 * [TDXApi](#TDXApi)
     * [new TDXApi(config)](#new_TDXApi_new)
     * [.authenticate(id, secret, [ttl])](#TDXApi+authenticate) ⇒ <code>string</code>
-    * [.addAccount(options)](#TDXApi+addAccount) ⇒ [<code>CommandResult</code>](#CommandResult)
+    * [.addAccount(options, [wait])](#TDXApi+addAccount) ⇒ [<code>CommandResult</code>](#CommandResult)
     * [.addAccountApplicationConnection(accountId, applicationId, [wait])](#TDXApi+addAccountApplicationConnection)
     * [.approveAccount(username, approved)](#TDXApi+approveAccount)
     * [.deleteAccount(username)](#TDXApi+deleteAccount)
@@ -45,6 +45,7 @@
     * [.setResourceSchema(resourceId, schema)](#TDXApi+setResourceSchema) ⇒ [<code>CommandResult</code>](#CommandResult)
     * [.setResourceShareMode(resourceId, shareMode)](#TDXApi+setResourceShareMode)
     * [.setResourcePermissiveShare(resourceId, allowPermissive)](#TDXApi+setResourcePermissiveShare)
+    * [.setResourceTextContent(resourceId, textContent)](#TDXApi+setResourceTextContent)
     * [.suspendResourceIndex(resourceId)](#TDXApi+suspendResourceIndex)
     * [.truncateResource(resourceId)](#TDXApi+truncateResource)
     * [.updateResource(resourceId, update)](#TDXApi+updateResource)
@@ -79,6 +80,7 @@
     * [.getData(datasetId, [filter], [projection], [options], [ndJSON])](#TDXApi+getData) ⇒ [<code>DatasetData</code>](#DatasetData)
     * [.getDatasetDataStream(datasetId, [filter], [projection], [options], [ndJSON])](#TDXApi+getDatasetDataStream) ⇒ <code>object</code>
     * [.getDatasetData(datasetId, [filter], [projection], [options], [ndJSON])](#TDXApi+getDatasetData) ⇒ [<code>DatasetData</code>](#DatasetData)
+    * [.getDataCount(datasetId, [filter])](#TDXApi+getDataCount)
     * [.getDatasetDataCount(datasetId, [filter])](#TDXApi+getDatasetDataCount)
     * [.getDistinct(datasetId, key, [filter])](#TDXApi+getDistinct) ⇒ <code>Array.&lt;object&gt;</code>
     * [.getResource(resourceId, [noThrow])](#TDXApi+getResource) ⇒ [<code>Resource</code>](#Resource)
@@ -139,27 +141,28 @@ tdxApi.authenticate("DKJG8dfg", "letmein", 7200);
 ```
 <a name="TDXApi+addAccount"></a>
 
-### tdxApi.addAccount(options) ⇒ [<code>CommandResult</code>](#CommandResult)
+### tdxApi.addAccount(options, [wait]) ⇒ [<code>CommandResult</code>](#CommandResult)
 Adds an account to the TDX. An account can be an e-mail based user account, a share key (token) account,
 a databot host, an application, or an account-set (user group).
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
 
-| Param | Type | Description |
-| --- | --- | --- |
-| options | <code>object</code> | new account options |
-| options.accountType | <code>string</code> | the type of account, one of ["user", "token"] |
-| [options.approved] | <code>bool</code> | account is pre-approved (reserved for system use only) |
-| [options.authService] | <code>string</code> | the authentication type, one of ["local", "oauth:google", "oauth:github"]. Required for user-based accounts. Ignored for non-user accounts. |
-| [options.displayName] | <code>string</code> | the human-friendly display name of the account, e.g. "Toby's share key" |
-| [options.expires] | <code>number</code> | a timestamp at which the account expires and will no longer be granted a token |
-| [options.key] | <code>string</code> | the account secret. Required for all but oauth-based account types. |
-| [options.owner] | <code>string</code> | the owner of the account. |
-| [options.scratchAccess] | <code>bool</code> | indicates this account can create resources in the owners scratch folder. Ignored for all accounts except share key (token) accounts. Is useful for databots that need to create intermediate or temporary resources without specifying a parent resource - if no parent resource is given when a resource is created and scratch access is enabled, the resource will be created in the owner's scratch folder. |
-| [options.settings] | <code>object</code> | free-form JSON object for user data. |
-| [options.username] | <code>string</code> | the username of the new account. Required for user-based accounts, and should be the account e-mail address. Can be omitted for non-user accounts, and will be auto-generated. |
-| [options.verified] | <code>bool</code> | account is pre-verified (reserved for system use only) |
-| [options.whitelist] | <code>Array.&lt;string&gt;</code> | a list of IP addresses. Tokens will only be granted if the requesting IP address is in this list |
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| options | <code>object</code> |  | new account options |
+| options.accountType | <code>string</code> |  | the type of account, one of ["user", "token"] |
+| [options.approved] | <code>bool</code> |  | account is pre-approved (reserved for system use only) |
+| [options.authService] | <code>string</code> |  | the authentication type, one of ["local", "oauth:google", "oauth:github"]. Required for user-based accounts. Ignored for non-user accounts. |
+| [options.displayName] | <code>string</code> |  | the human-friendly display name of the account, e.g. "Toby's share key" |
+| [options.expires] | <code>number</code> |  | a timestamp at which the account expires and will no longer be granted a token |
+| [options.key] | <code>string</code> |  | the account secret. Required for all but oauth-based account types. |
+| [options.owner] | <code>string</code> |  | the owner of the account. |
+| [options.scratchAccess] | <code>bool</code> |  | indicates this account can create resources in the owners scratch folder. Ignored for all accounts except share key (token) accounts. Is useful for databots that need to create intermediate or temporary resources without specifying a parent resource - if no parent resource is given when a resource is created and scratch access is enabled, the resource will be created in the owner's scratch folder. |
+| [options.settings] | <code>object</code> |  | free-form JSON object for user data. |
+| [options.username] | <code>string</code> |  | the username of the new account. Required for user-based accounts, and should be the account e-mail address. Can be omitted for non-user accounts, and will be auto-generated. |
+| [options.verified] | <code>bool</code> |  | account is pre-verified (reserved for system use only) |
+| [options.whitelist] | <code>Array.&lt;string&gt;</code> |  | a list of IP addresses. Tokens will only be granted if the requesting IP address is in this list |
+| [wait] | <code>bool</code> | <code>false</code> | flag indicating this method will wait for the account to be fully created before returning. |
 
 <a name="TDXApi+addAccountApplicationConnection"></a>
 
@@ -279,6 +282,7 @@ Adds a resource to the TDX.
 | [options.schema] | <code>object</code> |  | optional schema definition. |
 | [options.shareMode] | <code>string</code> |  | the share mode assigned to the new resource. One of [`"pw"`, `"pr"`, `"tr"`], corresponding to "public read/write", "public read/trusted write", "trusted only". |
 | [options.tags] | <code>Array.&lt;string&gt;</code> |  | a list of tags to associate with the resource. |
+| [options.textContent] | <code>string</code> |  | the text content for the resource. Only applicable to text content based resources. |
 | [wait] | <code>bool</code> | <code>false</code> | indicates if the call should wait for the index to be built before it returns. |
 
 **Example** *(usage)*  
@@ -435,6 +439,26 @@ can share it with others.
 | resourceId | <code>string</code> | The resource id. |
 | allowPermissive | <code>bool</code> | The required permissive share mode. |
 
+<a name="TDXApi+setResourceTextContent"></a>
+
+### tdxApi.setResourceTextContent(resourceId, textContent)
+Set the text for a text-content based resource.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| resourceId | <code>string</code> | The resource id. |
+| textContent | <code>string</code> | The text content to set. |
+
+**Example** *(usage)*  
+```js
+// Sets the text content for a text-html resource.
+tdxApi.setResourceTextContent(
+  "HyeqJgVdJ7",
+  "<html><body><p>Hello World</p></body></html>"
+);
+```
 <a name="TDXApi+suspendResourceIndex"></a>
 
 ### tdxApi.suspendResourceIndex(resourceId)
@@ -478,6 +502,7 @@ Modify one or more of the meta data associated with the resource.
 | [update.provenance] | <code>string</code> |  |
 | [update.schema] | <code>string</code> |  |
 | [update.tags] | <code>string</code> |  |
+| [update.textContent] | <code>string</code> |  |
 
 <a name="TDXApi+addData"></a>
 
@@ -579,7 +604,7 @@ tdxApi.updateData(myDatasetId, {lsoa: "E000001", count: 488});
 **Example** *(upsert a document)*  
 ```js
 // Will create a document if no data exists matching key 'lsoa': "E000004"
-tdxApi.updateData(myDatasetId, {lsoa: "E000004", count: 288, true});
+tdxApi.updateData(myDatasetId, {lsoa: "E000004", count: 288}, true);
 ```
 <a name="TDXApi+updateDataByQuery"></a>
 
@@ -880,7 +905,7 @@ Gets the details for a given account id.
 <a name="TDXApi+getAggregateDataStream"></a>
 
 ### tdxApi.getAggregateDataStream(datasetId, pipeline, [ndJSON]) ⇒ <code>object</code>
-Performs an aggregate query on the given dataset, returning a response object with stream in the body
+Performs an aggregate query on the given dataset resource, returning a response object with stream in the body
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
 **Returns**: <code>object</code> - - Response object, where the response body is a stream object.  
@@ -894,7 +919,7 @@ Performs an aggregate query on the given dataset, returning a response object wi
 <a name="TDXApi+getAggregateData"></a>
 
 ### tdxApi.getAggregateData(datasetId, pipeline, [ndJSON]) ⇒ [<code>DatasetData</code>](#DatasetData)
-Performs an aggregate query on the given dataset.
+Performs an aggregate query on the given dataset resource.
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
 
@@ -914,8 +939,8 @@ Gets details of the currently authenticated account.
 <a name="TDXApi+getDataStream"></a>
 
 ### tdxApi.getDataStream(datasetId, [filter], [projection], [options], [ndJSON]) ⇒ <code>object</code>
-Gets all data from the given dataset that matches the filter provided and returns a response object with stream
-in the body.
+Gets all data from the given dataset resource that matches the filter provided and returns a response object with
+stream in the body.
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
 **Returns**: <code>object</code> - - Response object, where the response body is a stream object.  
@@ -932,7 +957,7 @@ in the body.
 <a name="TDXApi+getData"></a>
 
 ### tdxApi.getData(datasetId, [filter], [projection], [options], [ndJSON]) ⇒ [<code>DatasetData</code>](#DatasetData)
-Gets all data from the given dataset that matches the filter provided.
+Gets all data from the given dataset resource that matches the filter provided.
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
 
@@ -949,8 +974,8 @@ Gets all data from the given dataset that matches the filter provided.
 
 ### tdxApi.getDatasetDataStream(datasetId, [filter], [projection], [options], [ndJSON]) ⇒ <code>object</code>
 [DEPRECATED] - use getDataStream
-Gets all data from the given dataset that matches the filter provided and returns a response object with stream
-in the body.
+Gets all data from the given dataset resource that matches the filter provided and returns a response object with
+stream in the body.
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
 **Returns**: <code>object</code> - - Response object, where the response body is a stream object.  
@@ -968,7 +993,7 @@ in the body.
 
 ### tdxApi.getDatasetData(datasetId, [filter], [projection], [options], [ndJSON]) ⇒ [<code>DatasetData</code>](#DatasetData)
 [DEPRECATED] - use getData
-Gets all data from the given dataset that matches the filter provided.
+Gets all data from the given dataset resource that matches the filter provided.
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
 
@@ -981,9 +1006,22 @@ Gets all data from the given dataset that matches the filter provided.
 | [options.nqmMeta] | <code>bool</code> | When set, the resource metadata will be returned along with the dataset data. Can be used to avoid a second call to `getResource`. Otherwise a URL to the metadata is provided. |
 | [ndJSON] | <code>bool</code> | If set, the data is sent in [newline delimited json format](http://ndjson.org/). |
 
+<a name="TDXApi+getDataCount"></a>
+
+### tdxApi.getDataCount(datasetId, [filter])
+Gets a count of the data in a dataset-based resource, after applying the given filter.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| datasetId | <code>string</code> | The id of the dataset-based resource. |
+| [filter] | <code>object</code> | An optional mongodb filter to apply before counting the data. |
+
 <a name="TDXApi+getDatasetDataCount"></a>
 
 ### tdxApi.getDatasetDataCount(datasetId, [filter])
+[DEPRECATED] - use getDataCount
 Gets a count of the data in a dataset-based resource, after applying the given filter.
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
