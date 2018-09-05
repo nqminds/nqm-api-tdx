@@ -34,23 +34,26 @@ const fetchWithDeadline = function(request) {
       deadline = 0;
     }
 
+    const clearTimer = () => {
+      // Cancel pending deadline.
+      if (deadline) {
+        clearTimeout(deadline);
+        deadline = 0;
+      }
+    };
+
     Promise.resolve(fetch(request))
       .then((response) => {
+        clearTimer();
         // Forward response.
         resolve(response);
       })
       .catch((err) => {
+        clearTimer();
         if (!rejected) {
           reject(err);
         } else {
           log("already rejected by timeout, ignoring rejection [%s]", err.message);
-        }
-      })
-      .finally(() => {
-        // Cancel pending deadline.
-        if (deadline) {
-          clearTimeout(deadline);
-          deadline = 0;
         }
       });
   });
