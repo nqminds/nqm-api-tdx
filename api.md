@@ -279,6 +279,7 @@ Adds a resource to the TDX.
 | [options.meta] | <code>object</code> |  | a free-form object for storing metadata associated with this resource. |
 | [options.parentId] | <code>string</code> |  | the id of the parent resource. If omitted, will default to the appropriate root folder based on the type of resource being created. |
 | [options.provenance] | <code>string</code> |  | a description of the provenance of the resource. Markdown format is supported. |
+| [options.queryProxy] | <code>string</code> |  | a url or IP address that will handle all queries to this resource |
 | [options.schema] | <code>object</code> |  | optional schema definition. |
 | [options.shareMode] | <code>string</code> |  | the share mode assigned to the new resource. One of [`"pw"`, `"pr"`, `"tr"`], corresponding to "public read/write", "public read/trusted write", "trusted only". |
 | [options.tags] | <code>Array.&lt;string&gt;</code> |  | a list of tags to associate with the resource. |
@@ -500,9 +501,10 @@ Modify one or more of the meta data associated with the resource.
 | [update.meta] | <code>string</code> |  |
 | [update.name] | <code>string</code> |  |
 | [update.provenance] | <code>string</code> |  |
+| [update.queryProxy] | <code>string</code> |  |
 | [update.schema] | <code>string</code> |  |
 | [update.tags] | <code>string</code> |  |
-| [update.textContent] | <code>string</code> |  |
+| [update.textContent] | <code>string</code> | see also [setResourceTextContent](#TDXApi+setResourceTextContent) |
 
 <a name="TDXApi+addData"></a>
 

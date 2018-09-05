@@ -341,6 +341,7 @@ class TDXApi {
    * root folder based on the type of resource being created.
    * @param  {string} [options.provenance] - a description of the provenance of the resource. Markdown format is
    * supported.
+   * @param  {string} [options.queryProxy] - a url or IP address that will handle all queries to this resource
    * @param  {object} [options.schema] - optional schema definition.
    * @param  {string} [options.shareMode] - the share mode assigned to the new resource. One of [`"pw"`, `"pr"`,
    * `"tr"`], corresponding to "public read/write", "public read/trusted write", "trusted only".
@@ -667,9 +668,10 @@ class TDXApi {
    * @param  {string} [update.meta]
    * @param  {string} [update.name]
    * @param  {string} [update.provenance]
+   * @param  {string} [update.queryProxy]
    * @param  {string} [update.schema]
    * @param  {string} [update.tags]
-   * @param  {string} [update.textContent]
+   * @param  {string} [update.textContent] see also {@link TDXApi#setResourceTextContent}
    */
   updateResource(resourceId, update) {
     const request = buildCommandRequest.call(this, "resource/update", {id: resourceId, ...update});
