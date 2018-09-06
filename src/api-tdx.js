@@ -450,9 +450,9 @@ class TDXApi {
    * @param  {object} file - The file to upload, obtained from an `<input type="file">` element.
    * @param  {bool} [stream=false] - Flag indicating whether the call should return a stream allowing
    * callees to monitor progress.
-   * @param  {compressed} [boolean=false] - Flag indicating the file should be decompressed after upload. ZIP format
+   * @param  {bool} [compressed=false] - Flag indicating the file should be decompressed after upload. ZIP format
    * only.
-   * @param  {base64Encoded} [boolean=false] = Flag indicating the file should be decoded from base64 after upload.
+   * @param  {bool} [base64Encoded=false] = Flag indicating the file should be decoded from base64 after upload.
    */
   fileUpload(resourceId, file, stream, compressed = false, base64Encoded = false) {
     const request = buildFileUploadRequest.call(this, resourceId, compressed, base64Encoded, file);
@@ -469,7 +469,7 @@ class TDXApi {
       .then((response) => {
         return [response, response.text()];
       })
-      .spread((response, text) => {
+      .then(([response, text]) => {
         if (response.ok) {
           return Promise.resolve(text);
         } else {
