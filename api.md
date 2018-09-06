@@ -38,7 +38,7 @@
     * [.addResourceAccess(resourceId, accountId, sourceId, access)](#TDXApi+addResourceAccess)
     * [.deleteResource(resourceId)](#TDXApi+deleteResource)
     * [.deleteManyResources(resourceIdList)](#TDXApi+deleteManyResources) ⇒ [<code>CommandResult</code>](#CommandResult)
-    * [.fileUpload(resourceId, file, [stream], [boolean], [boolean])](#TDXApi+fileUpload)
+    * [.fileUpload(resourceId, file, [stream], [compressed], [base64Encoded])](#TDXApi+fileUpload)
     * [.moveResource(id, fromParentId, toParentId)](#TDXApi+moveResource)
     * [.rebuildResourceIndex(resourceId)](#TDXApi+rebuildResourceIndex)
     * [.removeResourceAccess(resourceId, accountId, addedBy, sourceId, access)](#TDXApi+removeResourceAccess)
@@ -346,7 +346,7 @@ Will fail **all** deletes if any of the permission checks fail.
 
 <a name="TDXApi+fileUpload"></a>
 
-### tdxApi.fileUpload(resourceId, file, [stream], [boolean], [boolean])
+### tdxApi.fileUpload(resourceId, file, [stream], [compressed], [base64Encoded])
 Upload a file to a resource.
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
@@ -356,8 +356,8 @@ Upload a file to a resource.
 | resourceId | <code>string</code> |  | The id of the destination resource. |
 | file | <code>object</code> |  | The file to upload, obtained from an `<input type="file">` element. |
 | [stream] | <code>bool</code> | <code>false</code> | Flag indicating whether the call should return a stream allowing callees to monitor progress. |
-| [boolean] | <code>compressed</code> | <code>false</code> | Flag indicating the file should be decompressed after upload. ZIP format only. |
-| [boolean] | <code>base64Encoded</code> | <code>false</code> | = Flag indicating the file should be decoded from base64 after upload. |
+| [compressed] | <code>bool</code> | <code>false</code> | Flag indicating the file should be decompressed after upload. ZIP format only. |
+| [base64Encoded] | <code>bool</code> | <code>false</code> | = Flag indicating the file should be decoded from base64 after upload. |
 
 <a name="TDXApi+moveResource"></a>
 
