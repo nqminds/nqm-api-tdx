@@ -78,10 +78,10 @@
     * [.getAuthenticatedAccount()](#TDXApi+getAuthenticatedAccount) ⇒ <code>object</code>
     * [.getDataStream(datasetId, [filter], [projection], [options], [ndJSON])](#TDXApi+getDataStream) ⇒ <code>object</code>
     * [.getData(datasetId, [filter], [projection], [options], [ndJSON])](#TDXApi+getData) ⇒ [<code>DatasetData</code>](#DatasetData)
-    * [.getDatasetDataStream(datasetId, [filter], [projection], [options], [ndJSON])](#TDXApi+getDatasetDataStream) ⇒ <code>object</code>
-    * [.getDatasetData(datasetId, [filter], [projection], [options], [ndJSON])](#TDXApi+getDatasetData) ⇒ [<code>DatasetData</code>](#DatasetData)
+    * ~~[.getDatasetDataStream(datasetId, [filter], [projection], [options], [ndJSON])](#TDXApi+getDatasetDataStream) ⇒ <code>object</code>~~
+    * ~~[.getDatasetData(datasetId, [filter], [projection], [options], [ndJSON])](#TDXApi+getDatasetData) ⇒ [<code>DatasetData</code>](#DatasetData)~~
     * [.getDataCount(datasetId, [filter])](#TDXApi+getDataCount)
-    * [.getDatasetDataCount(datasetId, [filter])](#TDXApi+getDatasetDataCount)
+    * ~~[.getDatasetDataCount(datasetId, [filter])](#TDXApi+getDatasetDataCount)~~
     * [.getDistinct(datasetId, key, [filter])](#TDXApi+getDistinct) ⇒ <code>Array.&lt;object&gt;</code>
     * [.getResource(resourceId, [noThrow])](#TDXApi+getResource) ⇒ [<code>Resource</code>](#Resource)
     * [.getResourceAccess(resourceId)](#TDXApi+getResourceAccess) ⇒ <code>Array.&lt;object&gt;</code>
@@ -974,10 +974,8 @@ Gets all data from the given dataset resource that matches the filter provided.
 
 <a name="TDXApi+getDatasetDataStream"></a>
 
-### tdxApi.getDatasetDataStream(datasetId, [filter], [projection], [options], [ndJSON]) ⇒ <code>object</code>
-[DEPRECATED] - use getDataStream
-Gets all data from the given dataset resource that matches the filter provided and returns a response object with
-stream in the body.
+### ~~tdxApi.getDatasetDataStream(datasetId, [filter], [projection], [options], [ndJSON]) ⇒ <code>object</code>~~
+***Deprecated***
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
 **Returns**: <code>object</code> - - Response object, where the response body is a stream object.  
@@ -993,9 +991,8 @@ stream in the body.
 
 <a name="TDXApi+getDatasetData"></a>
 
-### tdxApi.getDatasetData(datasetId, [filter], [projection], [options], [ndJSON]) ⇒ [<code>DatasetData</code>](#DatasetData)
-[DEPRECATED] - use getData
-Gets all data from the given dataset resource that matches the filter provided.
+### ~~tdxApi.getDatasetData(datasetId, [filter], [projection], [options], [ndJSON]) ⇒ [<code>DatasetData</code>](#DatasetData)~~
+***Deprecated***
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
 
@@ -1022,9 +1019,8 @@ Gets a count of the data in a dataset-based resource, after applying the given f
 
 <a name="TDXApi+getDatasetDataCount"></a>
 
-### tdxApi.getDatasetDataCount(datasetId, [filter])
-[DEPRECATED] - use getDataCount
-Gets a count of the data in a dataset-based resource, after applying the given filter.
+### ~~tdxApi.getDatasetDataCount(datasetId, [filter])~~
+***Deprecated***
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
 
