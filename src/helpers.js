@@ -167,9 +167,9 @@ const buildFileUploadRequest = function(resourceId, compressed, base64Encoded, f
  * @param  {object} [options] - query options, e.g. {limit: 10, sort: {timestamp: -1}}
  */
 const buildQueryRequest = function(endpoint, filter, projection, options) {
-  filter = filter ? JSON.stringify(filter) : "";
-  projection = projection ? JSON.stringify(projection) : "";
-  options = options ? JSON.stringify(options) : "";
+  filter = filter ? encodeURIComponent(JSON.stringify(filter)) : "";
+  projection = projection ? encodeURIComponent(JSON.stringify(projection)) : "";
+  options = options ? encodeURIComponent(JSON.stringify(options)) : "";
   let query;
   if (endpoint.indexOf("?") < 0) {
     // There is no query portion in the prefix - add one now.
