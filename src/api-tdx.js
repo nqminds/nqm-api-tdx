@@ -767,11 +767,11 @@ class TDXApi {
    * @param  {object} data - The patch definition.
    * @param  {object|array} data.__update - An array of JSON patch specifications.
    * @example <caption>patch a single value in a single document</caption>
-   * tdxApi.patchData(myDatasetId, {lsoa: "E000001", __update: [{p: "count", m: "r", v: 948}]});
+   * tdxApi.patchData(myDatasetId, {lsoa: "E000001", __update: [{path: "/count", op: "replace", value: 948}]});
    * @example <caption>patch a more than one value in a single document</caption>
    * tdxApi.patchData(myDatasetId, {lsoa: "E000001", __update: [
-   *   {p: "count", m: "r", v: 948}
-   *   {p: "modified", m: "a", v: Date.now()}
+   *   {path: "/count", op: "replace", value: 948}
+   *   {path: "/modified", op: "add", value: Date.now()}
    * ]});
    */
   patchData(datasetId, data) {

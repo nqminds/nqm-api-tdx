@@ -576,13 +576,13 @@ which involves defining the primary key data followed by a flexible update speci
 
 **Example** *(patch a single value in a single document)*  
 ```js
-tdxApi.patchData(myDatasetId, {lsoa: "E000001", __update: [{p: "count", m: "r", v: 948}]});
+tdxApi.patchData(myDatasetId, {lsoa: "E000001", __update: [{path: "/count", op: "replace", value: 948}]});
 ```
 **Example** *(patch a more than one value in a single document)*  
 ```js
 tdxApi.patchData(myDatasetId, {lsoa: "E000001", __update: [
-  {p: "count", m: "r", v: 948}
-  {p: "modified", m: "a", v: Date.now()}
+  {path: "/count", op: "replace", value: 948}
+  {path: "/modified", op: "add", value: Date.now()}
 ]});
 ```
 <a name="TDXApi+updateData"></a>
