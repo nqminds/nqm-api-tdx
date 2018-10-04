@@ -203,11 +203,31 @@ const buildDatabotInstanceRequest = function(endpoint) {
   });
 };
 
-const checkResponse = function(source, response) {
+const checkResponse = function(source, doNotThrow, response) {
+  // If doNotThrow is omitted default to the config value (which defaults to `false`, i.e. errors will be thrown).
+  if (doNotThrow !== true && doNotThrow !== false) {
+    response = doNotThrow;
+    doNotThrow = !!this.config.doNotThrow;
+  }
+
   return response.json()
     .then((json) => {
       if (response.ok) {
-        return Promise.resolve(json);
+        return Promise.resolve(json)
+          .then((tdxResponse) => {
+            if (!doNotThrow && tdxResponse && tdxResponse.result) {
+              // Check for data validation (response) errors. These differ from straight-forward invalid argument
+              // failures. For example, a call to `updateData` might include requests to update 10 documents. The TDX
+              // will continue to apply updates even after one of them fails. For example, the first 4 updates succeed,
+              // the fifth fails and the rest succeed. In this case `tdxResponse` will contain a `result` object with
+              // details of the failures in an `error` array property and the successes in an `commit` property.
+              if (tdxResponse.result.errors && tdxResponse.result.errors.length) {
+                // Reject errors with 409 Conflict status.
+                return Promise.reject(handleError(source, tdxResponse.result.errors, 409));
+              }
+            }
+            return tdxResponse;
+          });
       } else {
         if (json.error) {
           // Build a failure object from the json response.

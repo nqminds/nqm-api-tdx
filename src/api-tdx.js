@@ -27,7 +27,7 @@ const errLog = debug("nqm-api-tdx:error");
  * of the data that was affected by the command.
  * @property  {object} result - Contains detailed error information when available.
  * @property  {array} result.errors - Will contain error information when appropriate.
- * @property  {array} result.commit - Contains details of each commited document.
+ * @property  {array} result.ok - Contains details of each commited document.
  */
 
 /**
@@ -68,6 +68,8 @@ class TDXApi {
    * @param  {string} [config.databotServer] - the URL of the TDX databot service, e.g. https://databot.nqminds.com
    * @param  {string} [config.accessToken] - an access token that will be used to authorise commands and queries.
    * Alternatively you can use the authenticate method to acquire a token.
+   * @param  {bool} [config.doNotThrow] - set to prevent throwing response errors. They will be returned in the
+   * {@link CommandResult} object. This was set by default prior to 0.5.x
    * @example <caption>standard usage</caption>
    * import TDXApi from "nqm-api-tdx";
    * const api = new TDXApi({tdxServer: "https://tdx.acme.com"});
@@ -108,7 +110,7 @@ class TDXApi {
 
     const request = buildAuthenticateRequest.call(this, credentials, ip, ttl);
     return fetch.call(this, request)
-      .then(checkResponse.bind(null, "authenticate"))
+      .then(checkResponse.bind(this, "authenticate"))
       .then((result) => {
         log(result);
         this.accessToken = result.access_token;
@@ -161,7 +163,7 @@ class TDXApi {
         errLog("TDXApi.addAccount: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "addAccount"))
+      .then(checkResponse.bind(this, "addAccount"))
       .then((result) => {
         if (wait) {
           return waitForAccount.call(this, options.username, options.verified, options.approved)
@@ -187,7 +189,7 @@ class TDXApi {
         errLog("TDXApi.addAccountApplicationConnection: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "addAccountApplicationConnection"))
+      .then(checkResponse.bind(this, "addAccountApplicationConnection"))
       .then((result) => {
         if (wait) {
           const applicationUserId = shortHash(`${applicationId}-${accountId}`);
@@ -213,7 +215,7 @@ class TDXApi {
         errLog("TDXApi.approveAccount: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "approveAccount"));
+      .then(checkResponse.bind(this, "approveAccount"));
   }
 
   /**
@@ -227,7 +229,7 @@ class TDXApi {
         errLog("TDXApi.deleteAccount: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "deleteAccount"));
+      .then(checkResponse.bind(this, "deleteAccount"));
   }
 
   /**
@@ -242,7 +244,7 @@ class TDXApi {
         errLog("TDXApi.resetAccount: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "resetAccount"));
+      .then(checkResponse.bind(this, "resetAccount"));
   }
 
   /**
@@ -263,7 +265,7 @@ class TDXApi {
         errLog("TDXApi.updateAccount: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "addAccount"));
+      .then(checkResponse.bind(this, "addAccount"));
   }
 
   /**
@@ -278,7 +280,7 @@ class TDXApi {
         errLog("TDXApi.verifyAccount: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "verifyAccount"));
+      .then(checkResponse.bind(this, "verifyAccount"));
   }
 
   /*
@@ -303,7 +305,7 @@ class TDXApi {
         errLog("TDXApi.addTrustedExchange: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "addTrustedExchange"));
+      .then(checkResponse.bind(this, "addTrustedExchange"));
   }
 
   /**
@@ -370,7 +372,7 @@ class TDXApi {
         errLog("TDXApi.addResource: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "addResource"))
+      .then(checkResponse.bind(this, "addResource"))
       .then((result) => {
         if (wait) {
           return waitForIndex.call(this, result.response.id)
@@ -410,7 +412,7 @@ class TDXApi {
         errLog("TDXApi.addResourceAccess: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "addResourceAccess"));
+      .then(checkResponse.bind(this, "addResourceAccess"));
   }
 
   /**
@@ -425,7 +427,7 @@ class TDXApi {
         errLog("TDXApi.deleteResource: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "deleteResource"));
+      .then(checkResponse.bind(this, "deleteResource"));
   }
 
   /**
@@ -441,7 +443,7 @@ class TDXApi {
         errLog("TDXApi.deleteManyResources: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "deleteManyResources"));
+      .then(checkResponse.bind(this, "deleteManyResources"));
   }
 
   /**
@@ -493,7 +495,7 @@ class TDXApi {
         errLog("TDXApi.moveResource: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "moveResource"));
+      .then(checkResponse.bind(this, "moveResource"));
   }
 
   /**
@@ -509,7 +511,7 @@ class TDXApi {
         errLog("TDXApi.rebuildResourceIndex: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "rebuildIndex"))
+      .then(checkResponse.bind(this, "rebuildIndex"))
       .then((res) => {
         result = res;
         return waitForIndex.call(this, result.response.id, "built");
@@ -543,7 +545,7 @@ class TDXApi {
         errLog("TDXApi.removeResourceAccess: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "removeResourceAccess"));
+      .then(checkResponse.bind(this, "removeResourceAccess"));
   }
 
   /**
@@ -559,7 +561,7 @@ class TDXApi {
         errLog("TDXApi.setResourceSchema: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "setResourceSchema"));
+      .then(checkResponse.bind(this, "setResourceSchema"));
   }
 
   /**
@@ -575,7 +577,7 @@ class TDXApi {
         errLog("TDXApi.setResourceShareMode: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "setResourceShareMode"));
+      .then(checkResponse.bind(this, "setResourceShareMode"));
   }
 
   /**
@@ -595,7 +597,7 @@ class TDXApi {
         errLog("TDXApi.setResourcePermissiveShare: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "setResourcePermissiveShare"));
+      .then(checkResponse.bind(this, "setResourcePermissiveShare"));
   }
 
   /**
@@ -616,7 +618,7 @@ class TDXApi {
         errLog("TDXApi.setResourceTextContent: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "setResourceTextContent"));
+      .then(checkResponse.bind(this, "setResourceTextContent"));
   }
 
   /**
@@ -633,7 +635,7 @@ class TDXApi {
         errLog("TDXApi.suspendResourceIndex: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "suspendIndex"))
+      .then(checkResponse.bind(this, "suspendIndex"))
       .then((res) => {
         result = res;
         return waitForIndex.call(this, result.response.id, "suspended");
@@ -655,7 +657,7 @@ class TDXApi {
         errLog("TDXApi.truncateResource: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "truncateResource"));
+      .then(checkResponse.bind(this, "truncateResource"));
   }
 
   /**
@@ -680,7 +682,7 @@ class TDXApi {
         errLog("TDXApi.updateResource: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "updateResource"));
+      .then(checkResponse.bind(this, "updateResource"));
   }
 
   /*
@@ -693,6 +695,7 @@ class TDXApi {
    * Add data to a dataset resource.
    * @param  {string} datasetId - The id of the dataset-based resource to add data to.
    * @param  {object|array} data - The data to add. Must conform to the schema defined by the resource metadata.
+   * @param  {bool} doNotThrow - set to override default error handling. See {@link TDXApi}.
    * Supports creating an individual document or many documents.
    * @example <caption>create an individual document</caption>
    * // Assumes the dataset primary key is 'lsoa'
@@ -704,7 +707,7 @@ class TDXApi {
    *  {lsoa: "E0000005", count: 4533},
    * ]);
    */
-  addData(datasetId, data) {
+  addData(datasetId, data, doNotThrow) {
     const postData = {
       datasetId,
       payload: [].concat(data),
@@ -715,7 +718,7 @@ class TDXApi {
         errLog("TDXApi.addData: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "addData"));
+      .then(checkResponse.bind(this, "addData", doNotThrow));
   }
 
   /**
@@ -723,7 +726,7 @@ class TDXApi {
    * @param  {string} datasetId - The id of the dataset-based resource to delete data from.
    * @param  {object|array} data - The primary key data to delete.
    */
-  deleteData(datasetId, data) {
+  deleteData(datasetId, data, doNotThrow) {
     const postData = {
       datasetId,
       payload: [].concat(data),
@@ -734,7 +737,7 @@ class TDXApi {
         errLog("TDXApi.deleteData: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "deleteData"));
+      .then(checkResponse.bind(this, "deleteData", doNotThrow));
   }
 
   /**
@@ -746,7 +749,7 @@ class TDXApi {
    * // Delete all documents with English lsoa.
    * tdxApi.deleteDataByQuery(myDatasetId, {lsoa: {$regex: "E*"}});
    */
-  deleteDataByQuery(datasetId, query) {
+  deleteDataByQuery(datasetId, query, doNotThrow) {
     const postData = {
       datasetId,
       query: JSON.stringify(query),
@@ -757,7 +760,7 @@ class TDXApi {
         errLog("TDXApi.deleteDataByQuery: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "deleteDataByQuery"));
+      .then(checkResponse.bind(this, "deleteDataByQuery", doNotThrow));
   }
 
   /**
@@ -774,7 +777,7 @@ class TDXApi {
    *   {path: "/modified", op: "add", value: Date.now()}
    * ]});
    */
-  patchData(datasetId, data) {
+  patchData(datasetId, data, doNotThrow) {
     const postData = {
       datasetId,
       payload: [].concat(data),
@@ -785,7 +788,7 @@ class TDXApi {
         errLog("TDXApi.patchData: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "patchData"));
+      .then(checkResponse.bind(this, "patchData", doNotThrow));
   }
 
   /**
@@ -802,7 +805,7 @@ class TDXApi {
    * // Will create a document if no data exists matching key 'lsoa': "E000004"
    * tdxApi.updateData(myDatasetId, {lsoa: "E000004", count: 288}, true);
    */
-  updateData(datasetId, data, upsert) {
+  updateData(datasetId, data, upsert, doNotThrow) {
     const postData = {
       datasetId,
       payload: [].concat(data),
@@ -814,7 +817,7 @@ class TDXApi {
         errLog("TDXApi.updateData: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "updateData"));
+      .then(checkResponse.bind(this, "updateData", doNotThrow));
   }
 
   /**
@@ -826,7 +829,7 @@ class TDXApi {
    * // Update all documents with English lsoa, setting `count` to 1000.
    * tdxApi.updateDataByQuery(myDatasetId, {lsoa: {$regex: "E*"}}, {count: 1000});
    */
-  updateDataByQuery(datasetId, query, update) {
+  updateDataByQuery(datasetId, query, update, doNotThrow) {
     const postData = {
       datasetId,
       query: JSON.stringify(query),
@@ -838,7 +841,7 @@ class TDXApi {
         errLog("TDXApi.updateDataByQuery: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "updateDataByQuery"));
+      .then(checkResponse.bind(this, "updateDataByQuery", doNotThrow));
   }
 
   /*
@@ -866,7 +869,7 @@ class TDXApi {
         errLog("TDXApi.deleteDatabotHost: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "deleteDatabotHost"));
+      .then(checkResponse.bind(this, "deleteDatabotHost"));
   }
 
   /**
@@ -884,7 +887,7 @@ class TDXApi {
         errLog("TDXApi.deleteDatabotInstance: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "deleteDatabotInstance"));
+      .then(checkResponse.bind(this, "deleteDatabotInstance"));
   }
 
   /**
@@ -898,7 +901,7 @@ class TDXApi {
         errLog("TDXApi.getDatabotInstance: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "getDatabotInstance"));
+      .then(checkResponse.bind(this, "getDatabotInstance"));
   }
 
   /**
@@ -913,7 +916,7 @@ class TDXApi {
         errLog("TDXApi.getDatabotInstanceOutput: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "getDatabotInstanceOutput"));
+      .then(checkResponse.bind(this, "getDatabotInstanceOutput"));
   }
 
   /**
@@ -927,7 +930,7 @@ class TDXApi {
         errLog("TDXApi.getDatabotInstanceStatus: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "getDatabotInstanceStatus"));
+      .then(checkResponse.bind(this, "getDatabotInstanceStatus"));
   }
 
   /**
@@ -948,7 +951,7 @@ class TDXApi {
         errLog("TDXApi.registerDatabotHost: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "registerDatabotHost"));
+      .then(checkResponse.bind(this, "registerDatabotHost"));
   }
 
   /**
@@ -976,7 +979,7 @@ class TDXApi {
         errLog("TDXApi.sendDatabotHostCommand: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "sendDatabotHostCommand"));
+      .then(checkResponse.bind(this, "sendDatabotHostCommand"));
   }
 
   /**
@@ -1012,7 +1015,7 @@ class TDXApi {
         errLog("TDXApi.startDatabotInstance: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "startDatabotInstance"));
+      .then(checkResponse.bind(this, "startDatabotInstance"));
   }
 
   /**
@@ -1031,7 +1034,7 @@ class TDXApi {
         errLog("TDXApi.stopDatabotInstance: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "stopDatabotInstance"));
+      .then(checkResponse.bind(this, "stopDatabotInstance"));
   }
 
   /**
@@ -1054,7 +1057,7 @@ class TDXApi {
         errLog("TDXApi.updateDatabotHostStatus: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "updateDatabotHostStatus"));
+      .then(checkResponse.bind(this, "updateDatabotHostStatus"));
   }
 
   /**
@@ -1068,7 +1071,7 @@ class TDXApi {
         errLog("TDXApi.writeDatabotHostInstanceOutput: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "writeDatabotHostInstanceOutput"));
+      .then(checkResponse.bind(this, "writeDatabotHostInstanceOutput"));
   }
 
   /*
@@ -1097,7 +1100,7 @@ class TDXApi {
         errLog("TDXApi.addZoneConnection: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "addZoneConnection"));
+      .then(checkResponse.bind(this, "addZoneConnection"));
   }
 
   /**
@@ -1111,7 +1114,7 @@ class TDXApi {
         errLog("TDXApi.deleteZoneConnection: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "deleteZoneConnection"));
+      .then(checkResponse.bind(this, "deleteZoneConnection"));
   }
 
   /**
@@ -1125,7 +1128,7 @@ class TDXApi {
         errLog("TDXApi.rollbackCommand: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "rollbackCommand"));
+      .then(checkResponse.bind(this, "rollbackCommand"));
   }
 
   /*
@@ -1157,7 +1160,7 @@ class TDXApi {
         errLog("TDXApi.createTDXToken: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "createTDXToken"));
+      .then(checkResponse.bind(this, "createTDXToken"));
   }
 
   /**
@@ -1186,7 +1189,7 @@ class TDXApi {
         errLog("TDXApi.exchangeTDXToken: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "exchangeTDXToken"));
+      .then(checkResponse.bind(this, "exchangeTDXToken"));
   }
 
   /**
@@ -1216,7 +1219,7 @@ class TDXApi {
         errLog("TDXApi.getAccount: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "getAccount"))
+      .then(checkResponse.bind(this, "getAccount"))
       .then((accountList) => {
         return accountList && accountList.length ? accountList[0] : null;
       });
@@ -1256,7 +1259,7 @@ class TDXApi {
    */
   getAggregateData(datasetId, pipeline, ndJSON) {
     return this.getAggregateDataStream(datasetId, pipeline, ndJSON)
-      .then(checkResponse.bind(null, "getAggregateData"));
+      .then(checkResponse.bind(this, "getAggregateData"));
   }
 
   /**
@@ -1270,7 +1273,7 @@ class TDXApi {
         errLog("TDXApi.getAuthenticatedAccount: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "getAuthenticatedAccount"));
+      .then(checkResponse.bind(this, "getAuthenticatedAccount"));
   }
 
   /**
@@ -1312,7 +1315,7 @@ class TDXApi {
    */
   getData(datasetId, filter, projection, options, ndJSON) {
     return this.getDataStream(datasetId, filter, projection, options, ndJSON)
-      .then(checkResponse.bind(null, "getData"));
+      .then(checkResponse.bind(this, "getData"));
   }
 
   /**
@@ -1364,7 +1367,7 @@ class TDXApi {
         errLog("TDXApi.getDataCount: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "getDataCount"));
+      .then(checkResponse.bind(this, "getDataCount"));
   }
 
   /**
@@ -1391,7 +1394,7 @@ class TDXApi {
         errLog("TDXApi.getDistinct: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "getDistinct"));
+      .then(checkResponse.bind(this, "getDistinct"));
   }
 
   /**
@@ -1416,10 +1419,10 @@ class TDXApi {
           } else if (response.status === 404) {
             return null;
           } else {
-            return checkResponse("getResource", response);
+            return checkResponse.call(this, "getResource", response);
           }
         } else {
-          return checkResponse("getResource", response);
+          return checkResponse.call(this, "getResource", response);
         }
       });
   }
@@ -1437,7 +1440,7 @@ class TDXApi {
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
       .then((response) => {
-        return checkResponse("getResourceAccess", response);
+        return checkResponse.call(this, "getResourceAccess", response);
       });
   }
 
@@ -1453,7 +1456,7 @@ class TDXApi {
         errLog("TDXApi.getDatasetAncestors: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "getResourceAncestors"));
+      .then(checkResponse.bind(this, "getResourceAncestors"));
   }
 
   /**
@@ -1471,7 +1474,7 @@ class TDXApi {
         errLog("TDXApi.getResource: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "getResources"));
+      .then(checkResponse.bind(this, "getResources"));
   }
 
   /**
@@ -1496,7 +1499,7 @@ class TDXApi {
         errLog("TDXApi.getTDXToken: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "getTDXToken"));
+      .then(checkResponse.bind(this, "getTDXToken"));
   }
 
   /**
@@ -1538,7 +1541,7 @@ class TDXApi {
         errLog("TDXApi.validateTDXToken: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(null, "validateTDXToken"));
+      .then(checkResponse.bind(this, "validateTDXToken"));
   }
 }
 

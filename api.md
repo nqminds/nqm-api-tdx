@@ -49,7 +49,7 @@
     * [.suspendResourceIndex(resourceId)](#TDXApi+suspendResourceIndex)
     * [.truncateResource(resourceId)](#TDXApi+truncateResource)
     * [.updateResource(resourceId, update)](#TDXApi+updateResource)
-    * [.addData(datasetId, data)](#TDXApi+addData)
+    * [.addData(datasetId, data, doNotThrow)](#TDXApi+addData)
     * [.deleteData(datasetId, data)](#TDXApi+deleteData)
     * [.deleteDataByQuery(datasetId, query)](#TDXApi+deleteDataByQuery)
     * [.patchData(datasetId, data)](#TDXApi+patchData)
@@ -107,6 +107,7 @@ Create a TDXApi instance
 | [config.queryServer] | <code>string</code> | the URL of the TDX query service, e.g. https://q.nqminds.com |
 | [config.databotServer] | <code>string</code> | the URL of the TDX databot service, e.g. https://databot.nqminds.com |
 | [config.accessToken] | <code>string</code> | an access token that will be used to authorise commands and queries. Alternatively you can use the authenticate method to acquire a token. |
+| [config.doNotThrow] | <code>bool</code> | set to prevent throwing response errors. They will be returned in the [CommandResult](#CommandResult) object. This was set by default prior to 0.5.x |
 
 **Example** *(standard usage)*  
 ```js
@@ -508,7 +509,7 @@ Modify one or more of the meta data associated with the resource.
 
 <a name="TDXApi+addData"></a>
 
-### tdxApi.addData(datasetId, data)
+### tdxApi.addData(datasetId, data, doNotThrow)
 Add data to a dataset resource.
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
@@ -516,7 +517,8 @@ Add data to a dataset resource.
 | Param | Type | Description |
 | --- | --- | --- |
 | datasetId | <code>string</code> | The id of the dataset-based resource to add data to. |
-| data | <code>object</code> \| <code>array</code> | The data to add. Must conform to the schema defined by the resource metadata. Supports creating an individual document or many documents. |
+| data | <code>object</code> \| <code>array</code> | The data to add. Must conform to the schema defined by the resource metadata. |
+| doNotThrow | <code>bool</code> | set to override default error handling. See [TDXApi](#TDXApi). Supports creating an individual document or many documents. |
 
 **Example** *(create an individual document)*  
 ```js
@@ -1166,7 +1168,7 @@ Validates the given token was signed by this TDX, and returns the decoded token 
 | response | <code>object</code> \| <code>string</code> | The response of the command. If a command is sent asynchronously, this will simply be the string `"ack"`. In synchronous mode, this will usually be an object consisting of the primary key of the data that was affected by the command. |
 | result | <code>object</code> | Contains detailed error information when available. |
 | result.errors | <code>array</code> | Will contain error information when appropriate. |
-| result.commit | <code>array</code> | Contains details of each commited document. |
+| result.ok | <code>array</code> | Contains details of each commited document. |
 
 <a name="DatasetData"></a>
 
