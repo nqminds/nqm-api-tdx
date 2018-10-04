@@ -205,7 +205,7 @@ const buildDatabotInstanceRequest = function(endpoint) {
 
 const checkResponse = function(source, doNotThrow, response) {
   // If doNotThrow is omitted default to the config value (which defaults to `false`, i.e. errors will be thrown).
-  if (doNotThrow !== true && doNotThrow !== false) {
+  if (typeof doNotThrow === "object") {
     response = doNotThrow;
     doNotThrow = !!this.config.doNotThrow;
   }
