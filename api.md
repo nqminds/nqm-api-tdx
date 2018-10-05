@@ -49,12 +49,12 @@
     * [.suspendResourceIndex(resourceId)](#TDXApi+suspendResourceIndex)
     * [.truncateResource(resourceId)](#TDXApi+truncateResource)
     * [.updateResource(resourceId, update)](#TDXApi+updateResource)
-    * [.addData(datasetId, data, doNotThrow)](#TDXApi+addData)
-    * [.deleteData(datasetId, data)](#TDXApi+deleteData)
-    * [.deleteDataByQuery(datasetId, query)](#TDXApi+deleteDataByQuery)
-    * [.patchData(datasetId, data)](#TDXApi+patchData)
-    * [.updateData(datasetId, data, [upsert])](#TDXApi+updateData) ⇒ [<code>CommandResult</code>](#CommandResult)
-    * [.updateDataByQuery(datasetId, query)](#TDXApi+updateDataByQuery)
+    * [.addData(datasetId, data, [doNotThrow])](#TDXApi+addData)
+    * [.deleteData(datasetId, data, [doNotThrow])](#TDXApi+deleteData)
+    * [.deleteDataByQuery(datasetId, query, [doNotThrow])](#TDXApi+deleteDataByQuery)
+    * [.patchData(datasetId, data, [doNotThrow])](#TDXApi+patchData)
+    * [.updateData(datasetId, data, [upsert], [doNotThrow])](#TDXApi+updateData) ⇒ [<code>CommandResult</code>](#CommandResult)
+    * [.updateDataByQuery(datasetId, query, [doNotThrow])](#TDXApi+updateDataByQuery)
     * [.deleteDatabotHost(payload)](#TDXApi+deleteDatabotHost)
     * [.deleteDatabotInstance(instanceId)](#TDXApi+deleteDatabotInstance)
     * [.getDatabotInstance(instanceId)](#TDXApi+getDatabotInstance)
@@ -509,16 +509,16 @@ Modify one or more of the meta data associated with the resource.
 
 <a name="TDXApi+addData"></a>
 
-### tdxApi.addData(datasetId, data, doNotThrow)
+### tdxApi.addData(datasetId, data, [doNotThrow])
 Add data to a dataset resource.
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
 
-| Param | Type | Description |
-| --- | --- | --- |
-| datasetId | <code>string</code> | The id of the dataset-based resource to add data to. |
-| data | <code>object</code> \| <code>array</code> | The data to add. Must conform to the schema defined by the resource metadata. |
-| doNotThrow | <code>bool</code> | set to override default error handling. See [TDXApi](#TDXApi). Supports creating an individual document or many documents. |
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| datasetId | <code>string</code> |  | The id of the dataset-based resource to add data to. |
+| data | <code>object</code> \| <code>array</code> |  | The data to add. Must conform to the schema defined by the resource metadata. |
+| [doNotThrow] | <code>bool</code> | <code>false</code> | set to override default error handling. See [TDXApi](#TDXApi). Supports creating an individual document or many documents. |
 
 **Example** *(create an individual document)*  
 ```js
@@ -535,27 +535,29 @@ tdxApi.addData(myDatasetId, [
 ```
 <a name="TDXApi+deleteData"></a>
 
-### tdxApi.deleteData(datasetId, data)
+### tdxApi.deleteData(datasetId, data, [doNotThrow])
 Deletes data from a dataset-based resource.
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
 
-| Param | Type | Description |
-| --- | --- | --- |
-| datasetId | <code>string</code> | The id of the dataset-based resource to delete data from. |
-| data | <code>object</code> \| <code>array</code> | The primary key data to delete. |
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| datasetId | <code>string</code> |  | The id of the dataset-based resource to delete data from. |
+| data | <code>object</code> \| <code>array</code> |  | The primary key data to delete. |
+| [doNotThrow] | <code>bool</code> | <code>false</code> | set to override default error handling. See [TDXApi](#TDXApi). |
 
 <a name="TDXApi+deleteDataByQuery"></a>
 
-### tdxApi.deleteDataByQuery(datasetId, query)
+### tdxApi.deleteDataByQuery(datasetId, query, [doNotThrow])
 Deletes data from a dataset-based resource using a query to specify the documents to be deleted.
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
 
-| Param | Type | Description |
-| --- | --- | --- |
-| datasetId | <code>string</code> | The id of the dataset-based resource to delete data from. |
-| query | <code>object</code> | The query that specifies the data to delete. All documents matching the query will be deleted. |
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| datasetId | <code>string</code> |  | The id of the dataset-based resource to delete data from. |
+| query | <code>object</code> |  | The query that specifies the data to delete. All documents matching the query will be deleted. |
+| [doNotThrow] | <code>bool</code> | <code>false</code> | set to override default error handling. See [TDXApi](#TDXApi). |
 
 **Example**  
 ```js
@@ -564,17 +566,18 @@ tdxApi.deleteDataByQuery(myDatasetId, {lsoa: {$regex: "E*"}});
 ```
 <a name="TDXApi+patchData"></a>
 
-### tdxApi.patchData(datasetId, data)
+### tdxApi.patchData(datasetId, data, [doNotThrow])
 Patches data in a dataset resource. Uses the [JSON patch](https://tools.ietf.org/html/rfc6902) format,
 which involves defining the primary key data followed by a flexible update specification.
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
 
-| Param | Type | Description |
-| --- | --- | --- |
-| datasetId | <code>string</code> | The id of the dataset-based resource to update. |
-| data | <code>object</code> | The patch definition. |
-| data.__update | <code>object</code> \| <code>array</code> | An array of JSON patch specifications. |
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| datasetId | <code>string</code> |  | The id of the dataset-based resource to update. |
+| data | <code>object</code> |  | The patch definition. |
+| data.__update | <code>object</code> \| <code>array</code> |  | An array of JSON patch specifications. |
+| [doNotThrow] | <code>bool</code> | <code>false</code> | set to override default error handling. See [TDXApi](#TDXApi). |
 
 **Example** *(patch a single value in a single document)*  
 ```js
@@ -589,7 +592,7 @@ tdxApi.patchData(myDatasetId, {lsoa: "E000001", __update: [
 ```
 <a name="TDXApi+updateData"></a>
 
-### tdxApi.updateData(datasetId, data, [upsert]) ⇒ [<code>CommandResult</code>](#CommandResult)
+### tdxApi.updateData(datasetId, data, [upsert], [doNotThrow]) ⇒ [<code>CommandResult</code>](#CommandResult)
 Updates data in a dataset resource.
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
@@ -599,7 +602,8 @@ Updates data in a dataset resource.
 | --- | --- | --- | --- |
 | datasetId | <code>string</code> |  | The id of the dataset-based resource to update. |
 | data | <code>object</code> \| <code>array</code> |  | The data to update. Must conform to the schema defined by the resource metadata. Supports updating individual or multiple documents. |
-| [upsert] | <code>bool</code> | <code>false</code> | Indicates the data should be created if no document is found matching the primary key. |
+| [upsert] | <code>bool</code> | <code>false</code> | Indicates the data should be created if no document is found matching the |
+| [doNotThrow] | <code>bool</code> | <code>false</code> | set to override default error handling. See [TDXApi](#TDXApi). primary key. |
 
 **Example** *(update an existing document)*  
 ```js
@@ -612,15 +616,16 @@ tdxApi.updateData(myDatasetId, {lsoa: "E000004", count: 288}, true);
 ```
 <a name="TDXApi+updateDataByQuery"></a>
 
-### tdxApi.updateDataByQuery(datasetId, query)
+### tdxApi.updateDataByQuery(datasetId, query, [doNotThrow])
 Updates data in a dataset-based resource using a query to specify the documents to be updated.
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
 
-| Param | Type | Description |
-| --- | --- | --- |
-| datasetId | <code>string</code> | The id of the dataset-based resource to update data in. |
-| query | <code>object</code> | The query that specifies the data to update. All documents matching the query will be updated. |
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| datasetId | <code>string</code> |  | The id of the dataset-based resource to update data in. |
+| query | <code>object</code> |  | The query that specifies the data to update. All documents matching the |
+| [doNotThrow] | <code>bool</code> | <code>false</code> | set to override default error handling. See [TDXApi](#TDXApi). query will be updated. |
 
 **Example**  
 ```js

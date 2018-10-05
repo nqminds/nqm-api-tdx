@@ -223,7 +223,16 @@ const checkResponse = function(source, doNotThrow, response) {
               // details of the failures in an `error` array property and the successes in an `commit` property.
               if (tdxResponse.result.errors && tdxResponse.result.errors.length) {
                 // Reject errors with 409 Conflict status.
-                return Promise.reject(handleError(source, tdxResponse.result.errors, 409));
+                return Promise.reject(
+                  handleError(
+                    source,
+                    {
+                      code: "DataError",
+                      message: tdxResponse.result.errors.join(", "),
+                    },
+                    409
+                  )
+                );
               }
             }
             return tdxResponse;

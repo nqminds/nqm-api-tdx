@@ -695,7 +695,7 @@ class TDXApi {
    * Add data to a dataset resource.
    * @param  {string} datasetId - The id of the dataset-based resource to add data to.
    * @param  {object|array} data - The data to add. Must conform to the schema defined by the resource metadata.
-   * @param  {bool} doNotThrow - set to override default error handling. See {@link TDXApi}.
+   * @param  {bool} [doNotThrow=false] - set to override default error handling. See {@link TDXApi}.
    * Supports creating an individual document or many documents.
    * @example <caption>create an individual document</caption>
    * // Assumes the dataset primary key is 'lsoa'
@@ -725,6 +725,7 @@ class TDXApi {
    * Deletes data from a dataset-based resource.
    * @param  {string} datasetId - The id of the dataset-based resource to delete data from.
    * @param  {object|array} data - The primary key data to delete.
+   * @param  {bool} [doNotThrow=false] - set to override default error handling. See {@link TDXApi}.
    */
   deleteData(datasetId, data, doNotThrow) {
     const postData = {
@@ -745,6 +746,7 @@ class TDXApi {
    * @param  {string} datasetId - The id of the dataset-based resource to delete data from.
    * @param  {object} query - The query that specifies the data to delete. All documents matching the
    * query will be deleted.
+   * @param  {bool} [doNotThrow=false] - set to override default error handling. See {@link TDXApi}.
    * @example
    * // Delete all documents with English lsoa.
    * tdxApi.deleteDataByQuery(myDatasetId, {lsoa: {$regex: "E*"}});
@@ -769,6 +771,7 @@ class TDXApi {
    * @param  {string} datasetId - The id of the dataset-based resource to update.
    * @param  {object} data - The patch definition.
    * @param  {object|array} data.__update - An array of JSON patch specifications.
+   * @param  {bool} [doNotThrow=false] - set to override default error handling. See {@link TDXApi}.
    * @example <caption>patch a single value in a single document</caption>
    * tdxApi.patchData(myDatasetId, {lsoa: "E000001", __update: [{path: "/count", op: "replace", value: 948}]});
    * @example <caption>patch a more than one value in a single document</caption>
@@ -797,6 +800,7 @@ class TDXApi {
    * @param  {object|array} data - The data to update. Must conform to the schema defined by the resource metadata.
    * Supports updating individual or multiple documents.
    * @param  {bool} [upsert=false] - Indicates the data should be created if no document is found matching the
+   * @param  {bool} [doNotThrow=false] - set to override default error handling. See {@link TDXApi}.
    * primary key.
    * @return {CommandResult} - Use the result property to check for errors.
    * @example <caption>update an existing document</caption>
@@ -824,6 +828,7 @@ class TDXApi {
    * Updates data in a dataset-based resource using a query to specify the documents to be updated.
    * @param  {string} datasetId - The id of the dataset-based resource to update data in.
    * @param  {object} query - The query that specifies the data to update. All documents matching the
+   * @param  {bool} [doNotThrow=false] - set to override default error handling. See {@link TDXApi}.
    * query will be updated.
    * @example
    * // Update all documents with English lsoa, setting `count` to 1000.
