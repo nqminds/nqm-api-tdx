@@ -1,6 +1,5 @@
 import crossFetch from "cross-fetch";
 import debug from "debug";
-import {constants, resourceUtils, splitTDXAccount} from "@nqminds/nqm-core-utils";
 
 const fetch = (typeof window !== "undefined" && window.fetch) ? window.fetch : crossFetch;
 const FetchRequest = fetch.Request || Request;
@@ -426,24 +425,6 @@ const waitForAccount = function(accountId, verified, approved, retryCount, maxRe
           retry = true;
         } else {
           retry = false;
-
-          if (splitTDXAccount(accountId)) {
-            //
-            // This is a user-based account.
-            //
-            // Account has been created => now wait for the account set folder to be created (this is done
-            // by the account saga, as the last operation in `createAccountFolders`).
-            const accountSetFolderId = resourceUtils.specialFolderId(
-              constants.accountSetRootFolderPrefix,
-              accountId
-            );
-            return waitForIndex.call(this, accountSetFolderId, "built", maxRetries)
-              .then(() => {
-                return account;
-              });
-          } else {
-            // Not a user-based account => do nothing and fall through with `retry` === false.
-          }
         }
       } else {
         // Account doesn't exist yet, or it exists but hasn't been initialised properly by the TDX.
