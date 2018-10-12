@@ -669,9 +669,10 @@ class TDXApi {
    * @param  {string} [update.description]
    * @param  {string} [update.meta]
    * @param  {string} [update.name]
+   * @param  {bool} [update.overwrite] - set this flag to overwrite existing data rather than merging (default). This
+   * currently only applies to the `meta` property.
    * @param  {string} [update.provenance]
    * @param  {string} [update.queryProxy]
-   * @param  {string} [update.schema]
    * @param  {string} [update.tags]
    * @param  {string} [update.textContent] see also {@link TDXApi#setResourceTextContent}
    */
@@ -1152,7 +1153,7 @@ class TDXApi {
    * @param  {string} username - The users' TDX id.
    * @param  {string} [ip] - The optional IP address to bind the user token to.
    * @param  {number} [ttl] - The ttl in seconds.
-   * @return  {object} - The new token application-user token, bound to the given IP.
+   * @return  {object} - The new application-user token, bound to the given IP.
    * @example <caption>create token bound to server ip with default TDX ttl</caption>
    * tdxApi.createTDXToken("bob@bob.com/acme.tdx.com");
    * @example <caption>create for specific IP</caption>

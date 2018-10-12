@@ -501,9 +501,9 @@ Modify one or more of the meta data associated with the resource.
 | [update.description] | <code>string</code> |  |
 | [update.meta] | <code>string</code> |  |
 | [update.name] | <code>string</code> |  |
+| [update.overwrite] | <code>bool</code> | set this flag to overwrite existing data rather than merging (default). This currently only applies to the `meta` property. |
 | [update.provenance] | <code>string</code> |  |
 | [update.queryProxy] | <code>string</code> |  |
-| [update.schema] | <code>string</code> |  |
 | [update.tags] | <code>string</code> |  |
 | [update.textContent] | <code>string</code> | see also [setResourceTextContent](#TDXApi+setResourceTextContent) |
 
@@ -839,7 +839,7 @@ application. The returned token will be bound to the given IP or the IP of the c
 (i.e the application server IP).
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
-**Returns**: <code>object</code> - - The new token application-user token, bound to the given IP.  
+**Returns**: <code>object</code> - - The new application-user token, bound to the given IP.  
 
 | Param | Type | Description |
 | --- | --- | --- |
