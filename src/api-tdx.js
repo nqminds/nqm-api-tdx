@@ -667,13 +667,13 @@ class TDXApi {
    * listed below. See the {@link TDXApi#addResource} method for semantics and syntax of each property.
    * @param  {string} [update.derived]
    * @param  {string} [update.description]
-   * @param  {string} [update.meta]
+   * @param  {object} [update.meta]
    * @param  {string} [update.name]
    * @param  {bool} [update.overwrite] - set this flag to overwrite existing data rather than merging (default). This
    * currently only applies to the `meta` property.
    * @param  {string} [update.provenance]
    * @param  {string} [update.queryProxy]
-   * @param  {string} [update.tags]
+   * @param  {array} [update.tags]
    * @param  {string} [update.textContent] see also {@link TDXApi#setResourceTextContent}
    */
   updateResource(resourceId, update) {

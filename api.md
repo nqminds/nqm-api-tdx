@@ -499,12 +499,12 @@ Modify one or more of the meta data associated with the resource.
 | update | <code>object</code> | object containing the properties to update. Can be one or more of those listed below. See the [addResource](#TDXApi+addResource) method for semantics and syntax of each property. |
 | [update.derived] | <code>string</code> |  |
 | [update.description] | <code>string</code> |  |
-| [update.meta] | <code>string</code> |  |
+| [update.meta] | <code>object</code> |  |
 | [update.name] | <code>string</code> |  |
 | [update.overwrite] | <code>bool</code> | set this flag to overwrite existing data rather than merging (default). This currently only applies to the `meta` property. |
 | [update.provenance] | <code>string</code> |  |
 | [update.queryProxy] | <code>string</code> |  |
-| [update.tags] | <code>string</code> |  |
+| [update.tags] | <code>array</code> |  |
 | [update.textContent] | <code>string</code> | see also [setResourceTextContent](#TDXApi+setResourceTextContent) |
 
 <a name="TDXApi+addData"></a>
