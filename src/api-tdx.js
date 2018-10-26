@@ -350,7 +350,8 @@ class TDXApi {
    * @param  {string[]} [options.tags] - a list of tags to associate with the resource.
    * @param  {string} [options.textContent] - the text content for the resource. Only applicable to text content based
    * resources.
-   * @param  {bool} [wait=false] - indicates if the call should wait for the index to be built before it returns.
+   * @param  {bool|string} [wait=false] - indicates if the call should wait for the index to be built before it
+   * returns. You can pass a string here to indicate the status you want to wait for, default is 'built'.
    * @example <caption>usage</caption>
    * // Creates a dataset resource in the authenticated users' scratch folder. The dataset stores key/value pairs
    * // where the `key` property is the primary key and the `value` property can take any JSON value.
@@ -375,7 +376,7 @@ class TDXApi {
       .then(checkResponse.bind(this, "addResource"))
       .then((result) => {
         if (wait) {
-          return waitForIndex.call(this, result.response.id)
+          return waitForIndex.call(this, result.response.id, wait === true ? "" : wait)
             .then(() => {
               return result;
             });
@@ -546,6 +547,22 @@ class TDXApi {
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
       .then(checkResponse.bind(this, "removeResourceAccess"));
+  }
+
+    /**
+   * Set the resource import flag.
+   * @param  {string} resourceId - The id of the dataset-based resource.
+   * @param  {boolean} importing - Indicates the state of the import flag.
+   * @return  {CommandResult}
+   */
+  setResourceImporting(resourceId, importing) {
+    const request = buildCommandRequest.call(this, "resource/importing", {id: resourceId, importing});
+    return fetch.call(this, request)
+      .catch((err) => {
+        errLog("TDXApi.setResourceImporting: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(this, "setResourceImporting"));
   }
 
   /**

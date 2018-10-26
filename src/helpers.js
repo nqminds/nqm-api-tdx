@@ -364,6 +364,7 @@ const waitForIndex = function(datasetId, status, maxRetries) {
   if (typeof maxRetries === "undefined") {
     maxRetries = waitInfinitely;
   }
+
   status = status || "built";
 
   let initialStatus = "";
