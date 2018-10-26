@@ -16,6 +16,9 @@ import {
   waitForIndex,
 } from "./helpers";
 
+// Default 'debug' module output to STDOUT rather than STDERR.
+debug.log = console.log.bind(console); // eslint-disable-line no-console
+
 const log = debug("nqm-api-tdx");
 const errLog = debug("nqm-api-tdx:error");
 
@@ -1039,6 +1042,23 @@ class TDXApi {
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
       .then(checkResponse.bind(this, "startDatabotInstance"));
+  }
+
+  /**
+   * Aborts a running databot instance.
+   * @param  {string} instanceId - The id of the instance to abort.
+   */
+  abortDatabotInstance(instanceId) {
+    const postData = {
+      instanceId,
+    };
+    const request = buildCommandRequest.call(this, "databot/abortInstance", postData);
+    return fetch.call(this, request)
+      .catch((err) => {
+        errLog("TDXApi.abortDatabotInstance: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(this, "abortDatabotInstance"));
   }
 
   /**
