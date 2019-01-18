@@ -194,6 +194,10 @@ const buildQueryRequest = function(endpoint, filter, projection, options) {
  * @param  {string} endpoint - the databot query endpoint, e.g. "status/jDduieG7"
  */
 const buildDatabotInstanceRequest = function(endpoint) {
+  if (!this.config.databotServer) {
+    return Promise.reject(new Error("databotServer URL not defined in API config"));
+  }
+
   return new FetchRequest(`${this.config.databotServer}/instance/${endpoint}`, {
     method: "GET",
     mode: "cors",

@@ -71,6 +71,7 @@ class TDXApi {
    * @param  {string} [config.databotServer] - the URL of the TDX databot service, e.g. https://databot.nqminds.com
    * @param  {string} [config.accessToken] - an access token that will be used to authorise commands and queries.
    * Alternatively you can use the authenticate method to acquire a token.
+   * @param  {number} [config.accessTokenTTL] - the TTL in seconds of the access token created when authenticating.
    * @param  {bool} [config.doNotThrow] - set to prevent throwing response errors. They will be returned in the
    * {@link CommandResult} object. This was set by default prior to 0.5.x
    * @example <caption>standard usage</caption>
@@ -87,7 +88,8 @@ class TDXApi {
    * Authenticates with the TDX, acquiring an authorisation token.
    * @param  {string} id - the account id, or a pre-formed credentials string, e.g. "DKJG8dfg:letmein"
    * @param  {string} secret - the account secret
-   * @param  {number} [ttl=3600] - the Time-To-Live of the token in seconds, default is 1 hour.
+   * @param  {number} [ttl=3600] - the Time-To-Live of the token in seconds, default is 1 hour. Will default to
+   * config.accessTokenTTL if not given here.
    * @return  {string} The access token.
    * @exception Will throw if credentials are invalid or there is a network error contacting the TDX.
    * @example <caption>authenticate using a share key and secret</caption>
