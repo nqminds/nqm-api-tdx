@@ -209,47 +209,61 @@ const buildDatabotInstanceRequest = function(endpoint) {
 };
 
 const checkResponse = function(source, doNotThrow, response) {
+  const log = debug("nqm-api-tdx:checkResponse");
+
   // If doNotThrow is omitted default to the config value (which defaults to `false`, i.e. errors will be thrown).
   if (typeof doNotThrow === "object") {
     response = doNotThrow;
     doNotThrow = !!this.config.doNotThrow;
   }
 
-  return response.json()
-    .then((json) => {
+  return response.text()
+    .then((text) => {
+      let jsonResponse;
+      try {
+        jsonResponse = JSON.parse(text);
+      } catch (parseError) {
+        log("failed to parse json => assuming plain text");
+      }
+
       if (response.ok) {
-        return Promise.resolve(json)
-          .then((tdxResponse) => {
-            if (!doNotThrow && tdxResponse && tdxResponse.result) {
-              // Check for data validation (response) errors. These differ from straight-forward invalid argument
-              // failures. For example, a call to `updateData` might include requests to update 10 documents. The TDX
-              // will continue to apply updates even after one of them fails. For example, the first 4 updates succeed,
-              // the fifth fails and the rest succeed. In this case `tdxResponse` will contain a `result` object with
-              // details of the failures in an `error` array property and the successes in an `commit` property.
-              if (tdxResponse.result.errors && tdxResponse.result.errors.length) {
-                // Reject errors with 409 Conflict status.
-                return Promise.reject(
-                  handleError(
-                    source,
-                    {
-                      code: "DataError",
-                      message: tdxResponse.result.errors.join(", "),
-                    },
-                    409
-                  )
-                );
-              }
+        if (jsonResponse) {
+          // Successfully parsed JSON content.
+          if (!doNotThrow && jsonResponse && jsonResponse.result) {
+            // Check for data validation (response) errors. These differ from straight-forward invalid argument
+            // failures. For example, a call to `updateData` might include requests to update 10 documents. The TDX
+            // will continue to apply updates even after one of them fails. For example, the first 4 updates succeed,
+            // the fifth fails and the rest succeed. In this case `tdxResponse` will contain a `result` object with
+            // details of the failures in an `error` array property and the successes in an `commit` property.
+            if (jsonResponse.result.errors && jsonResponse.result.errors.length) {
+              // Reject errors with 409 Conflict status.
+              return Promise.reject(
+                handleError(
+                  source,
+                  {
+                    code: "DataError",
+                    message: jsonResponse.result.errors.join(", "),
+                  },
+                  409
+                )
+              );
             }
-            return tdxResponse;
-          });
+          }
+          return jsonResponse;
+        } else {
+          // Response is OK but isn't in JSON format - this is usually for text content, e.g. markdown etc, or
+          // new-line delimited JSON.
+          return text;
+        }
       } else {
-        if (json.error) {
+        // Response has a non-200 status => see if the error is in JSON format.
+        if (jsonResponse && jsonResponse.error) {
           // Build a failure object from the json response.
-          const failure = {code: json.error, message: json.error_description};
+          const failure = {code: jsonResponse.error, message: jsonResponse.error_description};
           return Promise.reject(handleError(source, failure, response.status));
         } else {
           // The response body holds the error details.
-          return Promise.reject(handleError(source, json, response.status));
+          return Promise.reject(handleError(source, jsonResponse || text, response.status));
         }
       }
     });

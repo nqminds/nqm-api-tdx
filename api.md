@@ -14,6 +14,8 @@
 <dd></dd>
 <dt><a href="#Resource">Resource</a> : <code>object</code></dt>
 <dd></dd>
+<dt><a href="#ResourceAccess">ResourceAccess</a> : <code>object</code></dt>
+<dd></dd>
 <dt><a href="#Zone">Zone</a> : <code>object</code></dt>
 <dd></dd>
 </dl>
@@ -42,6 +44,7 @@
     * [.moveResource(id, fromParentId, toParentId)](#TDXApi+moveResource)
     * [.rebuildResourceIndex(resourceId)](#TDXApi+rebuildResourceIndex)
     * [.removeResourceAccess(resourceId, accountId, addedBy, sourceId, access)](#TDXApi+removeResourceAccess)
+    * [.setResourceImporting(resourceId, importing)](#TDXApi+setResourceImporting) ⇒ [<code>CommandResult</code>](#CommandResult)
     * [.setResourceSchema(resourceId, schema)](#TDXApi+setResourceSchema) ⇒ [<code>CommandResult</code>](#CommandResult)
     * [.setResourceShareMode(resourceId, shareMode)](#TDXApi+setResourceShareMode)
     * [.setResourcePermissiveShare(resourceId, allowPermissive)](#TDXApi+setResourcePermissiveShare)
@@ -63,6 +66,7 @@
     * [.registerDatabotHost(payload)](#TDXApi+registerDatabotHost)
     * [.sendDatabotHostCommand(command, hostId, [hostIp], [hostPort], [payload])](#TDXApi+sendDatabotHostCommand)
     * [.startDatabotInstance(databotId, payload)](#TDXApi+startDatabotInstance)
+    * [.abortDatabotInstance(instanceId)](#TDXApi+abortDatabotInstance)
     * [.stopDatabotInstance(instanceId, mode)](#TDXApi+stopDatabotInstance)
     * [.updateDatabotHostStatus(payload)](#TDXApi+updateDatabotHostStatus)
     * [.writeDatabotHostInstanceOutput(output)](#TDXApi+writeDatabotHostInstanceOutput)
@@ -78,13 +82,14 @@
     * [.getAuthenticatedAccount()](#TDXApi+getAuthenticatedAccount) ⇒ <code>object</code>
     * [.getDataStream(datasetId, [filter], [projection], [options], [ndJSON])](#TDXApi+getDataStream) ⇒ <code>object</code>
     * [.getData(datasetId, [filter], [projection], [options], [ndJSON])](#TDXApi+getData) ⇒ [<code>DatasetData</code>](#DatasetData)
+    * [.getNDData()](#TDXApi+getNDData)
     * ~~[.getDatasetDataStream(datasetId, [filter], [projection], [options], [ndJSON])](#TDXApi+getDatasetDataStream) ⇒ <code>object</code>~~
     * ~~[.getDatasetData(datasetId, [filter], [projection], [options], [ndJSON])](#TDXApi+getDatasetData) ⇒ [<code>DatasetData</code>](#DatasetData)~~
     * [.getDataCount(datasetId, [filter])](#TDXApi+getDataCount)
     * ~~[.getDatasetDataCount(datasetId, [filter])](#TDXApi+getDatasetDataCount)~~
     * [.getDistinct(datasetId, key, [filter])](#TDXApi+getDistinct) ⇒ <code>Array.&lt;object&gt;</code>
     * [.getResource(resourceId, [noThrow])](#TDXApi+getResource) ⇒ [<code>Resource</code>](#Resource)
-    * [.getResourceAccess(resourceId)](#TDXApi+getResourceAccess) ⇒ <code>Array.&lt;object&gt;</code>
+    * [.getResourceAccess(resourceId)](#TDXApi+getResourceAccess) ⇒ [<code>Array.&lt;ResourceAccess&gt;</code>](#ResourceAccess)
     * [.getResourceAncestors(resourceId)](#TDXApi+getResourceAncestors) ⇒ [<code>Array.&lt;Resource&gt;</code>](#Resource)
     * [.getResources([filter], [projection], [options])](#TDXApi+getResources) ⇒ [<code>Array.&lt;Resource&gt;</code>](#Resource)
     * [.getResourcesWithSchema(schemaId)](#TDXApi+getResourcesWithSchema) ⇒ [<code>Array.&lt;Resource&gt;</code>](#Resource)
@@ -107,6 +112,7 @@ Create a TDXApi instance
 | [config.queryServer] | <code>string</code> | the URL of the TDX query service, e.g. https://q.nqminds.com |
 | [config.databotServer] | <code>string</code> | the URL of the TDX databot service, e.g. https://databot.nqminds.com |
 | [config.accessToken] | <code>string</code> | an access token that will be used to authorise commands and queries. Alternatively you can use the authenticate method to acquire a token. |
+| [config.accessTokenTTL] | <code>number</code> | the TTL in seconds of the access token created when authenticating. |
 | [config.doNotThrow] | <code>bool</code> | set to prevent throwing response errors. They will be returned in the [CommandResult](#CommandResult) object. This was set by default prior to 0.5.x |
 
 **Example** *(standard usage)*  
@@ -130,7 +136,7 @@ Authenticates with the TDX, acquiring an authorisation token.
 | --- | --- | --- | --- |
 | id | <code>string</code> |  | the account id, or a pre-formed credentials string, e.g. "DKJG8dfg:letmein" |
 | secret | <code>string</code> |  | the account secret |
-| [ttl] | <code>number</code> | <code>3600</code> | the Time-To-Live of the token in seconds, default is 1 hour. |
+| [ttl] | <code>number</code> | <code>3600</code> | the Time-To-Live of the token in seconds, default is 1 hour. Will default to config.accessTokenTTL if not given here. |
 
 **Example** *(authenticate using a share key and secret)*  
 ```js
@@ -285,7 +291,7 @@ Adds a resource to the TDX.
 | [options.shareMode] | <code>string</code> |  | the share mode assigned to the new resource. One of [`"pw"`, `"pr"`, `"tr"`], corresponding to "public read/write", "public read/trusted write", "trusted only". |
 | [options.tags] | <code>Array.&lt;string&gt;</code> |  | a list of tags to associate with the resource. |
 | [options.textContent] | <code>string</code> |  | the text content for the resource. Only applicable to text content based resources. |
-| [wait] | <code>bool</code> | <code>false</code> | indicates if the call should wait for the index to be built before it returns. |
+| [wait] | <code>bool</code> \| <code>string</code> | <code>false</code> | indicates if the call should wait for the index to be built before it returns. You can pass a string here to indicate the status you want to wait for, default is 'built'. |
 
 **Example** *(usage)*  
 ```js
@@ -402,6 +408,18 @@ write access.
 | addedBy | <code>string</code> | The account id that originally added the access, probably your account id. |
 | sourceId | <code>string</code> | The source of the access, usually the resource itself. |
 | access | <code>Array.&lt;string&gt;</code> | The access, one or more of [`"r"`, `"w"`]. |
+
+<a name="TDXApi+setResourceImporting"></a>
+
+### tdxApi.setResourceImporting(resourceId, importing) ⇒ [<code>CommandResult</code>](#CommandResult)
+Set the resource import flag.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| resourceId | <code>string</code> | The id of the dataset-based resource. |
+| importing | <code>boolean</code> | Indicates the state of the import flag. |
 
 <a name="TDXApi+setResourceSchema"></a>
 
@@ -749,6 +767,17 @@ Starts a databot instance.
 | payload.shareKeyId | <code>string</code> |  | The share key to run the databot under. |
 | [payload.shareKeySecret] | <code>string</code> |  | The secret of the share key. Ignored if the share key id refers to a user-based account. |
 
+<a name="TDXApi+abortDatabotInstance"></a>
+
+### tdxApi.abortDatabotInstance(instanceId)
+Aborts a running databot instance.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| instanceId | <code>string</code> | The id of the instance to abort. |
+
 <a name="TDXApi+stopDatabotInstance"></a>
 
 ### tdxApi.stopDatabotInstance(instanceId, mode)
@@ -966,7 +995,11 @@ stream in the body.
 <a name="TDXApi+getData"></a>
 
 ### tdxApi.getData(datasetId, [filter], [projection], [options], [ndJSON]) ⇒ [<code>DatasetData</code>](#DatasetData)
-Gets all data from the given dataset resource that matches the filter provided.
+For structured resources, e.g. datasets, this function gets all data from the given dataset resource that
+matches the filter provided.
+
+For non-structured resources such as text-content or raw files etc only the `datasetId` argument is relevant
+and this method is equivalent to `downloadResource`.
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
 
@@ -979,6 +1012,12 @@ Gets all data from the given dataset resource that matches the filter provided.
 | [options.nqmMeta] | <code>bool</code> | When set, the resource metadata will be returned along with the dataset data. Can be used to avoid a second call to `getResource`. Otherwise a URL to the metadata is provided. |
 | [ndJSON] | <code>bool</code> | If set, the data is sent in [newline delimited json format](http://ndjson.org/). |
 
+<a name="TDXApi+getNDData"></a>
+
+### tdxApi.getNDData()
+Sugar for newline delimited data. See `getData` for details.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
 <a name="TDXApi+getDatasetDataStream"></a>
 
 ### ~~tdxApi.getDatasetDataStream(datasetId, [filter], [projection], [options], [ndJSON]) ⇒ <code>object</code>~~
@@ -1066,18 +1105,32 @@ Gets the details for a given resource id.
 | resourceId | <code>string</code> |  | The id of the resource to retrieve. |
 | [noThrow] | <code>bool</code> | <code>false</code> | If set, the call won't reject or throw if the resource doesn't exist. |
 
+**Example**  
+```js
+api.getResource(myResourceId)
+ .then((resource) => {
+   console.log(resource.name);
+ });
+```
 <a name="TDXApi+getResourceAccess"></a>
 
-### tdxApi.getResourceAccess(resourceId) ⇒ <code>Array.&lt;object&gt;</code>
+### tdxApi.getResourceAccess(resourceId) ⇒ [<code>Array.&lt;ResourceAccess&gt;</code>](#ResourceAccess)
 Gets all access the authenticated account has to the given resource id.
 
 **Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
-**Returns**: <code>Array.&lt;object&gt;</code> - - Array of access objects.  
+**Returns**: [<code>Array.&lt;ResourceAccess&gt;</code>](#ResourceAccess) - - Array of ResourceAccess objects.  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | resourceId | <code>string</code> | The id of the resource whose access is to be retrieved. |
 
+**Example**  
+```js
+api.getResourceAccess(myResourceId)
+ .then((resourceAccess) => {
+   console.log("length of access list: ", resourceAccess.length);
+ });
+```
 <a name="TDXApi+getResourceAncestors"></a>
 
 ### tdxApi.getResourceAncestors(resourceId) ⇒ [<code>Array.&lt;Resource&gt;</code>](#Resource)
@@ -1201,6 +1254,24 @@ Validates the given token was signed by this TDX, and returns the decoded token 
 | parents | <code>Array.&lt;string&gt;</code> | 
 | schemaDefinition | <code>object</code> | 
 | tags | <code>Array.&lt;string&gt;</code> | 
+
+<a name="ResourceAccess"></a>
+
+## ResourceAccess : <code>object</code>
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| aid | <code>string</code> | account id that is the subject of this access |
+| by | <code>string</code> | comma-delimited list of attribution for this access |
+| rid | <code>string</code> | resource id to which this access refers |
+| grp | <code>string</code> | indicates the share mode (user groups only) |
+| own | <code>string</code> | account that owns the resource |
+| par | <code>Array.&lt;string&gt;</code> | the parent(s) of the resource |
+| typ | <code>string</code> | the base type of the resource |
+| r | <code>Array.&lt;string&gt;</code> | array of resource ids that are the source of read access (e.g. parent) |
+| w | <code>Array.&lt;string&gt;</code> | array of resource ids that are the source of write access |
 
 <a name="Zone"></a>
 

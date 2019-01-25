@@ -51,6 +51,19 @@ const errLog = debug("nqm-api-tdx:error");
  */
 
 /**
+ * @typedef  {object} ResourceAccess
+ * @property  {string} aid - account id that is the subject of this access
+ * @property  {string} by - comma-delimited list of attribution for this access
+ * @property  {string} rid - resource id to which this access refers
+ * @property  {string} grp - indicates the share mode (user groups only)
+ * @property  {string} own - account that owns the resource
+ * @property  {string[]} par - the parent(s) of the resource
+ * @property  {string} typ - the base type of the resource
+ * @property  {string[]} r - array of resource ids that are the source of read access (e.g. parent)
+ * @property  {string[]} w - array of resource ids that are the source of write access
+ */
+
+ /**
  * @typedef  {object} Zone
  * @property  {string} accountType
  * @property  {string} displayName
@@ -1346,7 +1359,12 @@ class TDXApi {
   }
 
   /**
-   * Gets all data from the given dataset resource that matches the filter provided.
+   * For structured resources, e.g. datasets, this function gets all data from the given dataset resource that
+   * matches the filter provided.
+   *
+   * For non-structured resources such as text-content or raw files etc only the `datasetId` argument is relevant
+   * and this method is equivalent to `downloadResource`.
+   *
    * @param  {string} datasetId - The id of the dataset-based resource.
    * @param  {object} [filter] - A mongodb filter object. If omitted, all data will be retrieved.
    * @param  {object} [projection] - A mongodb projection object. Should be used to restrict the payload to the
@@ -1361,6 +1379,14 @@ class TDXApi {
   getData(datasetId, filter, projection, options, ndJSON) {
     return this.getDataStream(datasetId, filter, projection, options, ndJSON)
       .then(checkResponse.bind(this, "getData"));
+  }
+
+  /**
+   * Sugar for newline delimited data. See `getData` for details.
+   */
+  getNDData(datasetId, filter, projection, options) {
+    return this.getDataStream(datasetId, filter, projection, options, true)
+      .then(checkResponse.bind(this, "getNDData"));
   }
 
   /**
@@ -1448,6 +1474,11 @@ class TDXApi {
    * @param  {bool} [noThrow=false] - If set, the call won't reject or throw if the resource doesn't exist.
    * @return  {Resource}
    * @exception  Will throw if the resource is not found (see `noThrow` flag) or permission is denied.
+   * @example
+   * api.getResource(myResourceId)
+   *  .then((resource) => {
+   *    console.log(resource.name);
+   *  });
    */
   getResource(resourceId, noThrow) {
     const request = buildQueryRequest.call(this, `resources/${resourceId}`);
@@ -1475,7 +1506,12 @@ class TDXApi {
   /**
    * Gets all access the authenticated account has to the given resource id.
    * @param  {string} resourceId - The id of the resource whose access is to be retrieved.
-   * @return {object[]} - Array of access objects.
+   * @return {ResourceAccess[]} - Array of ResourceAccess objects.
+   * @example
+   * api.getResourceAccess(myResourceId)
+   *  .then((resourceAccess) => {
+   *    console.log("length of access list: ", resourceAccess.length);
+   *  });
    */
   getResourceAccess(resourceId, filter, projection, options) {
     const request = buildQueryRequest.call(this, `resources/${resourceId}/access`, filter, projection, options);
