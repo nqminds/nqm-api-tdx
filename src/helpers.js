@@ -126,6 +126,10 @@ const buildCommandRequest = function(command, data, contentType, async) {
  * @param  {string} [contentType=application/json] - the content type
  */
 const buildDatabotHostRequest = function(command, data) {
+  if (!this.config.databotServer) {
+    throw new Error("databotServer URL not defined in API config");
+  }
+
   return new FetchRequest(`${this.config.databotServer}/host/${command}`, {
     method: "POST",
     mode: "cors",
@@ -195,7 +199,7 @@ const buildQueryRequest = function(endpoint, filter, projection, options) {
  */
 const buildDatabotInstanceRequest = function(endpoint) {
   if (!this.config.databotServer) {
-    return Promise.reject(new Error("databotServer URL not defined in API config"));
+    throw new Error("databotServer URL not defined in API config");
   }
 
   return new FetchRequest(`${this.config.databotServer}/instance/${endpoint}`, {
@@ -220,39 +224,42 @@ const checkResponse = function(source, doNotThrow, response) {
   return response.text()
     .then((text) => {
       let jsonResponse;
+
       try {
+        // Attempt to parse JSON, we could check the content-type header first?
         jsonResponse = JSON.parse(text);
       } catch (parseError) {
-        log("failed to parse json => assuming plain text");
+        log("failed to parse json => assuming non-JSON content type");
       }
 
       if (response.ok) {
         if (jsonResponse) {
           // Successfully parsed JSON content.
-          if (!doNotThrow && jsonResponse && jsonResponse.result) {
-            // Check for data validation (response) errors. These differ from straight-forward invalid argument
-            // failures. For example, a call to `updateData` might include requests to update 10 documents. The TDX
-            // will continue to apply updates even after one of them fails. For example, the first 4 updates succeed,
-            // the fifth fails and the rest succeed. In this case `tdxResponse` will contain a `result` object with
-            // details of the failures in an `error` array property and the successes in an `commit` property.
-            if (jsonResponse.result.errors && jsonResponse.result.errors.length) {
-              // Reject errors with 409 Conflict status.
-              return Promise.reject(
-                handleError(
-                  source,
-                  {
-                    code: "DataError",
-                    message: jsonResponse.result.errors.join(", "),
-                  },
-                  409
-                )
-              );
-            }
+          // Check for data validation (response) errors. These differ from straight-forward invalid argument
+          // failures. For example, a call to `updateData` might include requests to update 10 documents. The TDX
+          // will continue to apply updates even after one of them fails, i.e. the first 4 updates succeed,
+          // the fifth fails and the rest succeed. In this case `tdxResponse` will contain a `result` object with
+          // details of the failures in an `error` array property and the successes in an `commit` property.
+          if (!doNotThrow && jsonResponse.result && jsonResponse.result.errors && jsonResponse.result.errors.length) {
+            // Reject errors with 409 Conflict status.
+            return Promise.reject(
+              handleError(
+                source,
+                {
+                  code: "DataError",
+                  message: jsonResponse.result.errors.join(", "),
+                },
+                409
+              )
+            );
+          } else {
+            // Either there are no errors or doNoThrow is set (in which case the callee must check `result.errors`).
+            // Do nothing, fall-through and return JSON response.
           }
           return jsonResponse;
         } else {
-          // Response is OK but isn't in JSON format - this is usually for text content, e.g. markdown etc, or
-          // new-line delimited JSON.
+          // Response is OK but isn't in JSON format - this is usually for text content, e.g.new-line delimited JSON,
+          // markdown, html etc...
           return text;
         }
       } else {

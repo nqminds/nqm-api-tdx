@@ -1283,7 +1283,25 @@ class TDXApi {
       });
   }
 
-   /**
+  /**
+   * Gets the details for all peer accounts.
+   * @param  {object} filter - query filter.
+   * @param  {string} filter.accountType - the account type to filter by, e.g. "user", "token", "host" etc.
+   * @return  {Zone[]} zone
+   * @example <caption>Get all databots owned by bob</caption>
+   * api.getAccounts({accountType: "host", own: "bob@nqminds.com"})
+   */
+  getAccounts(filter) {
+    const request = buildQueryRequest.call(this, "accounts", filter);
+    return fetch.call(this, request)
+      .catch((err) => {
+        errLog("TDXApi.getAccounts: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(this, "getAccounts"));
+  }
+
+  /**
    * Performs an aggregate query on the given dataset resource, returning a response object with stream in the body
    * @param  {string} datasetId - The id of the dataset-based resource to perform the aggregate query on.
    * @param  {object|string} pipeline - The aggregate pipeline, as defined in the
