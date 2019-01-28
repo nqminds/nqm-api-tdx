@@ -8,6 +8,14 @@
 ## Typedefs
 
 <dl>
+<dt><a href="#TDXApiError">TDXApiError</a> : <code>Error</code></dt>
+<dd><p>The TDX api supplies detailed error information depending on the context of the call.
+In some instances, e.g. attempting to retrieve a resource that does not exist, the
+error will be a simple <code>NotFound</code> string message. In other cases, e.g. attempting
+to update 100 documents in a single call, the error will supply details for each
+document update that failed, such as the primary key of the document and the reason
+for the failure.</p>
+</dd>
 <dt><a href="#CommandResult">CommandResult</a> : <code>object</code></dt>
 <dd></dd>
 <dt><a href="#DatasetData">DatasetData</a> : <code>object</code></dt>
@@ -77,6 +85,7 @@
     * [.exchangeTDXToken(token, [validateIP], [exchangeIP], [ttl])](#TDXApi+exchangeTDXToken) ⇒ <code>object</code>
     * [.downloadResource(resourceId)](#TDXApi+downloadResource) ⇒ <code>object</code>
     * [.getAccount(accountId)](#TDXApi+getAccount) ⇒ [<code>Zone</code>](#Zone)
+    * [.getAccounts(filter)](#TDXApi+getAccounts) ⇒ [<code>Array.&lt;Zone&gt;</code>](#Zone)
     * [.getAggregateDataStream(datasetId, pipeline, [ndJSON])](#TDXApi+getAggregateDataStream) ⇒ <code>object</code>
     * [.getAggregateData(datasetId, pipeline, [ndJSON])](#TDXApi+getAggregateData) ⇒ [<code>DatasetData</code>](#DatasetData)
     * [.getAuthenticatedAccount()](#TDXApi+getAuthenticatedAccount) ⇒ <code>object</code>
@@ -116,7 +125,7 @@ Create a TDXApi instance
 | [config.doNotThrow] | <code>bool</code> | set to prevent throwing response errors. They will be returned in the [CommandResult](#CommandResult) object. This was set by default prior to 0.5.x |
 
 **Example** *(standard usage)*  
-```js
+```
 import TDXApi from "nqm-api-tdx";
 const api = new TDXApi({tdxServer: "https://tdx.acme.com"});
 ```
@@ -139,11 +148,11 @@ Authenticates with the TDX, acquiring an authorisation token.
 | [ttl] | <code>number</code> | <code>3600</code> | the Time-To-Live of the token in seconds, default is 1 hour. Will default to config.accessTokenTTL if not given here. |
 
 **Example** *(authenticate using a share key and secret)*  
-```js
+```
 tdxApi.authenticate("DKJG8dfg", "letmein");
 ```
 **Example** *(authenticate using custom ttl of 2 hours)*  
-```js
+```
 tdxApi.authenticate("DKJG8dfg", "letmein", 7200);
 ```
 <a name="TDXApi+addAccount"></a>
@@ -294,7 +303,7 @@ Adds a resource to the TDX.
 | [wait] | <code>bool</code> \| <code>string</code> | <code>false</code> | indicates if the call should wait for the index to be built before it returns. You can pass a string here to indicate the status you want to wait for, default is 'built'. |
 
 **Example** *(usage)*  
-```js
+```
 // Creates a dataset resource in the authenticated users' scratch folder. The dataset stores key/value pairs
 // where the `key` property is the primary key and the `value` property can take any JSON value.
 tdxApi.addResource({
@@ -940,6 +949,23 @@ Gets the details for a given account id.
 | --- | --- | --- |
 | accountId | <code>string</code> | the id of the account to be retrieved. |
 
+<a name="TDXApi+getAccounts"></a>
+
+### tdxApi.getAccounts(filter) ⇒ [<code>Array.&lt;Zone&gt;</code>](#Zone)
+Gets the details for all peer accounts.
+
+**Kind**: instance method of [<code>TDXApi</code>](#TDXApi)  
+**Returns**: [<code>Array.&lt;Zone&gt;</code>](#Zone) - zone  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| filter | <code>object</code> | query filter. |
+| filter.accountType | <code>string</code> | the account type to filter by, e.g. "user", "token", "host" etc. |
+
+**Example** *(Get all databots owned by bob)*  
+```js
+api.getAccounts({accountType: "host", own: "bob@nqminds.com"})
+```
 <a name="TDXApi+getAggregateDataStream"></a>
 
 ### tdxApi.getAggregateDataStream(datasetId, pipeline, [ndJSON]) ⇒ <code>object</code>
@@ -1214,6 +1240,30 @@ Validates the given token was signed by this TDX, and returns the decoded token 
 | token | <code>string</code> | The TDX auth server token to validate. |
 | [ip] | <code>string</code> | The optional IP address to validate against. |
 
+<a name="TDXApiError"></a>
+
+## TDXApiError : <code>Error</code>
+The TDX api supplies detailed error information depending on the context of the call.
+In some instances, e.g. attempting to retrieve a resource that does not exist, the
+error will be a simple `NotFound` string message. In other cases, e.g. attempting
+to update 100 documents in a single call, the error will supply details for each
+document update that failed, such as the primary key of the document and the reason
+for the failure.
+
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| name | <code>string</code> | "TDXApiError", indicating the error originated from this library. |
+| code | <code>number</code> | The HTTP response status code, e.g. 401 |
+| message | <code>string</code> | *Deprecated* - A string-encoded form of the error, essentially a JSON stringified copy of the entire error object. This is included for legacy reasons and may be removed in a future release. |
+| from | <code>string</code> | Usually the name of the API call that originated the error, e.g. updateData |
+| stack | <code>string</code> | the stack trace |
+| failure | <code>object</code> | an object containing the error information as received from the TDX |
+| failure.code | <code>string</code> | the TDX short error code, e.g. NotFound, PermissionDenied etc. |
+| failure.message | <code>string</code> \| <code>array</code> | details of the failure. For simple cases this will be a string, e.g. `resource not found: KDiEI3k_`. In other instance this will be an array of objects describing each error. For example an attempt to update 2 documents might result in an array of the form: ``` [  {    key: "foo",    error: {      message: "document not found matching key 'foo'"    }  },  {    key: "bar",    error: {      message: "'hello' is not a valid enum value",      name: "ValidatorError",      kind: "enum"      path: "value"    }  } ] ``` |
+
 <a name="CommandResult"></a>
 
 ## CommandResult : <code>object</code>
@@ -1224,9 +1274,9 @@ Validates the given token was signed by this TDX, and returns the decoded token 
 | --- | --- | --- |
 | commandId | <code>string</code> | The auto-generated unique id of the command. |
 | response | <code>object</code> \| <code>string</code> | The response of the command. If a command is sent asynchronously, this will simply be the string `"ack"`. In synchronous mode, this will usually be an object consisting of the primary key of the data that was affected by the command. |
-| result | <code>object</code> | Contains detailed error information when available. |
+| result | <code>object</code> | Contains success flag and detailed error information when available. |
 | result.errors | <code>array</code> | Will contain error information when appropriate. |
-| result.ok | <code>array</code> | Contains details of each commited document. |
+| result.ok | <code>array</code> | Contains details of each successfully commited document. |
 
 <a name="DatasetData"></a>
 
