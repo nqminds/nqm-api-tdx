@@ -125,7 +125,7 @@ Create a TDXApi instance
 | [config.doNotThrow] | <code>bool</code> | set to prevent throwing response errors. They will be returned in the [CommandResult](#CommandResult) object. This was set by default prior to 0.5.x |
 
 **Example** *(standard usage)*  
-```
+```js
 import TDXApi from "nqm-api-tdx";
 const api = new TDXApi({tdxServer: "https://tdx.acme.com"});
 ```
@@ -148,11 +148,11 @@ Authenticates with the TDX, acquiring an authorisation token.
 | [ttl] | <code>number</code> | <code>3600</code> | the Time-To-Live of the token in seconds, default is 1 hour. Will default to config.accessTokenTTL if not given here. |
 
 **Example** *(authenticate using a share key and secret)*  
-```
+```js
 tdxApi.authenticate("DKJG8dfg", "letmein");
 ```
 **Example** *(authenticate using custom ttl of 2 hours)*  
-```
+```js
 tdxApi.authenticate("DKJG8dfg", "letmein", 7200);
 ```
 <a name="TDXApi+addAccount"></a>
@@ -303,7 +303,7 @@ Adds a resource to the TDX.
 | [wait] | <code>bool</code> \| <code>string</code> | <code>false</code> | indicates if the call should wait for the index to be built before it returns. You can pass a string here to indicate the status you want to wait for, default is 'built'. |
 
 **Example** *(usage)*  
-```
+```js
 // Creates a dataset resource in the authenticated users' scratch folder. The dataset stores key/value pairs
 // where the `key` property is the primary key and the `value` property can take any JSON value.
 tdxApi.addResource({
@@ -1262,8 +1262,28 @@ for the failure.
 | stack | <code>string</code> | the stack trace |
 | failure | <code>object</code> | an object containing the error information as received from the TDX |
 | failure.code | <code>string</code> | the TDX short error code, e.g. NotFound, PermissionDenied etc. |
-| failure.message | <code>string</code> \| <code>array</code> | details of the failure. For simple cases this will be a string, e.g. `resource not found: KDiEI3k_`. In other instance this will be an array of objects describing each error. For example an attempt to update 2 documents might result in an array of the form: ``` [  {    key: "foo",    error: {      message: "document not found matching key 'foo'"    }  },  {    key: "bar",    error: {      message: "'hello' is not a valid enum value",      name: "ValidatorError",      kind: "enum"      path: "value"    }  } ] ``` |
+| failure.message | <code>string</code> \| <code>array</code> | details of the failure. For simple cases this will be a string, e.g. `resource not found: KDiEI3k_`. In other instance this will be an array of objects describing each error. See the example below showing a failed attempt to update 2 documents. One of the errors is a simple document not found and the other is a validation error giving details of the exact path in the document that failed validation. |
 
+**Example**  
+```js
+[
+ {
+   key: "foo",
+   error: {
+     message: "document not found matching key 'foo'"
+   }
+ },
+ {
+   key: "bar",
+   error: {
+     message: "'hello' is not a valid enum value",
+     name: "ValidatorError",
+     kind: "enum"
+     path: "value"
+   }
+ }
+]
+```
 <a name="CommandResult"></a>
 
 ## CommandResult : <code>object</code>
