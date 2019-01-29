@@ -23,14 +23,62 @@ const log = debug("nqm-api-tdx");
 const errLog = debug("nqm-api-tdx:error");
 
 /**
+ * @typedef  {Error} TDXApiError
+ * The TDX api supplies detailed error information depending on the context of the call.
+ * In some instances, e.g. attempting to retrieve a resource that does not exist, the
+ * error will be a simple `NotFound` string message. In other cases, e.g. attempting
+ * to update 100 documents in a single call, the error will supply details for each
+ * document update that failed, such as the primary key of the document and the reason
+ * for the failure.
+ * @property  {string} name - "TDXApiError", indicating the error originated from this library.
+ * @property  {number} code - The HTTP response status code, e.g. 401
+ * @property  {string} message - *Deprecated* - A string-encoded form of the error, essentially a JSON stringified
+ * copy of the entire error object. This is included for legacy reasons and may be removed in a future release.
+ * @property  {string} from - Usually the name of the API call that originated the error, e.g. updateData
+ * @property  {string} stack - the stack trace
+ * @property  {object} failure - an object containing the error information as received from the TDX
+ * @property  {string} failure.code - the TDX short error code, e.g. NotFound, PermissionDenied etc.
+ * @property  {string|array} failure.message - details of the failure. For simple cases this will be a string,
+ * e.g. `resource not found: KDiEI3k_`. In other instance this will be an array of objects describing each error. See
+ * the example below showing a failed attempt to update 2 documents. One of the errors is a simple document not found
+ * and the other is a validation error giving details of the exact path in the document that failed validation.
+ * @example <caption>`failure` for simple query error</caption>
+ * failure: {
+ *  code: "NotFound",
+ *  message: "resource not found: KDiEI3k_"
+ * }
+ * @example <caption>`failure` for complex data update error</caption>
+ * failure: {
+ *  code: "BadRequestError",
+ *  message: [
+ *    {
+ *      key: {id: "foo"},
+ *      error: {
+ *        message: "document not found matching key 'foo'"
+ *      }
+ *    },
+ *    {
+ *      key: {id: "bar"},
+ *      error: {
+ *        message: "'hello' is not a valid enum value",
+ *        name: "ValidatorError",
+ *        kind: "enum"
+ *        path: "value"
+ *      }
+ *    }
+ *  ]
+ * }
+ */
+
+/**
  * @typedef  {object} CommandResult
  * @property  {string} commandId - The auto-generated unique id of the command.
  * @property  {object|string} response - The response of the command. If a command is sent asynchronously, this will
  * simply be the string `"ack"`. In synchronous mode, this will usually be an object consisting of the primary key
  * of the data that was affected by the command.
- * @property  {object} result - Contains detailed error information when available.
+ * @property  {object} result - Contains success flag and detailed error information when available.
  * @property  {array} result.errors - Will contain error information when appropriate.
- * @property  {array} result.ok - Contains details of each commited document.
+ * @property  {array} result.ok - Contains details of each successfully commited document.
  */
 
 /**
@@ -494,7 +542,7 @@ class TDXApi {
         if (response.ok) {
           return Promise.resolve(text);
         } else {
-          return Promise.reject(handleError("fileUpload", {code: "failure", message: text}));
+          return Promise.reject(handleError(response.status, {code: "failure", message: text}, "fileUpload"));
         }
       });
     }

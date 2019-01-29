@@ -1264,25 +1264,35 @@ for the failure.
 | failure.code | <code>string</code> | the TDX short error code, e.g. NotFound, PermissionDenied etc. |
 | failure.message | <code>string</code> \| <code>array</code> | details of the failure. For simple cases this will be a string, e.g. `resource not found: KDiEI3k_`. In other instance this will be an array of objects describing each error. See the example below showing a failed attempt to update 2 documents. One of the errors is a simple document not found and the other is a validation error giving details of the exact path in the document that failed validation. |
 
-**Example**  
+**Example** *(&#x60;failure&#x60; for simple query error)*  
 ```js
-[
- {
-   key: "foo",
-   error: {
-     message: "document not found matching key 'foo'"
+failure: {
+ code: "NotFound",
+ message: "resource not found: KDiEI3k_"
+}
+```
+**Example** *(&#x60;failure&#x60; for complex data update error)*  
+```js
+failure: {
+ code: "BadRequestError",
+ message: [
+   {
+     key: {id: "foo"},
+     error: {
+       message: "document not found matching key 'foo'"
+     }
+   },
+   {
+     key: {id: "bar"},
+     error: {
+       message: "'hello' is not a valid enum value",
+       name: "ValidatorError",
+       kind: "enum"
+       path: "value"
+     }
    }
- },
- {
-   key: "bar",
-   error: {
-     message: "'hello' is not a valid enum value",
-     name: "ValidatorError",
-     kind: "enum"
-     path: "value"
-   }
- }
-]
+ ]
+}
 ```
 <a name="CommandResult"></a>
 

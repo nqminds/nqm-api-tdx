@@ -60,9 +60,19 @@ const fetchWithDeadline = function(request) {
   });
 };
 
-const TDXApiError = function(message, stack) {
+const TDXApiError = function(code, failure, source, stack) {
+  // Build a string summary for legacy or non-json clients.
+  const stringVersion = JSON.stringify({
+    from: source,
+    failure: JSON.stringify(failure),
+    code,
+  });
+
   this.name = "TDXApiError";
-  this.message = message || "no message given";
+  this.code = code;
+  this.message = stringVersion;
+  this.failure = failure;
+  this.from = source;
   this.stack = stack || (new Error()).stack;
 };
 
@@ -75,13 +85,13 @@ TDXApiError.prototype.constructor = TDXApiError;
  * @param  {object} failure - The error details, in the form `{code: xxx, message: yyy}`
  * @param  {string} code - The error code, usually the response status code, e.g. 422, 401 etc.
  */
-const handleError = function(source, failure, code) {
-  const internal = {
-    from: source,
-    failure: JSON.stringify(failure),
-    code: typeof code === "undefined" ? "n/a" : code,
-  };
-  return new TDXApiError(JSON.stringify(internal), (new Error()).stack);
+const handleError = function(code, failure, source) {
+  return new TDXApiError(
+    typeof code === "undefined" ? "n/a" : code,
+    failure,
+    source,
+    (new Error()).stack
+  );
 };
 
 const buildAuthenticateRequest = function(credentials, ip, ttl) {
@@ -235,8 +245,9 @@ const checkResponse = function(source, doNotThrow, response) {
       if (response.ok) {
         if (jsonResponse) {
           // Successfully parsed JSON content.
-          // Check for data validation (response) errors. These differ from straight-forward invalid argument
-          // failures. For example, a call to `updateData` might include requests to update 10 documents. The TDX
+          // Check for data write errors. These differ from straight-forward invalid argument or validation
+          // failures. For example, a call to `updateData` might include requests to update 10 documents.
+          // If all 10 documents pass validation, the TDX will go ahead and attempt to write the data and
           // will continue to apply updates even after one of them fails, i.e. the first 4 updates succeed,
           // the fifth fails and the rest succeed. In this case `tdxResponse` will contain a `result` object with
           // details of the failures in an `error` array property and the successes in an `commit` property.
@@ -244,12 +255,12 @@ const checkResponse = function(source, doNotThrow, response) {
             // Reject errors with 409 Conflict status.
             return Promise.reject(
               handleError(
-                source,
+                409,
                 {
                   code: "DataError",
                   message: jsonResponse.result.errors.join(", "),
                 },
-                409
+                source
               )
             );
           } else {
@@ -267,10 +278,10 @@ const checkResponse = function(source, doNotThrow, response) {
         if (jsonResponse && jsonResponse.error) {
           // Build a failure object from the json response.
           const failure = {code: jsonResponse.error, message: jsonResponse.error_description};
-          return Promise.reject(handleError(source, failure, response.status));
+          return Promise.reject(handleError(response.status, failure, source));
         } else {
           // The response body holds the error details.
-          return Promise.reject(handleError(source, jsonResponse || text, response.status));
+          return Promise.reject(handleError(response.status, jsonResponse || text, source));
         }
       }
     });
