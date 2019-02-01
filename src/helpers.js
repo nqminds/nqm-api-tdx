@@ -1,6 +1,9 @@
 import crossFetch from "cross-fetch";
 import debug from "debug";
 
+// Default 'debug' module output to STDOUT rather than STDERR.
+debug.log = console.log.bind(console); // eslint-disable-line no-console
+
 const fetch = (typeof window !== "undefined" && window.fetch) ? window.fetch : crossFetch;
 const FetchRequest = fetch.Request || Request;
 const FetchHeaders = fetch.Headers || Headers;
