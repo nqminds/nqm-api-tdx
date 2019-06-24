@@ -500,7 +500,8 @@ class TDXApi {
   /**
    * Permanently deletes a list of resources.
    * Will fail **all** deletes if any of the permission checks fail.
-   * @param  {string[]} resourceIdList - This list of resource ids to delete.
+   * @param  {Resource[]} resourceList - The list of resources to delete. Note only the `id` property of each
+   * resource is required.
    * @return  {CommandResult}
    */
   deleteManyResources(resourceIdList) {
