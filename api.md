@@ -47,7 +47,7 @@ for the failure.</p>
     * [.addResource(options, [wait])](#TDXApi+addResource)
     * [.addResourceAccess(resourceId, accountId, sourceId, access)](#TDXApi+addResourceAccess)
     * [.deleteResource(resourceId)](#TDXApi+deleteResource)
-    * [.deleteManyResources(resourceIdList)](#TDXApi+deleteManyResources) ⇒ [<code>CommandResult</code>](#CommandResult)
+    * [.deleteManyResources(resourceList)](#TDXApi+deleteManyResources) ⇒ [<code>CommandResult</code>](#CommandResult)
     * [.fileUpload(resourceId, file, [stream], [compressed], [base64Encoded])](#TDXApi+fileUpload)
     * [.moveResource(id, fromParentId, toParentId)](#TDXApi+moveResource)
     * [.rebuildResourceIndex(resourceId)](#TDXApi+rebuildResourceIndex)
@@ -350,7 +350,7 @@ Permanently deletes a resource.
 
 <a name="TDXApi+deleteManyResources"></a>
 
-### tdxApi.deleteManyResources(resourceIdList) ⇒ [<code>CommandResult</code>](#CommandResult)
+### tdxApi.deleteManyResources(resourceList) ⇒ [<code>CommandResult</code>](#CommandResult)
 Permanently deletes a list of resources.
 Will fail **all** deletes if any of the permission checks fail.
 
@@ -358,7 +358,7 @@ Will fail **all** deletes if any of the permission checks fail.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| resourceIdList | <code>Array.&lt;string&gt;</code> | This list of resource ids to delete. |
+| resourceList | [<code>Array.&lt;Resource&gt;</code>](#Resource) | The list of resources to delete. Note only the `id` property of each resource is required. |
 
 <a name="TDXApi+fileUpload"></a>
 
