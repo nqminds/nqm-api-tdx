@@ -202,6 +202,9 @@ const buildQueryRequest = function(endpoint, filter, projection, options) {
     headers: new FetchHeaders({
       "Authorization": `Bearer ${this.accessToken}`,
       "Content-Type": "application/json",
+      "Cache-Control": "no-cache",
+      "Pragma": "no-cache",
+      "Expires": "0",
     }),
   });
 };
@@ -221,6 +224,9 @@ const buildDatabotInstanceRequest = function(endpoint) {
     headers: new FetchHeaders({
       "Authorization": `Bearer ${this.accessToken}`,
       "Content-Type": "application/json",
+      "Cache-Control": "no-cache",
+      "Pragma": "no-cache",
+      "Expires": "0",
     }),
   });
 };
