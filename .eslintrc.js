@@ -5,6 +5,7 @@ module.exports = {
     es6: true,
     browser: true,
     node: true,
+    "jest/globals": true
   },
   extends: 'eslint:recommended',
   parser: 'babel-eslint',
@@ -17,7 +18,7 @@ module.exports = {
   },
   plugins: [
     'babel',
-    'mocha'
+    'jest'
   ],
   rules: {
     'array-bracket-spacing': ['error', 'never'],
@@ -76,16 +77,8 @@ module.exports = {
     'yoda': 'error',
     'babel/object-curly-spacing': ['error', 'never'],
     'babel/generator-star-spacing': 'error',
-    'mocha/handle-done-callback': 'error',
-    'mocha/no-exclusive-tests': 'error',
-    'mocha/no-global-tests': 'error',
-    'mocha/no-pending-tests': 'error',
-    'mocha/no-skipped-tests': 'error',
     'strict': 'off',
     'no-case-declarations': 'off',
-    'mocha/no-synchronous-tests': 'off',
-    'mocha/valid-suite-description': 'off',
-    'mocha/valid-test-description': 'off',
     'babel/object-shorthand': 'off',
     'babel/new-cap': 'off',
   },

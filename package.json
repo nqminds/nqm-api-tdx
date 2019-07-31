@@ -10,8 +10,7 @@
   "scripts": {
     "build": "webpack --env build",
     "dev": "webpack --progress --colors --watch --env dev",
-    "test": "mocha --compilers js:babel-core/register --colors ./test/*.spec.js",
-    "test:watch": "mocha --compilers js:babel-core/register --colors -w ./test/*.spec.js"
+    "test": "jest"
   },
   "author": "toby.ealden@gmail.com",
   "license": "ISC",
@@ -20,21 +19,18 @@
   },
   "homepage": "https://github.com/nqminds/nqm-api-tdx",
   "devDependencies": {
-    "babel-cli": "^6.24.1",
-    "babel-eslint": "^7.2.3",
-    "babel-loader": "^7.0.0",
-    "babel-plugin-add-module-exports": "^0.2.1",
-    "babel-plugin-transform-object-rest-spread": "^6.23.0",
-    "babel-preset-env": "^1.7.0",
-    "chai": "^3.5.0",
-    "eslint": "^3.19.0",
-    "eslint-loader": "^1.7.1",
-    "eslint-plugin-babel": "^4.1.1",
-    "eslint-plugin-mocha": "^4.9.0",
-    "eslint-plugin-react": "^7.0.0",
-    "mocha": "^3.3.0",
-    "webpack": "^2.5.1",
-    "yargs": "^8.0.1"
+    "@babel/preset-env": "^7.5.5",
+    "babel-eslint": "^10.0.1",
+    "babel-jest": "^24.8.0",
+    "babel-loader": "^8.0.6",
+    "babel-plugin-add-module-exports": "^1.0.2",
+    "eslint": "^5.9.0",
+    "eslint-loader": "^2.2.1",
+    "eslint-plugin-babel": "^5.3.0",
+    "eslint-plugin-jest": "^22.14.0",
+    "eslint-plugin-react": "^7.11.1",
+    "jest": "^24.8.0",
+    "webpack": "^2.5.1"
   },
   "dependencies": {
     "@nqminds/nqm-core-utils": "^0.4.8",

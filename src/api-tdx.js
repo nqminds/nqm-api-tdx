@@ -111,14 +111,14 @@ const errLog = debug("nqm-api-tdx:error");
  * @property  {string[]} w - array of resource ids that are the source of write access
  */
 
- /**
+/**
  * @typedef  {object} Zone
  * @property  {string} accountType
  * @property  {string} displayName
  * @property  {string} username
  */
 
-class TDXApi {
+export class TDXApi {
   /**
    * Create a TDXApi instance
    * @param  {object} config - the TDX configuration for the remote TDX
@@ -140,7 +140,7 @@ class TDXApi {
    * const api = new TDXApi({tdxServer: "https://tdx.acme.com"});
    */
   constructor(config) {
-    this.config = {...config};
+    this.config = Object.assign({}, config);
     this.accessToken = config.accessToken || config.authToken || "";
     setDefaults(this.config);
   }
@@ -325,7 +325,7 @@ class TDXApi {
    * @param  {string[]} [options.whitelist]
    */
   updateAccount(username, options) {
-    const request = buildCommandRequest.call(this, "account/update", {username, ...options});
+    const request = buildCommandRequest.call(this, "account/update", Object.assign({username}, options));
     return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.updateAccount: %s", err.message);
@@ -536,16 +536,16 @@ class TDXApi {
       return response;
     } else {
       return response
-      .then((response) => {
-        return [response, response.text()];
-      })
-      .then(([response, text]) => {
-        if (response.ok) {
-          return Promise.resolve(text);
-        } else {
-          return Promise.reject(handleError(response.status, {code: "failure", message: text}, "fileUpload"));
-        }
-      });
+        .then((response) => {
+          return [response, response.text()];
+        })
+        .then(([response, text]) => {
+          if (response.ok) {
+            return Promise.resolve(text);
+          } else {
+            return Promise.reject(handleError(response.status, {code: "failure", message: text}, "fileUpload"));
+          }
+        });
     }
   }
 
@@ -616,7 +616,7 @@ class TDXApi {
       .then(checkResponse.bind(this, "removeResourceAccess"));
   }
 
-    /**
+  /**
    * Set the resource import flag.
    * @param  {string} resourceId - The id of the dataset-based resource.
    * @param  {boolean} importing - Indicates the state of the import flag.
@@ -682,6 +682,24 @@ class TDXApi {
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
       .then(checkResponse.bind(this, "setResourcePermissiveShare"));
+  }
+
+  /**
+   * Sets the dataset store of the resource. Reserved for system use.
+   * @param  {string} resourceId - The resource id.
+   * @param  {string} store - The name of the store.
+   */
+  setResourceStore(resourceId, store) {
+    const request = buildCommandRequest.call(this, "resource/store/set", {
+      id: resourceId,
+      store,
+    });
+    return fetch.call(this, request)
+      .catch((err) => {
+        errLog("TDXApi.setResourceStore: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      })
+      .then(checkResponse.bind(this, "setResourceStore"));
   }
 
   /**
@@ -761,7 +779,7 @@ class TDXApi {
    * @param  {string} [update.textContent] see also {@link TDXApi#setResourceTextContent}
    */
   updateResource(resourceId, update) {
-    const request = buildCommandRequest.call(this, "resource/update", {id: resourceId, ...update});
+    const request = buildCommandRequest.call(this, "resource/update", Object.assign({id: resourceId}, update));
     return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.updateResource: %s", err.message);
@@ -776,7 +794,7 @@ class TDXApi {
    *
    */
 
-   /**
+  /**
    * Add data to a dataset resource.
    * @param  {string} datasetId - The id of the dataset-based resource to add data to.
    * @param  {object|array} data - The data to add. Must conform to the schema defined by the resource metadata.
@@ -1367,10 +1385,10 @@ class TDXApi {
     const endpoint = `resources/${datasetId}/${ndJSON ? "ndaggregate" : "aggregate"}?pipeline=${pipeline}`;
     const request = buildQueryRequest.call(this, endpoint);
     return fetch.call(this, request)
-    .catch((err) => {
-      errLog("TDXApi.getAggregateData: %s", err.message);
-      return Promise.reject(new Error(`${err.message} - [network error]`));
-    });
+      .catch((err) => {
+        errLog("TDXApi.getAggregateData: %s", err.message);
+        return Promise.reject(new Error(`${err.message} - [network error]`));
+      });
   }
 
   /**
