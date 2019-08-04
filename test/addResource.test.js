@@ -9,7 +9,7 @@ beforeAll(async() => {
 
 beforeEach(async() => {
   // Make sure the test dataset doesn't already exist.
-  return api.deleteResource(resourceId).catch(() => {});
+  return api.deleteResource(resourceId).catch(() => {}).then(utils.delay);
 });
 
 test("creates dataset resource", async() => {
@@ -21,6 +21,23 @@ test("creates dataset resource", async() => {
       basedOnSchema: constants.datasetResourceType,
     }
   );
+});
+
+test("fails to create duplicate dataset resource", async() => {
+  await utils.addResource(
+    api,
+    {
+      id: resourceId,
+      name: "addResource dataset",
+      basedOnSchema: constants.datasetResourceType,
+    }
+  );
+  const addResult = api.addResource({
+    id: resourceId,
+    name: "addResource dataset",
+    basedOnSchema: constants.datasetResourceType,
+  }, true);
+  await expect(addResult).rejects.toBeTruthy();
 });
 
 test("creates text content resource", async() => {

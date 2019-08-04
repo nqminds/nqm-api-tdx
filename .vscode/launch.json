@@ -20,8 +20,12 @@
       "name": "Jest Current File",
       "program": "${workspaceFolder}/node_modules/.bin/jest",
       "args": [
+        "--verbose"
         "${file}",
       ],
+      "env": {
+        "DEBUG": ""
+      },
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "disableOptimisticBPs": true,

@@ -10,7 +10,6 @@ import {
   buildQueryRequest,
   checkResponse,
   fetchWithDeadline as fetch,
-  handleError,
   setDefaults,
   waitForAccount,
   waitForIndex,
@@ -118,7 +117,7 @@ const errLog = debug("nqm-api-tdx:error");
  * @property  {string} username
  */
 
-export class TDXApi {
+class TDXApi {
   /**
    * Create a TDXApi instance
    * @param  {object} config - the TDX configuration for the remote TDX
@@ -535,17 +534,7 @@ export class TDXApi {
     if (stream) {
       return response;
     } else {
-      return response
-        .then((response) => {
-          return [response, response.text()];
-        })
-        .then(([response, text]) => {
-          if (response.ok) {
-            return Promise.resolve(text);
-          } else {
-            return Promise.reject(handleError(response.status, {code: "failure", message: text}, "fileUpload"));
-          }
-        });
+      return response.then(checkResponse.bind(this, "fileUpload"));
     }
   }
 
@@ -888,7 +877,7 @@ export class TDXApi {
       datasetId,
       payload: [].concat(data),
     };
-    const request = buildCommandRequest.call(this, "dataset/data/upsertMany", postData);
+    const request = buildCommandRequest.call(this, "dataset/data/patchMany", postData);
     return fetch.call(this, request)
       .catch((err) => {
         errLog("TDXApi.patchData: %s", err.message);
@@ -905,6 +894,7 @@ export class TDXApi {
    * @param  {bool} [upsert=false] - Indicates the data should be created if no document is found matching the
    * @param  {bool} [doNotThrow=false] - set to override default error handling. See {@link TDXApi}.
    * primary key.
+   * @param  {object} [opts] - reserved for system use.
    * @return {CommandResult} - Use the result property to check for errors.
    * @example <caption>update an existing document</caption>
    * tdxApi.updateData(myDatasetId, {lsoa: "E000001", count: 488});
@@ -912,11 +902,12 @@ export class TDXApi {
    * // Will create a document if no data exists matching key 'lsoa': "E000004"
    * tdxApi.updateData(myDatasetId, {lsoa: "E000004", count: 288}, true);
    */
-  updateData(datasetId, data, upsert, doNotThrow) {
+  updateData(datasetId, data, upsert, doNotThrow, opts) {
     const postData = {
       datasetId,
       payload: [].concat(data),
       __upsert: !!upsert,
+      __opts: opts,
     };
     const request = buildCommandRequest.call(this, "dataset/data/updateMany", postData);
     return fetch.call(this, request)

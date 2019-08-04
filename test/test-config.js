@@ -15,5 +15,5 @@ module.exports = (function() {
     },
   };
 
-  return configs.localConfig;
+  return configs.nqm1Config;
 }());
