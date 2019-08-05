@@ -677,11 +677,13 @@ class TDXApi {
    * Sets the dataset store of the resource. Reserved for system use.
    * @param  {string} resourceId - The resource id.
    * @param  {string} store - The name of the store.
+   * @param  {number} [storeSize] - The size in bytes of the store.
    */
-  setResourceStore(resourceId, store) {
+  setResourceStore(resourceId, store, storeSize) {
     const request = buildCommandRequest.call(this, "resource/store/set", {
       id: resourceId,
       store,
+      storeSize,
     });
     return fetch.call(this, request)
       .catch((err) => {
