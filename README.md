@@ -32,6 +32,5 @@ npm run build
 ```
 ### generate API reference
 ```
-npm install -g jsdoc-to-markdown
-jsdoc2md ./src/api-tdx.js > api.md
+npm run generate-docs
 ```
