@@ -1,40 +1,47 @@
 {
-  "name": "nqm-api-tdx",
-  "version": "0.1.44",
-  "description": "nquiringminds Trusted Data Exchange command and query API interface for nodejs clients",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "browserify index.js --s TDXApi > client-api.js",
-    "postinstall": "browserify index.js --s TDXApi > client-api.js"
-  },
+  "name": "@nqminds/nqm-api-tdx",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/nqminds/nqm-api-tdx.git"
+    "url": "https://github.com/nqminds/nqm-api-tdx"
+  },
+  "version": "0.9.1",
+  "description": "",
+  "main": "lib/nqm-api-tdx.js",
+  "scripts": {
+    "build": "webpack --env build",
+    "dev": "webpack --progress --colors --watch --env dev",
+    "generate-docs": "node_modules/.bin/jsdoc -c jsdoc.json README.md",
+    "test": "jest"
   },
   "author": "toby.ealden@gmail.com",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/nqminds/nqm-api-tdx/issues"
   },
-  "homepage": "https://github.com/nqminds/nqm-api-tdx#readme",
-  "dependencies": {
-    "browserify": "^13.1.0",
-    "debug": "^2.2.0",
-    "superagent": "^2.3.0"
-  },
+  "homepage": "https://github.com/nqminds/nqm-api-tdx",
   "devDependencies": {
+    "babel-cli": "^6.24.1",
+    "babel-eslint": "^7.2.3",
+    "babel-loader": "^7.0.0",
+    "babel-plugin-add-module-exports": "^0.2.1",
+    "babel-plugin-transform-object-rest-spread": "^6.23.0",
+    "babel-preset-env": "^1.7.0",
     "chai": "^3.5.0",
-    "chai-as-promised": "^5.2.0",
-    "chai-subset": "^1.3.0",
-    "babel-eslint": "^7.1.0",
-    "eslint": "^3.10.2",
-    "eslint-find-rules": "^1.14.3",
-    "eslint-plugin-babel": "^3.2.0",
-    "eslint-plugin-json": "^1.2.0",
-    "eslint-plugin-mocha": "^4.7.0",
-    "eslint-plugin-node": "^3.0.4",
-    "eslint-plugin-react": "^6.7.1",
-    "mocha": "^3.0.0"
+    "docdash": "^1.1.1",
+    "eslint": "^3.19.0",
+    "eslint-loader": "^1.7.1",
+    "eslint-plugin-babel": "^4.1.1",
+    "eslint-plugin-jest": "^22.14.1",
+    "eslint-plugin-mocha": "^4.9.0",
+    "jest": "^23.6.0",
+    "jsdoc": "^3.6.3",
+    "lodash": "^4.17.15",
+    "webpack": "^2.5.1"
+  },
+  "dependencies": {
+    "@nqminds/nqm-core-utils": "^0.5.0",
+    "base-64": "^0.1.0",
+    "cross-fetch": "^2.2.1",
+    "debug": "^3.2.6"
   }
 }
