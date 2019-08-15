@@ -1,0 +1,1626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>Global - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="TDXApi.html">TDXApi</a><ul class='methods'><li data-type='method'><a href="TDXApi.html#abortDatabotInstance">abortDatabotInstance</a></li><li data-type='method'><a href="TDXApi.html#addAccount">addAccount</a></li><li data-type='method'><a href="TDXApi.html#addAccountApplicationConnection">addAccountApplicationConnection</a></li><li data-type='method'><a href="TDXApi.html#addData">addData</a></li><li data-type='method'><a href="TDXApi.html#addResource">addResource</a></li><li data-type='method'><a href="TDXApi.html#addResourceAccess">addResourceAccess</a></li><li data-type='method'><a href="TDXApi.html#addTrustedExchange">addTrustedExchange</a></li><li data-type='method'><a href="TDXApi.html#addZoneConnection">addZoneConnection</a></li><li data-type='method'><a href="TDXApi.html#approveAccount">approveAccount</a></li><li data-type='method'><a href="TDXApi.html#authenticate">authenticate</a></li><li data-type='method'><a href="TDXApi.html#createTDXToken">createTDXToken</a></li><li data-type='method'><a href="TDXApi.html#deleteAccount">deleteAccount</a></li><li data-type='method'><a href="TDXApi.html#deleteData">deleteData</a></li><li data-type='method'><a href="TDXApi.html#deleteDatabotHost">deleteDatabotHost</a></li><li data-type='method'><a href="TDXApi.html#deleteDatabotInstance">deleteDatabotInstance</a></li><li data-type='method'><a href="TDXApi.html#deleteDataByQuery">deleteDataByQuery</a></li><li data-type='method'><a href="TDXApi.html#deleteManyResources">deleteManyResources</a></li><li data-type='method'><a href="TDXApi.html#deleteResource">deleteResource</a></li><li data-type='method'><a href="TDXApi.html#deleteZoneConnection">deleteZoneConnection</a></li><li data-type='method'><a href="TDXApi.html#downloadResource">downloadResource</a></li><li data-type='method'><a href="TDXApi.html#exchangeTDXToken">exchangeTDXToken</a></li><li data-type='method'><a href="TDXApi.html#fileUpload">fileUpload</a></li><li data-type='method'><a href="TDXApi.html#getAccount">getAccount</a></li><li data-type='method'><a href="TDXApi.html#getAccounts">getAccounts</a></li><li data-type='method'><a href="TDXApi.html#getAggregateData">getAggregateData</a></li><li data-type='method'><a href="TDXApi.html#getAggregateDataStream">getAggregateDataStream</a></li><li data-type='method'><a href="TDXApi.html#getAuthenticatedAccount">getAuthenticatedAccount</a></li><li data-type='method'><a href="TDXApi.html#getData">getData</a></li><li data-type='method'><a href="TDXApi.html#getDatabotInstance">getDatabotInstance</a></li><li data-type='method'><a href="TDXApi.html#getDatabotInstanceOutput">getDatabotInstanceOutput</a></li><li data-type='method'><a href="TDXApi.html#getDatabotInstanceStatus">getDatabotInstanceStatus</a></li><li data-type='method'><a href="TDXApi.html#getDataCount">getDataCount</a></li><li data-type='method'><a href="TDXApi.html#getDatasetData">getDatasetData</a></li><li data-type='method'><a href="TDXApi.html#getDatasetDataCount">getDatasetDataCount</a></li><li data-type='method'><a href="TDXApi.html#getDatasetDataStream">getDatasetDataStream</a></li><li data-type='method'><a href="TDXApi.html#getDataStream">getDataStream</a></li><li data-type='method'><a href="TDXApi.html#getDistinct">getDistinct</a></li><li data-type='method'><a href="TDXApi.html#getNDData">getNDData</a></li><li data-type='method'><a href="TDXApi.html#getResource">getResource</a></li><li data-type='method'><a href="TDXApi.html#getResourceAccess">getResourceAccess</a></li><li data-type='method'><a href="TDXApi.html#getResourceAncestors">getResourceAncestors</a></li><li data-type='method'><a href="TDXApi.html#getResources">getResources</a></li><li data-type='method'><a href="TDXApi.html#getResourcesWithSchema">getResourcesWithSchema</a></li><li data-type='method'><a href="TDXApi.html#getTDXToken">getTDXToken</a></li><li data-type='method'><a href="TDXApi.html#getZone">getZone</a></li><li data-type='method'><a href="TDXApi.html#isInGroup">isInGroup</a></li><li data-type='method'><a href="TDXApi.html#moveResource">moveResource</a></li><li data-type='method'><a href="TDXApi.html#patchData">patchData</a></li><li data-type='method'><a href="TDXApi.html#rebuildResourceIndex">rebuildResourceIndex</a></li><li data-type='method'><a href="TDXApi.html#registerDatabotHost">registerDatabotHost</a></li><li data-type='method'><a href="TDXApi.html#removeResourceAccess">removeResourceAccess</a></li><li data-type='method'><a href="TDXApi.html#resetAccount">resetAccount</a></li><li data-type='method'><a href="TDXApi.html#rollbackCommand">rollbackCommand</a></li><li data-type='method'><a href="TDXApi.html#sendDatabotHostCommand">sendDatabotHostCommand</a></li><li data-type='method'><a href="TDXApi.html#setResourceImporting">setResourceImporting</a></li><li data-type='method'><a href="TDXApi.html#setResourcePermissiveShare">setResourcePermissiveShare</a></li><li data-type='method'><a href="TDXApi.html#setResourceSchema">setResourceSchema</a></li><li data-type='method'><a href="TDXApi.html#setResourceShareMode">setResourceShareMode</a></li><li data-type='method'><a href="TDXApi.html#setResourceStore">setResourceStore</a></li><li data-type='method'><a href="TDXApi.html#setResourceTextContent">setResourceTextContent</a></li><li data-type='method'><a href="TDXApi.html#startDatabotInstance">startDatabotInstance</a></li><li data-type='method'><a href="TDXApi.html#stopDatabotInstance">stopDatabotInstance</a></li><li data-type='method'><a href="TDXApi.html#suspendResourceIndex">suspendResourceIndex</a></li><li data-type='method'><a href="TDXApi.html#truncateResource">truncateResource</a></li><li data-type='method'><a href="TDXApi.html#updateAccount">updateAccount</a></li><li data-type='method'><a href="TDXApi.html#updateData">updateData</a></li><li data-type='method'><a href="TDXApi.html#updateDatabotHostStatus">updateDatabotHostStatus</a></li><li data-type='method'><a href="TDXApi.html#updateDataByQuery">updateDataByQuery</a></li><li data-type='method'><a href="TDXApi.html#updateResource">updateResource</a></li><li data-type='method'><a href="TDXApi.html#validateTDXToken">validateTDXToken</a></li><li data-type='method'><a href="TDXApi.html#verifyAccount">verifyAccount</a></li><li data-type='method'><a href="TDXApi.html#writeDatabotHostInstanceOutput">writeDatabotHostInstanceOutput</a></li></ul></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">Global</h1>
+    
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>
+        
+        </h2>
+        
+    
+</header>
+
+<article>
+    
+        <div class="container-overview">
+        
+            
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+            
+
+            
+        
+        </div>
+    
+
+    
+
+    
+
+    
+    
+    
+
+     
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Type Definitions</h3>
+
+        
+                
+<h4 class="name" id="CommandResult">CommandResult</h4>
+
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="api-tdx.js.html">api-tdx.js</a>, <a href="api-tdx.js.html#line72">line 72</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>commandId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The auto-generated unique id of the command.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>response</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+|
+
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The response of the command. If a command is sent asynchronously, this will
+simply be the string <code>&quot;ack&quot;</code>. In synchronous mode, this will usually be an object consisting of the primary key
+of the data that was affected by the command.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>result</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Contains success flag and detailed error information when available.</p>
+                <h6>Properties</h6>
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>errors</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">array</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Will contain error information when appropriate.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>ok</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">array</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Contains details of each successfully commited document.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">object</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+
+            
+                
+<h4 class="name" id="DatasetData">DatasetData</h4>
+
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="api-tdx.js.html">api-tdx.js</a>, <a href="api-tdx.js.html#line83">line 83</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>metaData</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The dataset metadata (see <code>nqmMeta</code> option in <code>getDatasetData</code>).</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>metaDataUrl</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The URL to the dataset metadata (see <code>nqmMeta</code> option in <code>getDatasetData</code>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;object></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The dataset documents.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">object</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+
+            
+                
+<h4 class="name" id="Resource">Resource</h4>
+
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="api-tdx.js.html">api-tdx.js</a>, <a href="api-tdx.js.html#line90">line 90</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>description</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>parents</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;string></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>schemaDefinition</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>tags</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;string></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">object</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+
+            
+                
+<h4 class="name" id="ResourceAccess">ResourceAccess</h4>
+
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="api-tdx.js.html">api-tdx.js</a>, <a href="api-tdx.js.html#line100">line 100</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>aid</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>account id that is the subject of this access</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>by</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>comma-delimited list of attribution for this access</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>rid</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>resource id to which this access refers</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>grp</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>indicates the share mode (user groups only)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>own</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>account that owns the resource</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>par</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;string></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>the parent(s) of the resource</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>typ</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>the base type of the resource</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>r</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;string></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>array of resource ids that are the source of read access (e.g. parent)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>w</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;string></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>array of resource ids that are the source of write access</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">object</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+
+            
+                
+<h4 class="name" id="TDXApiError">TDXApiError</h4>
+
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="api-tdx.js.html">api-tdx.js</a>, <a href="api-tdx.js.html#line24">line 24</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>&quot;TDXApiError&quot;, indicating the error originated from this library.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>code</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The HTTP response status code, e.g. 401</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>message</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p><em>Deprecated</em> - A string-encoded form of the error, essentially a JSON stringified
+copy of the entire error object. This is included for legacy reasons and may be removed in a future release.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>from</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Usually the name of the API call that originated the error, e.g. updateData</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>stack</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>the stack trace</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>failure</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>an object containing the error information as received from the TDX</p>
+                <h6>Properties</h6>
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>code</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>the TDX short error code, e.g. NotFound, PermissionDenied etc.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>message</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
+<span class="param-type">array</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>details of the failure. For simple cases this will be a string,
+e.g. <code>resource not found: KDiEI3k_</code>. In other instance this will be an array of objects describing each error. See
+the example below showing a failed attempt to update 2 documents. One of the errors is a simple document not found
+and the other is a validation error giving details of the exact path in the document that failed validation.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<div class="description">
+    <p>The TDX api supplies detailed error information depending on the context of the call.
+In some instances, e.g. attempting to retrieve a resource that does not exist, the
+error will be a simple <code>NotFound</code> string message. In other cases, e.g. attempting
+to update 100 documents in a single call, the error will supply details for each
+document update that failed, such as the primary key of the document and the reason
+for the failure.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Error</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+    <h5>Examples</h5>
+    
+        <p class="code-caption">`failure` for simple query error</p>
+    
+    <pre class="prettyprint"><code>failure: {
+ code: "NotFound",
+ message: "resource not found: KDiEI3k_"
+}</code></pre>
+
+        <p class="code-caption">`failure` for complex data update error</p>
+    
+    <pre class="prettyprint"><code>failure: {
+ code: "BadRequestError",
+ message: [
+   {
+     key: {id: "foo"},
+     error: {
+       message: "document not found matching key 'foo'"
+     }
+   },
+   {
+     key: {id: "bar"},
+     error: {
+       message: "'hello' is not a valid enum value",
+       name: "ValidatorError",
+       kind: "enum"
+       path: "value"
+     }
+   }
+ ]
+}</code></pre>
+
+
+
+            
+                
+<h4 class="name" id="Zone">Zone</h4>
+
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="api-tdx.js.html">api-tdx.js</a>, <a href="api-tdx.js.html#line113">line 113</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>accountType</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>displayName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>username</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">object</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+
+            
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Thu Aug 15 2019 18:22:58 GMT+0100 (British Summer Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+
+
+</body>
+</html>

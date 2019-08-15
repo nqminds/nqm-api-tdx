@@ -10,6 +10,7 @@
   "scripts": {
     "build": "webpack --env build",
     "dev": "webpack --progress --colors --watch --env dev",
+    "generate-docs": "node_modules/.bin/jsdoc -c jsdoc.json README.md",
     "test": "jest"
   },
   "author": "toby.ealden@gmail.com",
@@ -26,12 +27,14 @@
     "babel-plugin-transform-object-rest-spread": "^6.23.0",
     "babel-preset-env": "^1.7.0",
     "chai": "^3.5.0",
+    "docdash": "^1.1.1",
     "eslint": "^3.19.0",
     "eslint-loader": "^1.7.1",
     "eslint-plugin-babel": "^4.1.1",
     "eslint-plugin-jest": "^22.14.1",
     "eslint-plugin-mocha": "^4.9.0",
     "jest": "^23.6.0",
+    "jsdoc": "^3.6.3",
     "lodash": "^4.17.15",
     "webpack": "^2.5.1"
   },
