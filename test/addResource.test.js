@@ -21,7 +21,7 @@ test("creates dataset resource", async() => {
       basedOnSchema: constants.datasetResourceType,
     }
   );
-});
+}, 10000);
 
 test("fails to create duplicate dataset resource", async() => {
   await utils.addResource(
@@ -38,7 +38,7 @@ test("fails to create duplicate dataset resource", async() => {
     basedOnSchema: constants.datasetResourceType,
   }, true);
   await expect(addResult).rejects.toBeTruthy();
-});
+}, 10000);
 
 test("creates text content resource", async() => {
   return utils.addResource(
@@ -50,4 +50,4 @@ test("creates text content resource", async() => {
       textContent: {foo: "bar"},
     }
   );
-});
+}, 10000);
