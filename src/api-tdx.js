@@ -919,8 +919,8 @@ class TDXApi {
    * @param  {object|array} data - The data to update. Must conform to the schema defined by the resource metadata.
    * Supports updating individual or multiple documents.
    * @param  {bool} [upsert=false] - Indicates the data should be created if no document is found matching the
-   * @param  {bool} [doNotThrow=false] - set to override default error handling. See {@link TDXApi}.
    * primary key.
+   * @param  {bool} [doNotThrow=false] - set to override default error handling. See {@link TDXApi}.
    * @param  {object} [opts] - reserved for system use.
    * @return {CommandResult} - Use the result property to check for errors.
    * @example <caption>update an existing document</caption>
