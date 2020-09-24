@@ -1672,7 +1672,8 @@ class TDXApi {
 
   /**
    * Gets the details of all resources that match the given filter.
-   * @param  {object} [filter] - A mongodb filter definition
+   * @param  {object} [filter] - A mongodb filter definition.
+   * Note: filtering on id is restricted to a string or an array of strings
    * @param  {object} [projection] - A mongodb projection definition, can be used to restrict which properties are
    * returned thereby limiting the payload.
    * @param  {object} [options] - A mongodb options definition, can be used for limit, skip, sorting etc.
