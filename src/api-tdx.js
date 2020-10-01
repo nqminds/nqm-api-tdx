@@ -1726,8 +1726,16 @@ class TDXApi {
 
   /**
    * Determines if the given account is a member of the given group.
+   *
+   * Due to security concerns, you can only see if an account is in the group,
+   * if either:
+   * - you are the owner of the group
+   * - you are not the owner of the group, but you were the one that added
+   *   the `accountId` to the group.
    * @param {string} accountId - the id of the account
-   * @param {*} groupId - the id of the group
+   * @param {string} groupId - the id of the group
+   * @returns {Promise<boolean>} `true` if the account is in the group
+   * **AND** the current authenticated account can view this access.
    */
   isInGroup(accountId, groupId) {
     const lookup = {
