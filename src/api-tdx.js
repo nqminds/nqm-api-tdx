@@ -461,7 +461,8 @@ class TDXApi {
   /**
    * Adds read and/or write permission for an account to access a resource. Permission is required
    * equivalent to that which is being added, e.g. adding write permission requires existing
-   * write access.
+   * write access. Note access as a result of group membership is not included in determining
+   * permissions, in this case add the account to the group instead.
    * @param  {string} resourceId - The resource id
    * @param  {string} accountId - The account id to assign permission to
    * @param  {string} sourceId - The id of the resource acting as the source of the access. This
@@ -595,10 +596,19 @@ class TDXApi {
    * write access.
    * @param  {string} resourceId - The resource id.
    * @param  {string} accountId - The account id to remove access from.
-   * @param  {string} addedBy - The account id that originally added the access, probably your
-   * account id.
+   * @param  {string} addedBy - The full `by` path of the permission to be removed.
    * @param  {string} sourceId - The source of the access, usually the resource itself.
    * @param  {string[]} access - The access, one or more of [`"r"`, `"w"`].
+   * @example <caption>usage</caption>
+   * // Removes read access for account "john.trulove@nqminds.com/tdx.nqm-1.com" added by
+   * // Toby via "ezh.ubiapps@gmail.com/tdx.nqm-1.com,toby.ealden@gmail.com/tdx.nqm-1.com".
+   * tdxApi.removeResourceAccess(
+   *  "rJg9ldNEwD",
+   *  "john.trulove@nqminds.com/tdx.nqm-1.com",
+   *  "ezh.ubiapps@gmail.com/tdx.nqm-1.com,toby.ealden@gmail.com/tdx.nqm-1.com",
+   *  "rJg9ldNEwD",
+   *  ["r"]
+   * );
    */
   removeResourceAccess(resourceId, accountId, addedBy, sourceId, access) {
     const request = buildCommandRequest.call(this, "resourceAccess/delete", {
@@ -1672,11 +1682,20 @@ class TDXApi {
 
   /**
    * Gets the details of all resources that match the given filter.
-   * @param  {object} [filter] - A mongodb filter definition
+   * @param  {object} [filter] - A mongodb filter definition. Note, filtering on `id` is restricted to an explicit
+   * string match or a `$in` clause to match against a list of ids.
    * @param  {object} [projection] - A mongodb projection definition, can be used to restrict which properties are
    * returned thereby limiting the payload.
    * @param  {object} [options] - A mongodb options definition, can be used for limit, skip, sorting etc.
    * @return  {Resource[]}
+   * @example <caption>filtering by explicit id</caption>
+   * tdxApi.getResources({"id": "rygq8DNEPw"});
+   * @example <caption>filtering by set of ids</caption>
+   * tdxApi.getResources({"id": {"$in": ["rygq8DNEPw", "xmm1z-D8d"]}});
+   * @example <caption>filtering by name</caption>
+   * tdxApi.getResources({"name": {"$regex": "test"}});
+   * @example <caption>filtering by name, returning only id and name</caption>
+   * tdxApi.getResources({"name": {"$regex": "test"}}, {"id": 1, "name": 1});
    */
   getResources(filter, projection, options) {
     const request = buildQueryRequest.call(this, "resources", filter, projection, options);
@@ -1726,8 +1745,13 @@ class TDXApi {
 
   /**
    * Determines if the given account is a member of the given group.
+   * Note that accurate visibility of group members requires one or more of the
+   * following to be true:
+   * - the authenticated account added `accountId` to the group
+   * - the authenticated account owns the group
    * @param {string} accountId - the id of the account
    * @param {*} groupId - the id of the group
+   * @return {boolean} - `true` if `accountId` is a member of the group and visible to the authenticated account.
    */
   isInGroup(accountId, groupId) {
     const lookup = {
