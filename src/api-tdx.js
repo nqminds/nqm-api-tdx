@@ -1131,6 +1131,8 @@ class TDXApi {
    * Starts a databot instance.
    * @param  {string} databotId - The id of the databot definition to start.
    * @param  {object} payload - The instance input and parameters.
+   * @param  {string} [payload.id] - The id to assign to the new instance. This will be auto-generated if omitted.
+   * If there is an existing instance with this id the `overwriteExisting` flag must be set (see below).
    * @param  {number} [payload.authTokenTTL] - The time-to-live to use when creating the auth token, in seconds.
    * Will default to the TDX-configured default if not given (usually 1 hour).
    * @param  {number} [payload.chunks=1] - The number of processes to instantiate. Each will be given the same input
@@ -1143,7 +1145,8 @@ class TDXApi {
    * specification in the associated databot definition.
    * @param  {string} [payload.name] - The name to associate with this instance, e.g. "Male population
    * projection 2017"
-   * @param  {string} [payload.overwriteExisting] - The id of an existing instance that should be overwritten.
+   * @param  {boolean} [payload.overwriteExisting] - Set to allow existing instances to be overwritten (see the `id`
+   * property above). Note it is not possible to overwrite a running instance.
    * @param  {number} [payload.priority] - The priority to assign this instance. Reserved for system use.
    * @param  {string} payload.shareKeyId - The share key to run the databot under.
    * @param  {string} [payload.shareKeySecret] - The secret of the share key. Ignored if the share key id refers to a
