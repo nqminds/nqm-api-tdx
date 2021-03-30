@@ -1,6 +1,8 @@
 module.exports = (function() {
   "use strict";
-  const TDXApi = require("../lib/nqm-api-tdx");
+  // jest will automatically run this code through babel
+  const TDXApi = require("../src/api-tdx");
+
   const config = require("./test-config");
   const nqmUtils = require("@nqminds/nqm-core-utils");
 

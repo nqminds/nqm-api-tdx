@@ -2,6 +2,8 @@
 // https://jestjs.io/docs/en/configuration.html
 
 module.exports = {
+  // run each file sequentially, because TDX otherwise gets DDoS by requests
+  maxWorkers: 1,
   // All imported modules in your tests should be mocked automatically
   // automock: false,
 

@@ -26,14 +26,20 @@ beforeAll(async() => {
       },
     }
   );
-});
+}, 30000); // slow setup
 
 afterAll(async() => {
+  if (!api) {
+    return;
+  }
   // Delete the test datsaet.
   return api.deleteResource(resourceId).catch(() => {});
 });
 
 afterEach(async() => {
+  if (!api) {
+    return;
+  }
   await api.truncateResource(resourceId).then(() => utils.delay(2500));
 });
 
@@ -66,7 +72,7 @@ test("updates a single document 100 times consecutively", async() => {
   const getResult = await api.getData(resourceId);
   expect(getResult.data[0].__version).toEqual(100);
   expect(getResult.data[0].value).toEqual("hello 99");
-}, 10000);
+}, 60000);
 
 test("updates a single document 100 times concurrently", async() => {
   // n.b. the requests won't necessarily arrive at the TDX in order - see
@@ -86,7 +92,7 @@ test("updates a single document 100 times concurrently", async() => {
   // Expect 100 versions.
   const getResult = await api.getData(resourceId);
   expect(getResult.data[0].__version).toEqual(100);
-}, 12000);
+}, 120000);
 
 test("upserts 1000 documents one at a time", async() => {
   for (let i = 0; i < 1000; i++) {
@@ -104,7 +110,7 @@ test("upserts 1000 documents one at a time", async() => {
   const getResult = await api.getData(resourceId, {id: "doc-999"});
   expect(getResult.data[0].__version).toEqual(1);
   expect(getResult.data[0].value).toEqual("hello 999");
-}, 120000);
+}, 300000);
 
 test("upserts 1000 documents in 5 chunks", async() => {
   const docs = [];
