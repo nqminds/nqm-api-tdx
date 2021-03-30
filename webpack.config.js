@@ -24,9 +24,14 @@ const config = {
   output: {
     path: __dirname + "/lib",
     filename: outputFile,
-    library: libraryName,
-    libraryTarget: "umd",
-    umdNamedDefine: true
+    globalObject: "this", // required to get UMD working on Node.JS
+    library: {
+      name: libraryName,
+      type: "umd",
+      // means we can do const x = require(""), not require("").default
+      export: "default",
+      umdNamedDefine: true
+    },
   },
   module: {
     rules: [
@@ -39,7 +44,7 @@ const config = {
         test: /(\.jsx|\.js)$/,
         loader: "eslint-loader",
         exclude: /node_modules/
-      }
+      },
     ]
   },
   resolve: {

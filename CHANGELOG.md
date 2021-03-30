@@ -6,6 +6,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Dependencies
+
+- Bump semver of dependencies:
+  - @nqminds/nqm-core-utils: ^0.5.9
+  - base-64: ^1.0.0
+  - cross-fetch: ^3.1.2
+  - debug: ^4.3.1
+- Update devDepdencies to work with NPM v7 `npm install`:
+  - Replace babel-cli with @babel/cli: ^7.13.14
+  - webpack: ^5.28.0
+
 ## [0.9.1] - 2019-08-05
 ### Changed
 - add optional `storeSize` argument to setResourceStore
