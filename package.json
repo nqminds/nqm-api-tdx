@@ -7,8 +7,13 @@
   "version": "0.9.1",
   "description": "",
   "main": "lib/nqm-api-tdx.js",
+  "files": [
+    "lib/"
+  ],
   "scripts": {
+    "prepare": "npm-run-all build build:dev",
     "build": "webpack --env build",
+    "build:dev": "webpack --env dev",
     "dev": "webpack --progress --color --watch --env dev",
     "generate-docs": "node_modules/.bin/jsdoc -c jsdoc.json README.md",
     "test": "jest"
@@ -35,6 +40,7 @@
     "jest": "^27.0.0-next.6",
     "jsdoc": "^3.6.6",
     "lodash": "^4.17.21",
+    "npm-run-all": "^4.1.5",
     "webpack": "^5.28.0",
     "webpack-cli": "^4.6.0"
   },
