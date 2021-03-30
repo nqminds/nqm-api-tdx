@@ -1433,6 +1433,7 @@ class TDXApi {
     if (pipeline && typeof pipeline === "object") {
       pipeline = JSON.stringify(pipeline);
     }
+    pipeline = decodeURIComponent(pipeline); // Decode first in case the user has already url encoded
     pipeline = encodeURIComponent(pipeline);
     const endpoint = `resources/${datasetId}/${ndJSON ? "ndaggregate" : "aggregate"}?pipeline=${pipeline}`;
     const request = buildQueryRequest.call(this, endpoint);
