@@ -14,7 +14,7 @@
     "types/"
   ],
   "scripts": {
-    "prepare": "npm-run-all build build:dev typescript",
+    "prepare": "yon run build && yon run build:dev && yon run typescript",
     "build": "webpack --env build",
     "build:dev": "webpack --env dev",
     "dev": "webpack --progress --color --watch --env dev",
@@ -44,10 +44,10 @@
     "jest": "^27.0.0-next.6",
     "jsdoc": "^3.6.6",
     "lodash": "^4.17.21",
-    "npm-run-all": "^4.1.5",
     "typescript": "^4.2.3",
     "webpack": "^5.28.0",
-    "webpack-cli": "^4.6.0"
+    "webpack-cli": "^4.6.0",
+    "yarn-or-npm": "^3.0.1"
   },
   "dependencies": {
     "@nqminds/nqm-core-utils": "^0.5.9",
