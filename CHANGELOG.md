@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Refactor
+
+- Replaced old TDXApiError with new ES6 `extends Error` syntax.
+  This is not supported by Internet Explorer 10.
+- Adds `*.d.ts` type defintions for TypeScript/VS Code/other IDEs.
+
 ### Dependencies
 
 - Bump semver of dependencies:

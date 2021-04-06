@@ -22,54 +22,6 @@ const log = debug("nqm-api-tdx");
 const errLog = debug("nqm-api-tdx:error");
 
 /**
- * @typedef  {Error} TDXApiError
- * The TDX api supplies detailed error information depending on the context of the call.
- * In some instances, e.g. attempting to retrieve a resource that does not exist, the
- * error will be a simple `NotFound` string message. In other cases, e.g. attempting
- * to update 100 documents in a single call, the error will supply details for each
- * document update that failed, such as the primary key of the document and the reason
- * for the failure.
- * @property  {string} name - "TDXApiError", indicating the error originated from this library.
- * @property  {number} code - The HTTP response status code, e.g. 401
- * @property  {string} message - *Deprecated* - A string-encoded form of the error, essentially a JSON stringified
- * copy of the entire error object. This is included for legacy reasons and may be removed in a future release.
- * @property  {string} from - Usually the name of the API call that originated the error, e.g. updateData
- * @property  {string} stack - the stack trace
- * @property  {object} failure - an object containing the error information as received from the TDX
- * @property  {string} failure.code - the TDX short error code, e.g. NotFound, PermissionDenied etc.
- * @property  {string|array} failure.message - details of the failure. For simple cases this will be a string,
- * e.g. `resource not found: KDiEI3k_`. In other instance this will be an array of objects describing each error. See
- * the example below showing a failed attempt to update 2 documents. One of the errors is a simple document not found
- * and the other is a validation error giving details of the exact path in the document that failed validation.
- * @example <caption>`failure` for simple query error</caption>
- * failure: {
- *  code: "NotFound",
- *  message: "resource not found: KDiEI3k_"
- * }
- * @example <caption>`failure` for complex data update error</caption>
- * failure: {
- *  code: "BadRequestError",
- *  message: [
- *    {
- *      key: {id: "foo"},
- *      error: {
- *        message: "document not found matching key 'foo'"
- *      }
- *    },
- *    {
- *      key: {id: "bar"},
- *      error: {
- *        message: "'hello' is not a valid enum value",
- *        name: "ValidatorError",
- *        kind: "enum"
- *        path: "value"
- *      }
- *    }
- *  ]
- * }
- */
-
-/**
  * @typedef  {object} CommandResult
  * @property  {string} commandId - The auto-generated unique id of the command.
  * @property  {object|string} response - The response of the command. If a command is sent asynchronously, this will
@@ -117,6 +69,21 @@ const errLog = debug("nqm-api-tdx:error");
  * @property  {string} username
  */
 
+/**
+ * @typedef  {object} GetDataOptions A mongodb options object.
+ * Can be used to limit, skip, sort etc. Note a default
+ * `limit` of 1000 is applied if none is given here.
+ * @property  {boolean} [nqmMeta] - When set, the resource metadata will be returned along with the dataset
+ * data. Can be used to avoid a second call to `getResource`. Otherwise a URL to the metadata is provided.
+ * @property  {number} [limit] - Limit, the number of entries to get.
+ * @property  {number} [skip] - Skip, the number of entries to skip.
+ * Prefer to use filters if possible, instead of large skips, as they are slow
+ * on the TDX.
+ * @property {object} [sort] - MongoDB Sort object.
+ * See <https://docs.mongodb.com/manual/reference/method/cursor.sort/> for
+ * more information.
+ */
+
 class TDXApi {
   /**
    * Create a TDXApi instance
@@ -132,7 +99,7 @@ class TDXApi {
    * @param  {string} [config.accessToken] - an access token that will be used to authorise commands and queries.
    * Alternatively you can use the authenticate method to acquire a token.
    * @param  {number} [config.accessTokenTTL] - the TTL in seconds of the access token created when authenticating.
-   * @param  {bool} [config.doNotThrow] - set to prevent throwing response errors. They will be returned in the
+   * @param  {boolean} [config.doNotThrow] - set to prevent throwing response errors. They will be returned in the
    * {@link CommandResult} object. This was set by default prior to 0.5.x
    * @example <caption>standard usage</caption>
    * import TDXApi from "nqm-api-tdx";
@@ -199,7 +166,7 @@ class TDXApi {
    * a databot host, an application, or an account-set (user group).
    * @param  {object} options - new account options
    * @param  {string} options.accountType - the type of account, one of ["user", "token"]
-   * @param  {bool} [options.approved] - account is pre-approved (reserved for system use only)
+   * @param  {boolean} [options.approved] - account is pre-approved (reserved for system use only)
    * @param  {string} [options.authService] - the authentication type, one of ["local", "oauth:google",
    * "oauth:github"]. Required for user-based accounts. Ignored for non-user accounts.
    * @param  {string} [options.displayName] - the human-friendly display name of the account, e.g. "Toby's share key"
@@ -207,7 +174,7 @@ class TDXApi {
    * token
    * @param  {string} [options.key] - the account secret. Required for all but oauth-based account types.
    * @param  {string} [options.owner] - the owner of the account.
-   * @param  {bool} [options.scratchAccess] - indicates this account can create resources in the owners scratch
+   * @param  {boolean} [options.scratchAccess] - indicates this account can create resources in the owners scratch
    * folder. Ignored for all accounts except share key (token) accounts. Is useful for databots that need to create
    * intermediate or temporary resources without specifying a parent resource - if no parent resource is given
    * when a resource is created and scratch access is enabled, the resource will be created in the owner's scratch
@@ -215,10 +182,10 @@ class TDXApi {
    * @param  {object} [options.settings] - free-form JSON object for user data.
    * @param  {string} [options.username] - the username of the new account. Required for user-based accounts, and
    * should be the account e-mail address. Can be omitted for non-user accounts, and will be auto-generated.
-   * @param  {bool} [options.verified] - account is pre-verified (reserved for system use only)
+   * @param  {boolean} [options.verified] - account is pre-verified (reserved for system use only)
    * @param  {string[]} [options.whitelist] - a list of IP addresses. Tokens will only be granted if the requesting
    * IP address is in this list
-   * @param  {bool} [wait=false] - flag indicating this method will wait for the account to be fully created before
+   * @param  {boolean} [wait=false] - flag indicating this method will wait for the account to be fully created before
    * returning.
    * @return  {CommandResult}
    */
@@ -246,7 +213,7 @@ class TDXApi {
    * Adds the application/user connection resource. The authenticated token must belong to the application.
    * @param {string} accountId - the account id
    * @param {string} applicationId - the application id
-   * @param {bool} [wait=true] - whether or not to wait for the projection to catch up.
+   * @param {boolean} [wait=true] - whether or not to wait for the projection to catch up.
    */
   addAccountApplicationConnection(accountId, applicationId, wait = true) {
     const request = buildCommandRequest.call(this, "applicationConnection/create", {accountId});
@@ -272,7 +239,7 @@ class TDXApi {
   /**
    * Set account approved status. Reserved for system use.
    * @param  {string} username - the full TDX identity of the account.
-   * @param  {bool} approved - account approved status
+   * @param  {boolean} approved - account approved status
    */
   approveAccount(username, approved) {
     const request = buildCommandRequest.call(this, "account/approve", {username, approved});
@@ -323,7 +290,7 @@ class TDXApi {
    * @param  {object} options - the update options
    * @param  {string} [options.displayName]
    * @param  {string} [options.key]
-   * @param  {bool} [options.scratchAccess]
+   * @param  {boolean} [options.scratchAccess]
    * @param  {object} [options.settings]
    * @param  {string[]} [options.whitelist]
    */
@@ -341,7 +308,7 @@ class TDXApi {
   /**
    * Set account verified status. Reserved for system use.
    * @param  {string} username - the full TDX identity of the account.
-   * @param  {bool} approved - account verified status
+   * @param  {boolean} approved - account verified status
    */
   verifyAccount(username, verified) {
     const request = buildCommandRequest.call(this, "account/verify", {username, verified});
@@ -422,7 +389,7 @@ class TDXApi {
    * @param  {string[]} [options.tags] - a list of tags to associate with the resource.
    * @param  {string} [options.textContent] - the text content for the resource. Only applicable to text content based
    * resources.
-   * @param  {bool|string} [wait=false] - indicates if the call should wait for the index to be built before it
+   * @param  {boolean|string} [wait=false] - indicates if the call should wait for the index to be built before it
    * returns. You can pass a string here to indicate the status you want to wait for, default is 'built'.
    * @example <caption>usage</caption>
    * // Creates a dataset resource in the authenticated users' scratch folder. The dataset stores key/value pairs
@@ -528,11 +495,11 @@ class TDXApi {
    * Upload a file to a resource.
    * @param  {string} resourceId - The id of the destination resource.
    * @param  {object} file - The file to upload, obtained from an `<input type="file">` element.
-   * @param  {bool} [stream=false] - Flag indicating whether the call should return a stream allowing
+   * @param  {boolean} [stream=false] - Flag indicating whether the call should return a stream allowing
    * callees to monitor progress.
-   * @param  {bool} [compressed=false] - Flag indicating the file should be decompressed after upload. ZIP format
+   * @param  {boolean} [compressed=false] - Flag indicating the file should be decompressed after upload. ZIP format
    * only.
-   * @param  {bool} [base64Encoded=false] = Flag indicating the file should be decoded from base64 after upload.
+   * @param  {boolean} [base64Encoded=false] = Flag indicating the file should be decoded from base64 after upload.
    */
   fileUpload(resourceId, file, stream, compressed = false, base64Encoded = false) {
     const request = buildFileUploadRequest.call(this, resourceId, compressed, base64Encoded, file);
@@ -683,7 +650,7 @@ class TDXApi {
    * to share it with others. If a resource is not in permissive share mode, only the resource owner
    * can share it with others.
    * @param  {string} resourceId - The resource id.
-   * @param  {bool} allowPermissive - The required permissive share mode.
+   * @param  {boolean} allowPermissive - The required permissive share mode.
    */
   setResourcePermissiveShare(resourceId, allowPermissive) {
     const request = buildCommandRequest.call(this, "resource/setPermissiveShare", {
@@ -792,7 +759,7 @@ class TDXApi {
    * @param  {string} [update.description]
    * @param  {object} [update.meta]
    * @param  {string} [update.name]
-   * @param  {bool} [update.overwrite] - set this flag to overwrite existing data rather than merging (default). This
+   * @param  {boolean} [update.overwrite] - set this flag to overwrite existing data rather than merging (default). This
    * currently only applies to the `meta` property.
    * @param  {string} [update.provenance]
    * @param  {string} [update.queryProxy]
@@ -820,7 +787,7 @@ class TDXApi {
    * Add data to a dataset resource.
    * @param  {string} datasetId - The id of the dataset-based resource to add data to.
    * @param  {object|array} data - The data to add. Must conform to the schema defined by the resource metadata.
-   * @param  {bool} [doNotThrow=false] - set to override default error handling. See {@link TDXApi}.
+   * @param  {boolean} [doNotThrow=false] - set to override default error handling. See {@link TDXApi}.
    * Supports creating an individual document or many documents.
    * @example <caption>create an individual document</caption>
    * // Assumes the dataset primary key is 'lsoa'
@@ -851,7 +818,7 @@ class TDXApi {
    * Deletes data from a dataset-based resource.
    * @param  {string} datasetId - The id of the dataset-based resource to delete data from.
    * @param  {object|array} data - The primary key data to delete.
-   * @param  {bool} [doNotThrow=false] - set to override default error handling. See {@link TDXApi}.
+   * @param  {boolean} [doNotThrow=false] - set to override default error handling. See {@link TDXApi}.
    */
   deleteData(datasetId, data, doNotThrow) {
     const postData = {
@@ -873,7 +840,7 @@ class TDXApi {
    * @param  {string} datasetId - The id of the dataset-based resource to delete data from.
    * @param  {object} query - The query that specifies the data to delete. All documents matching the
    * query will be deleted.
-   * @param  {bool} [doNotThrow=false] - set to override default error handling. See {@link TDXApi}.
+   * @param  {boolean} [doNotThrow=false] - set to override default error handling. See {@link TDXApi}.
    * @example
    * // Delete all documents with English lsoa.
    * tdxApi.deleteDataByQuery(myDatasetId, {lsoa: {$regex: "E*"}});
@@ -899,7 +866,7 @@ class TDXApi {
    * @param  {string} datasetId - The id of the dataset-based resource to update.
    * @param  {object} data - The patch definition.
    * @param  {object|array} data.__update - An array of JSON patch specifications.
-   * @param  {bool} [doNotThrow=false] - set to override default error handling. See {@link TDXApi}.
+   * @param  {boolean} [doNotThrow=false] - set to override default error handling. See {@link TDXApi}.
    * @example <caption>patch a single value in a single document</caption>
    * tdxApi.patchData(myDatasetId, {lsoa: "E000001", __update: [{path: "/count", op: "replace", value: 948}]});
    * @example <caption>patch a more than one value in a single document</caption>
@@ -928,9 +895,9 @@ class TDXApi {
    * @param  {string} datasetId - The id of the dataset-based resource to update.
    * @param  {object|array} data - The data to update. Must conform to the schema defined by the resource metadata.
    * Supports updating individual or multiple documents.
-   * @param  {bool} [upsert=false] - Indicates the data should be created if no document is found matching the
+   * @param  {boolean} [upsert=false] - Indicates the data should be created if no document is found matching the
    * primary key.
-   * @param  {bool} [doNotThrow=false] - set to override default error handling. See {@link TDXApi}.
+   * @param  {boolean} [doNotThrow=false] - set to override default error handling. See {@link TDXApi}.
    * @param  {object} [opts] - reserved for system use.
    * @return {CommandResult} - Use the result property to check for errors.
    * @example <caption>update an existing document</caption>
@@ -960,7 +927,7 @@ class TDXApi {
    * Updates data in a dataset-based resource using a query to specify the documents to be updated.
    * @param  {string} datasetId - The id of the dataset-based resource to update data in.
    * @param  {object} query - The query that specifies the data to update. All documents matching the
-   * @param  {bool} [doNotThrow=false] - set to override default error handling. See {@link TDXApi}.
+   * @param  {boolean} [doNotThrow=false] - set to override default error handling. See {@link TDXApi}.
    * query will be updated.
    * @example
    * // Update all documents with English lsoa, setting `count` to 1000.
@@ -1137,7 +1104,7 @@ class TDXApi {
    * Will default to the TDX-configured default if not given (usually 1 hour).
    * @param  {number} [payload.chunks=1] - The number of processes to instantiate. Each will be given the same input
    * data, with only the chunk number varying.
-   * @param  {bool} [payload.debugMode=false] - Flag indicating this instance should be run in debug mode, meaning
+   * @param  {boolean} [payload.debugMode=false] - Flag indicating this instance should be run in debug mode, meaning
    * all debug output will be captured and stored on the TDX. n.b. setting this will also restrict the hosts available
    * to run the instance to those that are willing to run in debug mode.
    * @param  {string} [payload.description] - The description for this instance.
@@ -1425,7 +1392,7 @@ class TDXApi {
    * @param  {object|string} pipeline - The aggregate pipeline, as defined in the
    * [mongodb docs](https://docs.mongodb.com/manual/aggregation/). Can be given as a JSON object or as a stringified
    * JSON object.
-   * @param  {bool} [ndJSON] - If set, the data is sent in [newline delimited json format](http://ndjson.org/).
+   * @param  {boolean} [ndJSON] - If set, the data is sent in [newline delimited json format](http://ndjson.org/).
    * @return  {object} - Response object, where the response body is a stream object.
    */
   getAggregateDataStream(datasetId, pipeline, ndJSON) {
@@ -1447,7 +1414,7 @@ class TDXApi {
    * @param  {object|string} pipeline - The aggregate pipeline, as defined in the
    * [mongodb docs](https://docs.mongodb.com/manual/aggregation/). Can be given as a JSON object or as a stringified
    * JSON object.
-   * @param  {bool} [ndJSON] - If set, the data is sent in [newline delimited json format](http://ndjson.org/).
+   * @param  {boolean} [ndJSON] - If set, the data is sent in [newline delimited json format](http://ndjson.org/).
    * @return  {DatasetData}
    */
   getAggregateData(datasetId, pipeline, ndJSON) {
@@ -1476,11 +1443,9 @@ class TDXApi {
    * @param  {object} [filter] - A mongodb filter object. If omitted, all data will be retrieved.
    * @param  {object} [projection] - A mongodb projection object. Should be used to restrict the payload to the
    * minimum properties needed if a lot of data is being retrieved.
-   * @param  {object} [options] - A mongodb options object. Can be used to limit, skip, sort etc. Note a default
+   * @param  {GetDataOptions} [options] - A mongodb options object. Can be used to limit, skip, sort etc. Note a default
    * `limit` of 1000 is applied if none is given here.
-   * @param  {bool} [options.nqmMeta] - When set, the resource metadata will be returned along with the dataset
-   * data. Can be used to avoid a second call to `getResource`. Otherwise a URL to the metadata is provided.
-   * @param  {bool} [ndJSON] - If set, the data is sent in [newline delimited json format](http://ndjson.org/).
+   * @param  {boolean} [ndJSON] - If set, the data is sent in [newline delimited json format](http://ndjson.org/).
    * @return  {object} - Response object, where the response body is a stream object.
    */
   getDataStream(datasetId, filter, projection, options, ndJSON) {
@@ -1503,11 +1468,9 @@ class TDXApi {
    * @param  {object} [filter] - A mongodb filter object. If omitted, all data will be retrieved.
    * @param  {object} [projection] - A mongodb projection object. Should be used to restrict the payload to the
    * minimum properties needed if a lot of data is being retrieved.
-   * @param  {object} [options] - A mongodb options object. Can be used to limit, skip, sort etc. Note a default
+   * @param  {GetDataOptions} [options] - A mongodb options object. Can be used to limit, skip, sort etc. Note a default
    * `limit` of 1000 is applied if none is given here.
-   * @param  {bool} [options.nqmMeta] - When set, the resource metadata will be returned along with the dataset
-   * data. Can be used to avoid a second call to `getResource`. Otherwise a URL to the metadata is provided.
-   * @param  {bool} [ndJSON] - If set, the data is sent in [newline delimited json format](http://ndjson.org/).
+   * @param  {boolean} [ndJSON] - If set, the data is sent in [newline delimited json format](http://ndjson.org/).
    * @return  {DatasetData}
    */
   getData(datasetId, filter, projection, options, ndJSON) {
@@ -1529,11 +1492,9 @@ class TDXApi {
    * @param  {object} [filter] - A mongodb filter object. If omitted, all data will be retrieved.
    * @param  {object} [projection] - A mongodb projection object. Should be used to restrict the payload to the
    * minimum properties needed if a lot of data is being retrieved.
-   * @param  {object} [options] - A mongodb options object. Can be used to limit, skip, sort etc. Note a default
+   * @param  {GetDataOptions} [options] - A mongodb options object. Can be used to limit, skip, sort etc. Note a default
    * `limit` of 1000 is applied if none is given here.
-   * @param  {bool} [options.nqmMeta] - When set, the resource metadata will be returned along with the dataset
-   * data. Can be used to avoid a second call to `getResource`. Otherwise a URL to the metadata is provided.
-   * @param  {bool} [ndJSON] - If set, the data is sent in [newline delimited json format](http://ndjson.org/).
+   * @param  {boolean} [ndJSON] - If set, the data is sent in [newline delimited json format](http://ndjson.org/).
    * @return  {object} - Response object, where the response body is a stream object.
    */
   getDatasetDataStream(datasetId, filter, projection, options, ndJSON) {
@@ -1547,11 +1508,9 @@ class TDXApi {
    * @param  {object} [filter] - A mongodb filter object. If omitted, all data will be retrieved.
    * @param  {object} [projection] - A mongodb projection object. Should be used to restrict the payload to the
    * minimum properties needed if a lot of data is being retrieved.
-   * @param  {object} [options] - A mongodb options object. Can be used to limit, skip, sort etc. Note a default
+   * @param  {GetDataOptions} [options] - A mongodb options object. Can be used to limit, skip, sort etc. Note a default
    * `limit` of 1000 is applied if none is given here.
-   * @param  {bool} [options.nqmMeta] - When set, the resource metadata will be returned along with the dataset
-   * data. Can be used to avoid a second call to `getResource`. Otherwise a URL to the metadata is provided.
-   * @param  {bool} [ndJSON] - If set, the data is sent in [newline delimited json format](http://ndjson.org/).
+   * @param  {boolean} [ndJSON] - If set, the data is sent in [newline delimited json format](http://ndjson.org/).
    * @return  {DatasetData}
    */
   getDatasetData(datasetId, filter, projection, options, ndJSON) {
@@ -1611,7 +1570,7 @@ class TDXApi {
   /**
    * Gets the details for a given resource id.
    * @param  {string} resourceId - The id of the resource to retrieve.
-   * @param  {bool} [noThrow=false] - If set, the call won't reject or throw if the resource doesn't exist.
+   * @param  {boolean} [noThrow=false] - If set, the call won't reject or throw if the resource doesn't exist.
    * @return  {Resource}
    * @exception  Will throw if the resource is not found (see `noThrow` flag) or permission is denied.
    * @example

@@ -7,16 +7,20 @@
   "version": "0.9.1",
   "description": "",
   "main": "lib/nqm-api-tdx.js",
+  "types": "types/index.d.ts",
   "files": [
-    "lib/"
+    "lib/",
+    "src/",
+    "types/"
   ],
   "scripts": {
-    "prepare": "npm-run-all build build:dev",
+    "prepare": "npm-run-all build build:dev typescript",
     "build": "webpack --env build",
     "build:dev": "webpack --env dev",
     "dev": "webpack --progress --color --watch --env dev",
     "generate-docs": "node_modules/.bin/jsdoc -c jsdoc.json README.md",
-    "test": "jest"
+    "test": "jest",
+    "typescript": "tsc"
   },
   "author": "toby.ealden@gmail.com",
   "license": "ISC",
@@ -41,6 +45,7 @@
     "jsdoc": "^3.6.6",
     "lodash": "^4.17.21",
     "npm-run-all": "^4.1.5",
+    "typescript": "^4.2.3",
     "webpack": "^5.28.0",
     "webpack-cli": "^4.6.0"
   },
