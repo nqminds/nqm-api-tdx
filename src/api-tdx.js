@@ -1399,7 +1399,12 @@ class TDXApi {
     // Convert pipeline to string if necessary.
     if (pipeline && typeof pipeline === "object") {
       pipeline = JSON.stringify(pipeline);
+    } else {
+      // Decode client-provided string to avoid possible double-encoding.
+      pipeline = decodeURIComponent(pipeline);
     }
+    pipeline = encodeURIComponent(pipeline);
+
     const endpoint = `resources/${datasetId}/${ndJSON ? "ndaggregate" : "aggregate"}?pipeline=${pipeline}`;
     const request = buildQueryRequest.call(this, endpoint);
     return fetch.call(this, request).catch((err) => {
