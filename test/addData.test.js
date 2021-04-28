@@ -42,9 +42,12 @@ beforeAll(async() => {
       },
     );
   });
-});
+}, 30000); // slow setup
 
 afterAll(async() => {
+  if (!api) {
+    return;
+  }
   // Delete the test dataset.
   return api.deleteResource(resourceId)
     .catch(() => {})

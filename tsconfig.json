@@ -1,0 +1,21 @@
+{
+    // Change this to match your project
+    "include": ["src/**/*"],
+    "compilerOptions": {
+      // Tells TypeScript to read JS files, as
+      // normally they are ignored as source files
+      "allowJs": true,
+      // wishlist: enable
+      "checkJs": false,
+      // Generate d.ts files and map file
+      "declaration": true,
+      "declarationMap": true,
+      // This compiler run should ONLY output d.ts files
+      "emitDeclarationOnly": true,
+      // Export types in a seperate folder from src/
+      "outDir": "types/",
+      // unused for .d.ts files, but may be used in future typescript versions
+      "esModuleInterop": true,
+      "allowSyntheticDefaultImports": true,
+    }
+  }

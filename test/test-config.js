@@ -1,4 +1,4 @@
-module.exports = (function() {
+module.exports = (function () {
   const configs = {
     localConfig: {
       tdxConfig: {
@@ -7,13 +7,7 @@ module.exports = (function() {
       },
       credentials: "S1xKBBDm1r:password",
     },
-    nqm1Config: {
-      tdxConfig: {
-        tdxServer: "http://tdx.nqm-1.com",
-      },
-      credentials: "HyxyK0ACMH:password",
-    },
   };
 
   return configs.localConfig;
-}());
+})();

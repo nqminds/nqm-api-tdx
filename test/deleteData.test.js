@@ -24,7 +24,7 @@ beforeAll(async() => {
       },
     }
   );
-});
+}, 20000);
 
 afterAll(async() => {
   // Delete the test datsaet.
