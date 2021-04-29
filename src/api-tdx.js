@@ -162,8 +162,7 @@ class TDXApi {
    */
 
   /**
-   * Adds an account to the TDX. An account can be an e-mail based user account, a share key (token) account,
-   * a databot host, an application, or an account-set (user group).
+   * Adds an account to the TDX. An account can be an e-mail based user account or a share key (token) account.
    * @param  {object} options - new account options
    * @param  {string} options.accountType - the type of account, one of ["user", "token"]
    * @param  {boolean} [options.approved] - account is pre-approved (reserved for system use only)
@@ -284,7 +283,7 @@ class TDXApi {
   }
 
   /**
-   * Updates account details. All update properties are optional. See createAccount for full details of
+   * Updates account details. All update properties are optional. See addAccount for full details of
    * each option.
    * @param  {string} username - the full TDX identity of the account to update.
    * @param  {object} options - the update options
@@ -302,7 +301,7 @@ class TDXApi {
         errLog("TDXApi.updateAccount: %s", err.message);
         return Promise.reject(new Error(`${err.message} - [network error]`));
       })
-      .then(checkResponse.bind(this, "addAccount"));
+      .then(checkResponse.bind(this, "updateAccount"));
   }
 
   /**
