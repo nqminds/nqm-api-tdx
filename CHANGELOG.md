@@ -6,6 +6,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Types
+
+- Improved return types.
+  - All `async` types now return `Promise<*>`.
+  - Add commands now return `Promise<CommandResult>`.
+
+## [0.10.0] - 2021-04-27
+
+### BREAKING CHANGE
+
+- Internet Explorer 10 is no longer supported.
+
+### Added
+
+- Support auth server at host root.
+  Previously, only auth server subdomains worked (e.g. `https://app.tdx.example`).
+  Now, root domains, such as `https://tdx.example` work.
+
+### Fixed
+
+- Encode URI unsafe chars in aggregate pipelines ([#28](https://github.com/nqminds/nqm-api-tdx/pull/28))
+
 ### Refactor
 
 - Replaced old TDXApiError with new ES6 `extends Error` syntax.
