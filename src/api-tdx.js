@@ -213,6 +213,7 @@ class TDXApi {
    * @param {string} accountId - the account id
    * @param {string} applicationId - the application id
    * @param {boolean} [wait=true] - whether or not to wait for the projection to catch up.
+   * @return  {Promise<CommandResult>}
    */
   addAccountApplicationConnection(accountId, applicationId, wait = true) {
     const request = buildCommandRequest.call(this, "applicationConnection/create", {accountId});
@@ -239,6 +240,7 @@ class TDXApi {
    * Set account approved status. Reserved for system use.
    * @param  {string} username - the full TDX identity of the account.
    * @param  {boolean} approved - account approved status
+   * @return  {Promise<CommandResult>}
    */
   approveAccount(username, approved) {
     const request = buildCommandRequest.call(this, "account/approve", {username, approved});
@@ -254,6 +256,7 @@ class TDXApi {
   /**
    * Delete an account
    * @param  {string} username - the full TDX identity of the account to delete.
+   * @return  {Promise<CommandResult>}
    */
   deleteAccount(username) {
     const request = buildCommandRequest.call(this, "account/delete", {username});
@@ -270,6 +273,7 @@ class TDXApi {
    * Change account secret.
    * @param  {string} username - the full TDX identity of the account.
    * @param  {string} key - the new secret
+   * @return  {Promise<CommandResult>}
    */
   resetAccount(username, key) {
     const request = buildCommandRequest.call(this, "account/reset", {username, key});
@@ -292,6 +296,7 @@ class TDXApi {
    * @param  {boolean} [options.scratchAccess]
    * @param  {object} [options.settings]
    * @param  {string[]} [options.whitelist]
+   * @return  {Promise<CommandResult>}
    */
   updateAccount(username, options) {
     const request = buildCommandRequest.call(this, "account/update", Object.assign({username}, options));
@@ -308,6 +313,7 @@ class TDXApi {
    * Set account verified status. Reserved for system use.
    * @param  {string} username - the full TDX identity of the account.
    * @param  {boolean} approved - account verified status
+   * @return  {Promise<CommandResult>}
    */
   verifyAccount(username, verified) {
     const request = buildCommandRequest.call(this, "account/verify", {username, verified});
@@ -334,6 +340,7 @@ class TDXApi {
    * @param  {string} options.targetServer - the TDX to be trusted, e.g. `tdx.nqminds.com`
    * @param  {string} options.targetOwner - the account on the target TDX that is trusted,
    * e.g. `alice@mail.com/tdx.nqminds.com`.
+   * @return  {Promise<CommandResult>}
    */
   addTrustedExchange(options) {
     const request = buildCommandRequest.call(this, "trustedConnection/create", options);
@@ -390,6 +397,7 @@ class TDXApi {
    * resources.
    * @param  {boolean|string} [wait=false] - indicates if the call should wait for the index to be built before it
    * returns. You can pass a string here to indicate the status you want to wait for, default is 'built'.
+   * @return  {Promise<CommandResult>}
    * @example <caption>usage</caption>
    * // Creates a dataset resource in the authenticated users' scratch folder. The dataset stores key/value pairs
    * // where the `key` property is the primary key and the `value` property can take any JSON value.
@@ -437,6 +445,7 @@ class TDXApi {
    * revoked from the parent resource it will also be revoked from this resource.
    * @param  {string[]} access - The access, one or more of [`"r"`, `"w"`]. Can be an array or an individual
    * string.
+   * @return  {Promise<CommandResult>}
    * @example <caption>add access to an account</caption>
    * tdxApi.addResourceAccess(myResourceId, "bob@acme.com/tdx.acme.com", myResourceId, ["r"]);
    */
@@ -460,6 +469,7 @@ class TDXApi {
    * Permanently deletes a resource.
    * @param  {string} resourceId - the id of the resource to delete. Requires write permission
    * to the resource.
+   * @return  {Promise<CommandResult>}
    */
   deleteResource(resourceId) {
     const request = buildCommandRequest.call(this, "resource/delete", {id: resourceId});
@@ -499,6 +509,7 @@ class TDXApi {
    * @param  {boolean} [compressed=false] - Flag indicating the file should be decompressed after upload. ZIP format
    * only.
    * @param  {boolean} [base64Encoded=false] = Flag indicating the file should be decoded from base64 after upload.
+   * @return  {Promise<CommandResult>}
    */
   fileUpload(resourceId, file, stream, compressed = false, base64Encoded = false) {
     const request = buildFileUploadRequest.call(this, resourceId, compressed, base64Encoded, file);
@@ -520,6 +531,7 @@ class TDXApi {
    * @param  {string} id - the id of the resource to move.
    * @param  {string} fromParentId - the current parent resource to move from.
    * @param  {string} toParentId - the target folder resource to move to.
+   * @return  {Promise<CommandResult>}
    */
   moveResource(id, fromParentId, toParentId) {
     const request = buildCommandRequest.call(this, "resource/move", {id, fromParentId, toParentId});
@@ -536,6 +548,7 @@ class TDXApi {
    * Resets the resource index. This involves deleting existing indexes and rebuilding them. May take
    * a while depending on the size of any associated dataset and the number and complexity of indexes.
    * @param  {string} resourceId - the id of the resource, requires write permission.
+   * @return  {Promise<CommandResult>}
    */
   rebuildResourceIndex(resourceId) {
     const request = buildCommandRequest.call(this, "resource/index/rebuild", {id: resourceId});
@@ -565,6 +578,7 @@ class TDXApi {
    * @param  {string} addedBy - The full `by` path of the permission to be removed.
    * @param  {string} sourceId - The source of the access, usually the resource itself.
    * @param  {string[]} access - The access, one or more of [`"r"`, `"w"`].
+   * @return  {Promise<CommandResult>}
    * @example <caption>usage</caption>
    * // Removes read access for account "john.trulove@nqminds.com/tdx.nqm-1.com" added by
    * // Toby via "ezh.ubiapps@gmail.com/tdx.nqm-1.com,toby.ealden@gmail.com/tdx.nqm-1.com".
@@ -632,6 +646,7 @@ class TDXApi {
    * @param  {string} resourceId - The resource id.
    * @param  {string} shareMode - The share mode to set, one or [`"pw"`, `"pr"`, `"tr"`] corresponding to
    * 'public read/write', 'public read, trusted write', 'trusted only'.
+   * @return  {Promise<CommandResult>}
    */
   setResourceShareMode(resourceId, shareMode) {
     const request = buildCommandRequest.call(this, "resource/setShareMode", {id: resourceId, shareMode});
@@ -650,6 +665,7 @@ class TDXApi {
    * can share it with others.
    * @param  {string} resourceId - The resource id.
    * @param  {boolean} allowPermissive - The required permissive share mode.
+   * @return  {Promise<CommandResult>}
    */
   setResourcePermissiveShare(resourceId, allowPermissive) {
     const request = buildCommandRequest.call(this, "resource/setPermissiveShare", {
@@ -670,6 +686,7 @@ class TDXApi {
    * @param  {string} resourceId - The resource id.
    * @param  {string} store - The name of the store.
    * @param  {number} [storeSize] - The size in bytes of the store.
+   * @return  {Promise<CommandResult>}
    */
   setResourceStore(resourceId, store, storeSize) {
     const request = buildCommandRequest.call(this, "resource/store/set", {
@@ -690,6 +707,7 @@ class TDXApi {
    * Set the text for a text-content based resource.
    * @param  {string} resourceId - The resource id.
    * @param  {string} textContent - The text content to set.
+   * @return  {Promise<CommandResult>}
    * @example <caption>usage</caption>
    * // Sets the text content for a text-html resource.
    * tdxApi.setResourceTextContent(
@@ -713,6 +731,7 @@ class TDXApi {
    * a resource index is in `suspended` status, it is not possible to run any queries or updates against
    * the resource.
    * @param  {string} resourceId - the id of the resource. Requires write permission.
+   * @return  {Promise<CommandResult>}
    */
   suspendResourceIndex(resourceId) {
     const request = buildCommandRequest.call(this, "resource/index/suspend", {id: resourceId});
@@ -737,6 +756,7 @@ class TDXApi {
    * Removes all data from the resource. Applicable to dataset-based resources only. This can not be
    * undone.
    * @param  {string} resourceId - The resource id to truncate.
+   * @return  {Promise<CommandResult>}
    */
   truncateResource(resourceId) {
     const request = buildCommandRequest.call(this, "resource/truncate", {id: resourceId});
@@ -764,6 +784,7 @@ class TDXApi {
    * @param  {string} [update.queryProxy]
    * @param  {array} [update.tags]
    * @param  {string} [update.textContent] see also {@link TDXApi#setResourceTextContent}
+   * @return  {Promise<CommandResult>}
    */
   updateResource(resourceId, update) {
     const request = buildCommandRequest.call(this, "resource/update", Object.assign({id: resourceId}, update));
@@ -788,6 +809,7 @@ class TDXApi {
    * @param  {object|array} data - The data to add. Must conform to the schema defined by the resource metadata.
    * @param  {boolean} [doNotThrow=false] - set to override default error handling. See {@link TDXApi}.
    * Supports creating an individual document or many documents.
+   * @return  {Promise<CommandResult>}
    * @example <caption>create an individual document</caption>
    * // Assumes the dataset primary key is 'lsoa'
    * tdxApi.addData(myDatasetId, {lsoa: "E0000001", count: 398});
@@ -818,6 +840,7 @@ class TDXApi {
    * @param  {string} datasetId - The id of the dataset-based resource to delete data from.
    * @param  {object|array} data - The primary key data to delete.
    * @param  {boolean} [doNotThrow=false] - set to override default error handling. See {@link TDXApi}.
+   * @return  {Promise<CommandResult>}
    */
   deleteData(datasetId, data, doNotThrow) {
     const postData = {
@@ -840,6 +863,7 @@ class TDXApi {
    * @param  {object} query - The query that specifies the data to delete. All documents matching the
    * query will be deleted.
    * @param  {boolean} [doNotThrow=false] - set to override default error handling. See {@link TDXApi}.
+   * @return  {Promise<CommandResult>}
    * @example
    * // Delete all documents with English lsoa.
    * tdxApi.deleteDataByQuery(myDatasetId, {lsoa: {$regex: "E*"}});
@@ -866,6 +890,7 @@ class TDXApi {
    * @param  {object} data - The patch definition.
    * @param  {object|array} data.__update - An array of JSON patch specifications.
    * @param  {boolean} [doNotThrow=false] - set to override default error handling. See {@link TDXApi}.
+   * @return  {Promise<CommandResult>}
    * @example <caption>patch a single value in a single document</caption>
    * tdxApi.patchData(myDatasetId, {lsoa: "E000001", __update: [{path: "/count", op: "replace", value: 948}]});
    * @example <caption>patch a more than one value in a single document</caption>
@@ -928,6 +953,7 @@ class TDXApi {
    * @param  {object} query - The query that specifies the data to update. All documents matching the
    * @param  {boolean} [doNotThrow=false] - set to override default error handling. See {@link TDXApi}.
    * query will be updated.
+   * @return  {Promise<CommandResult>}
    * @example
    * // Update all documents with English lsoa, setting `count` to 1000.
    * tdxApi.updateDataByQuery(myDatasetId, {lsoa: {$regex: "E*"}}, {count: 1000});
@@ -962,6 +988,7 @@ class TDXApi {
    * @param  {string} payload.hostId - The id of the hosts to be deleted.
    * @param  {string} [payload.hostIp] - The optional ip of the hosts to be deleted.
    * @param  {number} [payload.hostPort] - The optional port number of the host to be deleted.
+   * @return  {Promise<CommandResult>}
    */
   deleteDatabotHost(payload) {
     const postData = {
@@ -981,6 +1008,7 @@ class TDXApi {
    * Deletes a databot instance and all output/debug data associated with it.
    * @param  {string[]} instanceId - The id(s) of the instances to delete. Can be an array of instance ids or an
    * individual string id
+   * @return  {Promise<CommandResult>}
    */
   deleteDatabotInstance(instanceId) {
     const postData = {
@@ -999,6 +1027,7 @@ class TDXApi {
   /**
    * Gets databot instance data for the given instance id.
    * @param  {string} instanceId - The id of the instance to retrieve.
+   * @return  {Promise<CommandResult>}
    */
   getDatabotInstance(instanceId) {
     const request = buildDatabotInstanceRequest.call(this, instanceId);
@@ -1015,6 +1044,7 @@ class TDXApi {
    * Get databot instance output.
    * @param  {string} instanceId - The instance id to retrieve output for.
    * @param  {string} [processId] - Optional process id. If omitted, output for all instance processes will be returned.
+   * @return  {Promise<CommandResult>}
    */
   getDatabotInstanceOutput(instanceId, processId) {
     const request = buildDatabotInstanceRequest.call(this, `output/${instanceId}/${processId || ""}`);
@@ -1030,6 +1060,7 @@ class TDXApi {
   /**
    * Get databot instance status.
    * @param  {string} instanceId - The id of the databot instance for which status is retrieved.
+   * @return  {Promise<CommandResult>}
    */
   getDatabotInstanceStatus(instanceId) {
     const request = buildDatabotInstanceRequest.call(this, `status/${instanceId}`);
@@ -1050,6 +1081,7 @@ class TDXApi {
    * @param  {string} payload.hostStatus - the current status of the host, "idle" or "busy".
    * @param  {string} [payload.ip] - optional ip address of the host. Usually the TDX can deduce this from the incoming
    * request.
+   * @return  {Promise<CommandResult>}
    * @example <caption>register a databot host</caption>
    * tdxApi.registerDatabotHost({version: "0.3.11", port: 2312, hostStatus: "idle"});
    */
@@ -1074,6 +1106,7 @@ class TDXApi {
    * @param  {number} [hostPort] - The port number of the host. If omitted, the command will be sent to
    * all host ports.
    * @param  {object} [payload] - The command payload.
+   * @return  {Promise<CommandResult>}
    */
   sendDatabotHostCommand(command, hostId, hostIp, hostPort, payload) {
     const postData = {
@@ -1117,6 +1150,7 @@ class TDXApi {
    * @param  {string} payload.shareKeyId - The share key to run the databot under.
    * @param  {string} [payload.shareKeySecret] - The secret of the share key. Ignored if the share key id refers to a
    * user-based account.
+   * @return  {Promise<CommandResult>}
    */
   startDatabotInstance(databotId, payload) {
     const postData = {
@@ -1136,6 +1170,7 @@ class TDXApi {
   /**
    * Aborts a running databot instance.
    * @param  {string} instanceId - The id of the instance to abort.
+   * @return  {Promise<CommandResult>}
    */
   abortDatabotInstance(instanceId) {
     const postData = {
@@ -1155,6 +1190,7 @@ class TDXApi {
    * Terminates or pauses a running databot instance.
    * @param  {string} instanceId - The id of the instance to terminate or pause.
    * @param  {string} mode - One of [`"stop"`, `"pause"`, `"resume"`]
+   * @return  {Promise<CommandResult>}
    */
   stopDatabotInstance(instanceId, mode) {
     const postData = {
@@ -1181,6 +1217,7 @@ class TDXApi {
    * @param  {string} payload.hostStatus - The current host status, either "idle" or "busy".
    * @param  {string} [payload.ip] - optional ip address of the host. Usually the TDX can deduce this from the incoming
    * request.
+   * @return  {Promise<CommandResult>}
    * @example <caption>update databot host status</caption>
    * tdxApi.updateDatabotHostStatus({port: 2312, hostStatus: "idle"});
    */
@@ -1198,6 +1235,7 @@ class TDXApi {
   /**
    * Stores databot instance output on the TDX.
    * @param  {object} output - The output payload for the databot instance.
+   * @return  {Promise<CommandResult>}
    */
   writeDatabotHostInstanceOutput(output) {
     const request = buildDatabotHostRequest.call(this, "output", output);
@@ -1228,6 +1266,7 @@ class TDXApi {
    * @param  {string} [options.databotServer] - The URL of the target TDX databot server,
    * e.g. https://databot.nqminds.com
    * @param  {string} [options.displayName] - The friendly name of the TDX.
+   * @return  {Promise<CommandResult>}
    */
   addZoneConnection(options) {
     const request = buildCommandRequest.call(this, "zoneConnection/create", options);
@@ -1243,6 +1282,7 @@ class TDXApi {
   /**
    * Deletes a zone connection. The authenticated account must own the zone connection.
    * @param  {string} id - The id of the zone connection to delete.
+   * @return  {Promise<CommandResult>}
    */
   deleteZoneConnection(id) {
     const request = buildCommandRequest.call(this, "zoneConnection/delete", {id});

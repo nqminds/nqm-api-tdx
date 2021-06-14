@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Improved return types.
   - All `async` types now return `Promise<*>`.
+  - Add commands now return `Promise<CommandResult>`.
 
 ## [0.10.0] - 2021-04-27
 
