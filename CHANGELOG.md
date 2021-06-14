@@ -4,7 +4,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.10.0] - 2021-04-27
+
+### BREAKING CHANGE
+
+- Internet Explorer 10 is no longer supported.
+
+### Added
+
+- Support auth server at host root.
+  Previously, only auth server subdomains worked (e.g. `https://app.tdx.example`).
+  Now, root domains, such as `https://tdx.example` work.
+
+### Fixed
+
+- Encode URI unsafe chars in aggregate pipelines ([#28](https://github.com/nqminds/nqm-api-tdx/pull/28))
 
 ### Refactor
 
