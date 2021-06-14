@@ -117,7 +117,7 @@ class TDXApi {
    * @param  {string} secret - the account secret
    * @param  {number} [ttl=3600] - the Time-To-Live of the token in seconds, default is 1 hour. Will default to
    * config.accessTokenTTL if not given here.
-   * @return  {string} The access token.
+   * @return  {Promise<string>} The access token.
    * @exception Will throw if credentials are invalid or there is a network error contacting the TDX.
    * @example <caption>authenticate using a share key and secret</caption>
    * tdxApi.authenticate("DKJG8dfg", "letmein");
@@ -186,7 +186,7 @@ class TDXApi {
    * IP address is in this list
    * @param  {boolean} [wait=false] - flag indicating this method will wait for the account to be fully created before
    * returning.
-   * @return  {CommandResult}
+   * @return  {Promise<CommandResult>}
    */
   addAccount(options, wait) {
     const request = buildCommandRequest.call(this, "account/create", options);
@@ -477,7 +477,7 @@ class TDXApi {
    * Will fail **all** deletes if any of the permission checks fail.
    * @param  {Resource[]} resourceList - The list of resources to delete. Note only the `id` property of each
    * resource is required.
-   * @return  {CommandResult}
+   * @return  {Promise<CommandResult>}
    */
   deleteManyResources(resourceIdList) {
     const request = buildCommandRequest.call(this, "resource/deleteMany", {payload: resourceIdList});
@@ -597,7 +597,7 @@ class TDXApi {
    * Set the resource import flag.
    * @param  {string} resourceId - The id of the dataset-based resource.
    * @param  {boolean} importing - Indicates the state of the import flag.
-   * @return  {CommandResult}
+   * @return  {Promise<CommandResult>}
    */
   setResourceImporting(resourceId, importing) {
     const request = buildCommandRequest.call(this, "resource/importing", {id: resourceId, importing});
@@ -614,7 +614,7 @@ class TDXApi {
    * Set the resource schema.
    * @param  {string} resourceId - The id of the dataset-based resource.
    * @param  {object} schema - The new schema definition. TODO - document
-   * @return  {CommandResult}
+   * @return  {Promise<CommandResult>}
    */
   setResourceSchema(resourceId, schema) {
     const request = buildCommandRequest.call(this, "resource/schema/set", {id: resourceId, schema});
@@ -898,7 +898,7 @@ class TDXApi {
    * primary key.
    * @param  {boolean} [doNotThrow=false] - set to override default error handling. See {@link TDXApi}.
    * @param  {object} [opts] - reserved for system use.
-   * @return {CommandResult} - Use the result property to check for errors.
+   * @return {Promise<CommandResult>} - Use the result property to check for errors.
    * @example <caption>update an existing document</caption>
    * tdxApi.updateData(myDatasetId, {lsoa: "E000001", count: 488});
    * @example <caption>upsert a document</caption>
@@ -1286,7 +1286,7 @@ class TDXApi {
    * @param  {string} username - The users' TDX id.
    * @param  {string} [ip] - The optional IP address to bind the user token to.
    * @param  {number} [ttl] - The ttl in seconds.
-   * @return  {object} - The new application-user token, bound to the given IP.
+   * @return  {Promise<object>} - The new application-user token, bound to the given IP.
    * @example <caption>create token bound to server ip with default TDX ttl</caption>
    * tdxApi.createTDXToken("bob@bob.com/acme.tdx.com");
    * @example <caption>create for specific IP</caption>
@@ -1314,7 +1314,7 @@ class TDXApi {
    * @param  {string} [validateIP] - The optional IP address to validate the user token against.
    * @param  {string} [exchangeIP] - The optional IP address to bind the new token to.
    * @param  {number} [ttl] - The ttl in seconds.
-   * @return  {object} - The new token application-user token, bound to the server IP.
+   * @return  {Promise<object>} - The new token application-user token, bound to the server IP.
    * @example <caption>validate against current IP</caption>
    * tdxApi.exchangeTDXToken(clientToken);
    * @example <caption>validate against different IP</caption>
@@ -1337,7 +1337,7 @@ class TDXApi {
    * Streams the contents of a resource. For dataset-based resources this will stream the dataset contents in newline
    * delimited JSON (NDJSON). For raw file resources this will stream the raw file contents (zip, raw JSON etc).
    * @param  {string} resourceId - The id of the resource to be downloaded.
-   * @return {object} - Response object, where the response body is a stream object.
+   * @return {Promise<object>} - Response object, where the response body is a stream object.
    */
   downloadResource(resourceId) {
     const request = buildQueryRequest.call(this, `resources/${resourceId}/download`);
@@ -1350,7 +1350,7 @@ class TDXApi {
   /**
    * Gets the details for a given account id.
    * @param  {string} accountId - the id of the account to be retrieved.
-   * @return  {Zone} zone
+   * @return  {Promise<Zone>} zone
    */
   getAccount(accountId) {
     const request = buildQueryRequest.call(this, "accounts", {username: accountId});
@@ -1370,7 +1370,7 @@ class TDXApi {
    * Gets the details for all peer accounts.
    * @param  {object} filter - query filter.
    * @param  {string} filter.accountType - the account type to filter by, e.g. "user", "token", "host" etc.
-   * @return  {Zone[]} zone
+   * @return  {Promise<Zone[]>} zones
    * @example <caption>Get all databots owned by bob</caption>
    * api.getAccounts({accountType: "host", own: "bob@nqminds.com"})
    */
@@ -1392,7 +1392,7 @@ class TDXApi {
    * [mongodb docs](https://docs.mongodb.com/manual/aggregation/). Can be given as a JSON object or as a stringified
    * JSON object.
    * @param  {boolean} [ndJSON] - If set, the data is sent in [newline delimited json format](http://ndjson.org/).
-   * @return  {object} - Response object, where the response body is a stream object.
+   * @return  {Promise<object>} - Response object, where the response body is a stream object.
    */
   getAggregateDataStream(datasetId, pipeline, ndJSON) {
     // Convert pipeline to string if necessary.
@@ -1419,7 +1419,7 @@ class TDXApi {
    * [mongodb docs](https://docs.mongodb.com/manual/aggregation/). Can be given as a JSON object or as a stringified
    * JSON object.
    * @param  {boolean} [ndJSON] - If set, the data is sent in [newline delimited json format](http://ndjson.org/).
-   * @return  {DatasetData}
+   * @return  {Promise<DatasetData>}
    */
   getAggregateData(datasetId, pipeline, ndJSON) {
     return this.getAggregateDataStream(datasetId, pipeline, ndJSON).then(checkResponse.bind(this, "getAggregateData"));
@@ -1427,7 +1427,7 @@ class TDXApi {
 
   /**
    * Gets details of the currently authenticated account.
-   * @return  {object} - Details of the authenticated account.
+   * @return  {Promise<object>} - Details of the authenticated account.
    */
   getAuthenticatedAccount() {
     const request = buildQueryRequest.call(this, "auth-account");
@@ -1450,7 +1450,7 @@ class TDXApi {
    * @param  {GetDataOptions} [options] - A mongodb options object. Can be used to limit, skip, sort etc. Note a default
    * `limit` of 1000 is applied if none is given here.
    * @param  {boolean} [ndJSON] - If set, the data is sent in [newline delimited json format](http://ndjson.org/).
-   * @return  {object} - Response object, where the response body is a stream object.
+   * @return  {Promise<object>} - Response object, where the response body is a stream object.
    */
   getDataStream(datasetId, filter, projection, options, ndJSON) {
     const endpoint = `resources/${datasetId}/${ndJSON ? "nddata" : "data"}`;
@@ -1475,7 +1475,7 @@ class TDXApi {
    * @param  {GetDataOptions} [options] - A mongodb options object. Can be used to limit, skip, sort etc. Note a default
    * `limit` of 1000 is applied if none is given here.
    * @param  {boolean} [ndJSON] - If set, the data is sent in [newline delimited json format](http://ndjson.org/).
-   * @return  {DatasetData}
+   * @return  {Promise<DatasetData>}
    */
   getData(datasetId, filter, projection, options, ndJSON) {
     return this.getDataStream(datasetId, filter, projection, options, ndJSON).then(checkResponse.bind(this, "getData"));
@@ -1499,7 +1499,7 @@ class TDXApi {
    * @param  {GetDataOptions} [options] - A mongodb options object. Can be used to limit, skip, sort etc. Note a default
    * `limit` of 1000 is applied if none is given here.
    * @param  {boolean} [ndJSON] - If set, the data is sent in [newline delimited json format](http://ndjson.org/).
-   * @return  {object} - Response object, where the response body is a stream object.
+   * @return  {Promise<object>} - Response object, where the response body is a stream object.
    */
   getDatasetDataStream(datasetId, filter, projection, options, ndJSON) {
     return this.getDataStream(datasetId, filter, projection, options, ndJSON);
@@ -1515,7 +1515,7 @@ class TDXApi {
    * @param  {GetDataOptions} [options] - A mongodb options object. Can be used to limit, skip, sort etc. Note a default
    * `limit` of 1000 is applied if none is given here.
    * @param  {boolean} [ndJSON] - If set, the data is sent in [newline delimited json format](http://ndjson.org/).
-   * @return  {DatasetData}
+   * @return  {Promise<DatasetData>}
    */
   getDatasetData(datasetId, filter, projection, options, ndJSON) {
     return this.getData(datasetId, filter, projection, options, ndJSON);
@@ -1552,7 +1552,7 @@ class TDXApi {
    * @param  {string} datasetId - The id of the dataset-based resource.
    * @param  {string} key - The name of the property to use. Can be a property path, e.g. `"address.postcode"`.
    * @param  {object} [filter] - An optional mongodb filter to apply.
-   * @return  {object[]} - The distinct values.
+   * @return  {Promise<object[]>} - The distinct values.
    */
   getDistinct(datasetId, key, filter, projection, options) {
     const request = buildQueryRequest.call(
@@ -1575,7 +1575,7 @@ class TDXApi {
    * Gets the details for a given resource id.
    * @param  {string} resourceId - The id of the resource to retrieve.
    * @param  {boolean} [noThrow=false] - If set, the call won't reject or throw if the resource doesn't exist.
-   * @return  {Resource}
+   * @return  {Promise<Resource>}
    * @exception  Will throw if the resource is not found (see `noThrow` flag) or permission is denied.
    * @example
    * api.getResource(myResourceId)
@@ -1610,7 +1610,7 @@ class TDXApi {
   /**
    * Gets all access the authenticated account has to the given resource id.
    * @param  {string} resourceId - The id of the resource whose access is to be retrieved.
-   * @return {ResourceAccess[]} - Array of ResourceAccess objects.
+   * @return {Promise<ResourceAccess[]>} - Array of ResourceAccess objects.
    * @example
    * api.getResourceAccess(myResourceId)
    *  .then((resourceAccess) => {
@@ -1633,7 +1633,7 @@ class TDXApi {
   /**
    * Gets all resources that are ancestors of the given resource.
    * @param  {string} resourceId - The id of the resource whose parents are to be retrieved.
-   * @return  {Resource[]}
+   * @return  {Promise<Resource[]>}
    */
   getResourceAncestors(resourceId) {
     const request = buildQueryRequest.call(this, `resources/${resourceId}/ancestors`);
@@ -1653,7 +1653,7 @@ class TDXApi {
    * @param  {object} [projection] - A mongodb projection definition, can be used to restrict which properties are
    * returned thereby limiting the payload.
    * @param  {object} [options] - A mongodb options definition, can be used for limit, skip, sorting etc.
-   * @return  {Resource[]}
+   * @return  {Promise<Resource[]>}
    * @example <caption>filtering by explicit id</caption>
    * tdxApi.getResources({"id": "rygq8DNEPw"});
    * @example <caption>filtering by set of ids</caption>
@@ -1677,7 +1677,7 @@ class TDXApi {
   /**
    * Retrieves all resources that have an immediate ancestor of the given schema id.
    * @param  {string} schemaId - The id of the schema to match, e.g. `"geojson"`.
-   * @return  {Resource[]}
+   * @return  {Promise<Resource[]>}
    */
   getResourcesWithSchema(schemaId) {
     const filter = {"schemaDefinition.parent": schemaId};
@@ -1687,7 +1687,7 @@ class TDXApi {
   /**
    * Retrieves an authorisation token for the given TDX instance
    * @param  {string} tdx - The TDX instance name, e.g. `"tdx.acme.com"`.
-   * @return  {string}
+   * @return  {Promise<string>}
    */
   getTDXToken(tdx) {
     const request = buildQueryRequest.call(this, `tdx-token/${tdx}`);
@@ -1703,7 +1703,7 @@ class TDXApi {
   /**
    * Gets the details for a given zone (account) id.
    * @param  {string} accountId - the id of the zone to be retrieved.
-   * @return  {Zone} zone
+   * @return  {Promise<Zone>} zone
    */
   getZone(accountId) {
     return this.getAccount(accountId);
@@ -1717,7 +1717,8 @@ class TDXApi {
    * - the authenticated account owns the group
    * @param {string} accountId - the id of the account
    * @param {*} groupId - the id of the group
-   * @return {boolean} - `true` if `accountId` is a member of the group and visible to the authenticated account.
+   * @return {Promise<boolean>} - `true` if `accountId` is a member of the
+   * group and visible to the authenticated account.
    */
   isInGroup(accountId, groupId) {
     const lookup = {
@@ -1734,7 +1735,7 @@ class TDXApi {
    * Validates the given token was signed by this TDX, and returns the decoded token data.
    * @param  {string} token - The TDX auth server token to validate.
    * @param  {string} [ip] - The optional IP address to validate against.
-   * @return  {object} - The decoded token data.
+   * @return  {Promise<object>} - The decoded token data.
    */
   validateTDXToken(token, ip) {
     const request = buildQueryRequest.call(this, "token/validate", {token, ip});
