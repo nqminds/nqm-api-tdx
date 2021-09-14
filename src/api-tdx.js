@@ -117,6 +117,7 @@ class TDXApi {
    * @param  {string} secret - the account secret
    * @param  {number} [ttl=3600] - the Time-To-Live of the token in seconds, default is 1 hour. Will default to
    * config.accessTokenTTL if not given here.
+   * @param {string} [ip] - If set, the ip address to limit the authorisation token to.
    * @return  {string} The access token.
    * @exception Will throw if credentials are invalid or there is a network error contacting the TDX.
    * @example <caption>authenticate using a share key and secret</caption>
@@ -926,8 +927,9 @@ class TDXApi {
    * Updates data in a dataset-based resource using a query to specify the documents to be updated.
    * @param  {string} datasetId - The id of the dataset-based resource to update data in.
    * @param  {object} query - The query that specifies the data to update. All documents matching the
-   * @param  {boolean} [doNotThrow=false] - set to override default error handling. See {@link TDXApi}.
    * query will be updated.
+   * @param  {object} update - The updated data.
+   * @param  {boolean} [doNotThrow=false] - set to override default error handling. See {@link TDXApi}.
    * @example
    * // Update all documents with English lsoa, setting `count` to 1000.
    * tdxApi.updateDataByQuery(myDatasetId, {lsoa: {$regex: "E*"}}, {count: 1000});
@@ -1552,6 +1554,9 @@ class TDXApi {
    * @param  {string} datasetId - The id of the dataset-based resource.
    * @param  {string} key - The name of the property to use. Can be a property path, e.g. `"address.postcode"`.
    * @param  {object} [filter] - An optional mongodb filter to apply.
+   * @param  {object} [projection] - An mongodb projection definition,
+   * can be used to restrict which properties are returned thereby limiting the payload.
+   * @param  {GetDataOptions} [options] - A mongodb options definition, can be used for limit, skip, sorting etc.
    * @return  {object[]} - The distinct values.
    */
   getDistinct(datasetId, key, filter, projection, options) {
@@ -1610,6 +1615,10 @@ class TDXApi {
   /**
    * Gets all access the authenticated account has to the given resource id.
    * @param  {string} resourceId - The id of the resource whose access is to be retrieved.
+   * @param  {object} [filter] - An optional mongodb filter to apply.
+   * @param  {object} [projection] - An mongodb projection definition,
+   * can be used to restrict which properties are returned thereby limiting the payload.
+   * @param  {GetDataOptions} [options] - A mongodb options definition, can be used for limit, skip, sorting etc.
    * @return {ResourceAccess[]} - Array of ResourceAccess objects.
    * @example
    * api.getResourceAccess(myResourceId)
