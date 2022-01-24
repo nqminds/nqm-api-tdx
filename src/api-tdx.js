@@ -1117,6 +1117,18 @@ class TDXApi {
    * @param  {string} payload.shareKeyId - The share key to run the databot under.
    * @param  {string} [payload.shareKeySecret] - The secret of the share key. Ignored if the share key id refers to a
    * user-based account.
+   * @param  {object} [payload.schedule] - Schedule object, used to describe if the databot should run again.
+   * @param  {bool}   [payload.schedule.always] - Set to `true` to automatically restart this databot
+   * when it finishes.
+   * @param  {string} [payload.schedule.cron] - A cron string that describes when to run the databot.
+   * Should only be used if `schedule.always` is `false`.
+   * Parsing is done via [`'later'`](https://www.npmjs.com/package/later) and can be:
+   *   - a [cron expression](https://bunkat.github.io/later/parsers.html#cron)
+   *     e.g. `'15 10 ? * *'` means to run at 10:15AM every day
+   *   - a [simple text expression](https://bunkat.github.io/later/parsers.html#text),
+   *     e.g. `'every 5 mins'`.
+   *
+   * Warning: **Schedules will stop should a databot ever fail.**
    */
   startDatabotInstance(databotId, payload) {
     const postData = {
