@@ -1609,7 +1609,12 @@ class TDXApi {
 
   /**
    * Gets all access the authenticated account has to the given resource id.
+   *
    * @param  {string} resourceId - The id of the resource whose access is to be retrieved.
+   * @param  {object} [filter] - A mongodb filter definition.
+   * @param  {object} [projection] - A mongodb projection definition, can be used to restrict which properties are
+   * returned thereby limiting the payload.
+   * @param  {object} [options] - A mongodb options definition, can be used for limit, skip, sorting etc.
    * @return {ResourceAccess[]} - Array of ResourceAccess objects.
    * @example
    * api.getResourceAccess(myResourceId)
