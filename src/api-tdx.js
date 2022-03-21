@@ -491,14 +491,25 @@ class TDXApi {
   }
 
   /**
-   * Upload a file to a resource.
+   * Upload a file to a TDX resource.
+   *
    * @param  {string} resourceId - The id of the destination resource.
-   * @param  {object} file - The file to upload, obtained from an `<input type="file">` element.
-   * @param  {boolean} [stream=false] - Flag indicating whether the call should return a stream allowing
-   * callees to monitor progress.
+   * @param  {File} file - The Web API [`File`](https://developer.mozilla.org/en-US/docs/Web/API/File) to upload.
+   * - On browser, this is usually obtained from an `<input type="file">` element.
+   * - On Node.JS, due to limitations of `node-fetch` v2, the `file.stream()` method must return
+   * a [Node.JS `Readable` steam](https://nodejs.org/api/stream.html#stream_class_stream_readable).
+   * [Web API `ReadableStream`](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream)
+   * (such as from the "fetch-blob" library) are not supported.
+   * @param  {boolean} [stream=false] - _Deprecated_: Flag indicating whether the call should
+   * directly return the {@link Response} object.
+   * Since @nqminds/nqm-api-tdx v0.9.0, this parameter is deprecated, as the `fetch` request only
+   * returns a plain JSON object on success/failure.
    * @param  {boolean} [compressed=false] - Flag indicating the file should be decompressed after upload. ZIP format
    * only.
-   * @param  {boolean} [base64Encoded=false] = Flag indicating the file should be decoded from base64 after upload.
+   * @param  {boolean} [base64Encoded=false] - Flag indicating the file should be decoded from base64 after upload.
+   * @throws {Error} Rejects with a TDXApiError if the upload failed.
+   * @returns {Promise<{ok: true}> | Promise<Response>} Resolves with `{ok: true}` if the upload was successful.
+   * - _Deprecated_: If `stream=true`, returns the {@link Response} object.
    */
   fileUpload(resourceId, file, stream, compressed = false, base64Encoded = false) {
     const request = buildFileUploadRequest.call(this, resourceId, compressed, base64Encoded, file);
